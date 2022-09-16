@@ -7,11 +7,17 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="Options.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Infrastructure\Infrastructure.fsproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="CommandLineParser.FSharp" Version="2.9.1" />
+      <PackageReference Include="Motsoft.Util" Version="1.5.0" />
     </ItemGroup>
 
 </Project>
