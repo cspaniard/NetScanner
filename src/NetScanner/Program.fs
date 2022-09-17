@@ -7,6 +7,8 @@ open CommandLine
 open NetScanner.Options
 open Motsoft.Util
 
+open NetScanner.Exceptions
+
 type private IIpService = Infrastructure.DI.Services.NetworkDI.IIpService
 
 
@@ -18,13 +20,13 @@ let scanNetwork (argOptions : ArgumentOptions) =
     let checkNetworkTry network =
         let networkParts = network |> split "."
 
-        networkParts.Length = 3 |> failWithIfFalse "Número incorrecto de octetos."
+        networkParts.Length = 3 |> failWithIfFalse BAD_OCTET_COUNT
 
         networkParts
         |> Array.iter (fun np ->
                            let result, value = Int32.TryParse np
-                           result |> failWithIfFalse "La red sólo puede contener números."
-                           (value < 0 || value > 254) |> failWithIfTrue "Valores inválidos en la red.")
+                           result |> failWithIfFalse NETWORK_INVALID_CHARS
+                           (value < 0 || value > 254) |> failWithIfTrue NETWORK_INVALID_VALUES)
 
     let cleanNetwork (network : string) =
         network.Trim('.') + "."
