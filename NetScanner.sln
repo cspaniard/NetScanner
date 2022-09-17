@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "NetScanner", "NetScanner\NetScanner.fsproj", "{DF2B644D-13DD-4BCA-870E-C0B806E51E1B}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "NetScanner", "src\NetScanner\NetScanner.fsproj", "{DF2B644D-13DD-4BCA-870E-C0B806E51E1B}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Infrastructure", "Infrastructure\Infrastructure.fsproj", "{EFFC6E4A-A701-4355-8532-4BC1C5D77BC7}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Infrastructure", "src\Infrastructure\Infrastructure.fsproj", "{EFFC6E4A-A701-4355-8532-4BC1C5D77BC7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
