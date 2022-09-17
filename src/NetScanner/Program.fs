@@ -1,6 +1,5 @@
-﻿
+
 open System
-open System.Diagnostics
 open System.Text.RegularExpressions
 open System.Threading.Tasks
 
@@ -30,6 +29,16 @@ let scanNetwork (argOptions : ArgumentOptions) =
     let cleanNetwork (network : string) =
         network.Trim('.') + "."
 
+    let filterFun = Array.filter snd
+
+    let printIpsInfo ipsInfo =
+        let separator = Regex.Unescape(argOptions.Separator)
+
+        ipsInfo
+        |> (if argOptions.ActiveOnly then filterFun else id)
+        |> Array.iter (fun (ip, status) -> Console.WriteLine $"%s{ip}%s{separator}%b{status}")
+
+
     let scanTask =
         task {
             checkNetworkTry argOptions.Network
@@ -38,11 +47,7 @@ let scanNetwork (argOptions : ArgumentOptions) =
                                                                       argOptions.Retries
                                                                       (cleanNetwork argOptions.Network)
 
-            let separator = Regex.Unescape(argOptions.Separator)
-
-            ipsInfo
-            |> Array.iter (fun (ip, status) -> Console.WriteLine $"%s{ip}%s{separator}%b{status}")
-
+            printIpsInfo ipsInfo
         } :> Task
 
     scanTask.Wait()

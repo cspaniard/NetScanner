@@ -12,6 +12,9 @@ type ArgumentOptions = {
     [<Option ('s', "separador", Default = @"\t", HelpText="Separador entre campos.")>]
     Separator : string
 
+    [<Option ('a', "activos", Default = false, HelpText="Sólo devuelve los activos.")>]
+    ActiveOnly : bool
+
     [<Value (0, MetaName="network", Required = true, HelpText="La red que escanear.")>]
     Network : string
 }
