@@ -8,8 +8,8 @@
 
     <ItemGroup>
         <Compile Include="Options.fs" />
-        <Compile Include="Exceptions.fs" />
-        <Compile Include="NetworkHelper.fs" />
+        <Compile Include="HelpTextHelper.fs" />
+        <Compile Include="HelpText.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
