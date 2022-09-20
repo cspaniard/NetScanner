@@ -12,15 +12,16 @@ let argv = Environment.GetCommandLineArgs() |> Array.tail
 
 let scanAndOutputNetwork (options : ArgumentOptions) =
 
-    let myTast =
+    let processTask =
         task {
-            let! ipInfos = IIpService.scanNetworkAsync options.TimeOut options.Retries options.Network
+            let! ipInfos = IIpService.scanNetworkAsync options.TimeOut options.Retries
+                                                       options.Network options.ShowMac
 
             ipInfos
-            |> IIpService.outputNetworkIpsStatus options.ActiveOnly options.Separator
+            |> IIpService.outputNetworkIpsStatus options.ActiveOnly options.Separator options.ShowMac
         } :> Task
 
-    myTast.Wait()
+    processTask.Wait()
 
 try
     let parser = new Parser(fun o -> o.HelpWriter <- null)

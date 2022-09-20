@@ -12,9 +12,12 @@ type ArgumentOptions = {
     [<Option ('s', "separador", Default = @"\t", HelpText = "Separador entre campos.")>]
     Separator : string
 
-    [<Option ('a', "activos", Default = false, HelpText = "Sólo devuelve los activos.")>]
+    [<Option ('a', "activos", Default = false, HelpText = "Sólo devuelve las IPs activas.")>]
     ActiveOnly : bool
 
-    [<Value (0, MetaName="network", Required = true, HelpText = "La red a escanear.")>]
+    [<Option ('m', "mac", Default = false, HelpText = "Muestra la MAC de cada IP activa.")>]
+    ShowMac : bool
+
+    [<Value (0, MetaName="red", Required = true, HelpText = "La red a escanear.")>]
     Network : string
 }

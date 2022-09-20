@@ -17,6 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="ArpLookup" Version="2.0.3" />
       <PackageReference Include="Motsoft.Util" Version="1.5.0" />
     </ItemGroup>
 

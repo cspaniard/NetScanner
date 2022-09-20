@@ -2,6 +2,7 @@ namespace Brokers.Network.Ip
 
 open System.Net
 open System.Net.NetworkInformation
+open ArpLookup
 open Motsoft.Util
 
 open Brokers.Network.Ip.Exceptions
@@ -26,6 +27,21 @@ type Broker () =
                     retryCount <- retryCount - 1
 
             return ip, (resultStatus = IPStatus.Success)
+        }
+    //----------------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------------------------
+    static member getMacForIpAsync (ip: string) =
+
+        backgroundTask {
+            let! physicalAddress = Arp.LookupAsync(IPAddress.Parse(ip))
+
+            if physicalAddress <> null &&
+               physicalAddress.GetAddressBytes() <> Array.zeroCreate (physicalAddress.GetAddressBytes()).Length
+            then
+                return (ip, physicalAddress.ToString())
+            else
+                return (ip, "")
         }
     //----------------------------------------------------------------------------------------------------
 
