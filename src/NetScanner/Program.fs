@@ -3,6 +3,7 @@ open System.Threading.Tasks
 open CommandLine
 open NetScanner.Options
 open NetScanner.HelpText
+open NetScanner.Model
 
 
 type private IIpService = Infrastructure.DI.Services.NetworkDI.IIpService
@@ -14,10 +15,11 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
 
     let processTask =
         task {
-            let! ipInfos = IIpService.scanNetworkAsync options.TimeOut options.Retries
-                                                       options.Network options.ShowMac
+            let network = IpNetwork.create options.Network
+            let! ipInfosWithMacs = IIpService.scanNetworkAsync options.TimeOut options.Retries
+                                                               options.ShowMac network
 
-            ipInfos
+            ipInfosWithMacs
             |> IIpService.outputNetworkIpsStatus options.ActiveOnly options.Separator options.ShowMac
         } :> Task
 

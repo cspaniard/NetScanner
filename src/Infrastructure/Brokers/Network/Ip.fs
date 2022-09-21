@@ -5,12 +5,13 @@ open System.Net.NetworkInformation
 open ArpLookup
 open Motsoft.Util
 
+open NetScanner.Model
 open Brokers.Network.Ip.Exceptions
 
 type Broker () =
 
     //----------------------------------------------------------------------------------------------------
-    static member pingIpAsync timeOut retries (ip: string) =
+    static member pingIpAsync timeOut retries (ipAddress: IpAddress) =
 
         backgroundTask {
             let ping = new Ping()
@@ -18,7 +19,7 @@ type Broker () =
             let mutable resultStatus = IPStatus.Unknown
 
             while retryCount > 0 do
-                let! pingReply = ping.SendPingAsync(ip, timeOut)
+                let! pingReply = ping.SendPingAsync(ipAddress.value, timeOut)
 
                 if pingReply.Status = IPStatus.Success then
                     resultStatus <- pingReply.Status
@@ -26,22 +27,22 @@ type Broker () =
                 else
                     retryCount <- retryCount - 1
 
-            return ip, (resultStatus = IPStatus.Success)
+            return (ipAddress, (resultStatus = IPStatus.Success)) |> IpInfo
         }
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member getMacForIpAsync (ip: string) =
+    static member getMacForIpAsync (ipAddress: IpAddress) =
 
         backgroundTask {
-            let! physicalAddress = Arp.LookupAsync(IPAddress.Parse(ip))
+            let! physicalAddress = Arp.LookupAsync(IPAddress.Parse(ipAddress.value))
 
             if physicalAddress <> null &&
                physicalAddress.GetAddressBytes() <> Array.zeroCreate (physicalAddress.GetAddressBytes()).Length
             then
-                return (ip, physicalAddress.ToString())
+                return MacInfo (ipAddress, physicalAddress.ToString())
             else
-                return (ip, "")
+                return MacInfo (ipAddress, "")
         }
     //----------------------------------------------------------------------------------------------------
 

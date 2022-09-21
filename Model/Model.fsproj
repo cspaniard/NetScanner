@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Include="ValidationHelper.fs" />
+      <Compile Include="IpNetworkValidation.fs" />
+      <Compile Include="IpNetwork.fs" />
+      <Compile Include="IpAdressValidation.fs" />
+      <Compile Include="IpAddress.fs" />
+      <Compile Include="Types.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Motsoft.Util" Version="1.5.0" />
+    </ItemGroup>
+
+</Project>
