@@ -13,10 +13,12 @@ type IpAddress =
 
         static member private validate (value : string) =
 
-            getValidatorsList ()
-            |> Array.iter (fun f -> f value)
+            try
+                getValidatorsList ()
+                |> Array.iter (fun f -> f value)
 
-            value
+                value
+            with e -> failwith $"IpAddress: {e.Message}"
 
         member this.value = let (IpAddress value) = this in value
 

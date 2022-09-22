@@ -13,10 +13,12 @@ type IpNetwork =
 
         static member private validate (value : string) =
 
-            getValidatorsList ()
-            |> Array.iter (fun f -> f value)
+            try
+                getValidatorsList ()
+                |> Array.iter (fun f -> f value)
 
-            value
+                value
+            with e -> failwith $"IpNetwork: {e.Message}"
 
         member this.value = let (IpNetwork value) = this in value
         override this.ToString() = this.value

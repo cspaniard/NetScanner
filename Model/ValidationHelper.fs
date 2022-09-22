@@ -1,25 +1,36 @@
 module Model.ValidationHelper
 
 open System
+open System.Collections.Generic
 open Motsoft.Util
 
-let checkEmpty (value : string) =
-    value |> String.IsNullOrWhiteSpace |> failWithIfTrue "El valor está vacío."
+type Errors =
+    | ValueIsEmpty
+    | ValueContainsSpaces
+    | OctectIsEmpty
+    | OctectIsNotNumber
+    | OctectOutOfRange
+    | OctectIncorrectCount
 
-let checkOctectForSpacesOrEmpty (value : string) =
+type ErrorDict = Dictionary<Errors, string>
+
+let checkEmpty (errors : ErrorDict) (value : string) =
+    value |> String.IsNullOrWhiteSpace |> failWithIfTrue errors[ValueIsEmpty]
+
+let checkOctectsForSpacesOrEmpty (errors : ErrorDict) (value : string) =
     value
     |> fun s -> s.Split(".")
-    |> Array.iter (fun o -> o.Contains " " |> failWithIfTrue "El valor contiene espacios."
-                            o |> String.IsNullOrWhiteSpace |> failWithIfTrue "Octetos vacíos.")
+    |> Array.iter (fun o -> o.Contains " " |> failWithIfTrue errors[ValueContainsSpaces]
+                            o |> String.IsNullOrWhiteSpace |> failWithIfTrue errors[OctectIsEmpty])
 
-let checkOctectAreIntsInRange (value : string) =
+let checkOctectsAreIntsInRange (errors : ErrorDict) (value : string) =
     value
     |> split "."
     |> Array.iter
            (fun o -> match Int32.TryParse o with
-                     | false, _ -> failwith "Los valores de los octetos no son numéricos"
-                     | true, intVal when intVal < 0 || intVal > 254 -> failwith "Octetos fuera de rango."
+                     | false, _ -> failwith errors[OctectIsNotNumber]
+                     | true, intVal when intVal < 0 || intVal > 254 -> failwith errors[OctectOutOfRange]
                      | _ -> ())
 
-let checkOctectCount octet (value : string) =
-    (value |> split "." |> Array.length <> octet) |> failWithIfTrue "Número incorrecto de octetos."
+let checkOctectCount (errors : ErrorDict) octet (value : string) =
+    (value |> split "." |> Array.length <> octet) |> failWithIfTrue errors[OctectIncorrectCount]
