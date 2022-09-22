@@ -5,18 +5,18 @@ open NetScanner.Model.IpAddressValidation
 
 type IpAddress =
     private IpAddress of string
+        static member private canonicalize (value : string) =
+            value
+            |> trim
+            |> fun s -> s.Split(".")
+            |> join "."
+
         static member private validate (value : string) =
 
             getValidatorsList ()
             |> Array.iter (fun f -> f value)
 
             value
-
-        static member private canonicalize (value : string) =
-            value
-            |> split "."
-            |> Array.map trim
-            |> join "."
 
         member this.value = let (IpAddress value) = this in value
 
