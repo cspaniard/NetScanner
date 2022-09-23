@@ -32,7 +32,9 @@ try
     match parser.ParseArguments<ArgumentOptions> argv with
     | :? Parsed<ArgumentOptions> as opts -> scanAndOutputNetwork opts.Value
     | :? NotParsed<ArgumentOptions> as notParsed -> showHelpText <| ArgErrors notParsed.Errors
+                                                    exit 1
     | _ -> Console.WriteLine "No debiéramos llegar aquí."
 with
 | :? AggregateException as ae -> showHelpText <| ExceptionErrors ae.InnerExceptions
+                                 exit 2
 | e -> Console.WriteLine $"Raro que lleguemos aquí, pero: {e.Message}"
