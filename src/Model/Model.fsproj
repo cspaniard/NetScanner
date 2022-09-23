@@ -12,9 +12,12 @@
       <Compile Include="IpAdressValidation.fs" />
       <Compile Include="IpAddress.fs" />
       <Compile Include="Types.fs" />
+      <Compile Include="Options.fs" />
+      <Compile Include="HelpTextHelper.fs" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="CommandLineParser.FSharp" Version="2.9.1" />
       <PackageReference Include="Motsoft.Util" Version="1.5.0" />
     </ItemGroup>
 

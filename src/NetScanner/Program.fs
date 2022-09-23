@@ -1,13 +1,11 @@
 open System
 open System.Threading.Tasks
 open CommandLine
-open NetScanner.Options
-open NetScanner.HelpText
+open Model.Options
 open NetScanner.Model
 
-
-type private IIpService = Infrastructure.DI.Services.NetworkDI.IIpService
-
+open type Infrastructure.DI.Services.NetworkDI.IIpService
+open type Infrastructure.DI.Services.HelpDI.IIHelpTextService
 
 let argv = Environment.GetCommandLineArgs() |> Array.tail
 
@@ -16,11 +14,11 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
     let processTask =
         task {
             let network = IpNetwork.create options.Network
-            let! ipInfosWithMacs = IIpService.scanNetworkAsync options.TimeOut options.Retries
-                                                               options.ShowMac network
+            let! ipInfosWithMacs = scanNetworkAsync options.TimeOut options.Retries
+                                                    options.ShowMac network
 
             ipInfosWithMacs
-            |> IIpService.outputNetworkIpsStatus options.ActiveOnly options.Separator options.ShowMac
+            |> outputNetworkIpsStatus options.ActiveOnly options.Separator options.ShowMac
         } :> Task
 
     processTask.Wait()

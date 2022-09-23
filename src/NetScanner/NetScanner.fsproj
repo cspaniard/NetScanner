@@ -4,20 +4,17 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <AssemblyName>netscanner</AssemblyName>
-        <AssemblyVersion>1.2.0</AssemblyVersion>
-        <FileVersion>1.2.0</FileVersion>
+        <AssemblyVersion>1.4.0</AssemblyVersion>
+        <FileVersion>1.4.0</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Options.fs" />
-        <Compile Include="HelpTextHelper.fs" />
-        <Compile Include="HelpText.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Model\Model.fsproj" />
       <ProjectReference Include="..\Infrastructure\Infrastructure.fsproj" />
+      <ProjectReference Include="..\Model\Model.fsproj" />
     </ItemGroup>
 
     <ItemGroup>

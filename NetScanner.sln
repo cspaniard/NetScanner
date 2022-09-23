@@ -4,7 +4,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "NetScanner", "src\NetScanne
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Infrastructure", "src\Infrastructure\Infrastructure.fsproj", "{EFFC6E4A-A701-4355-8532-4BC1C5D77BC7}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Model", "Model\Model.fsproj", "{824E4FD2-9923-48DB-BE6B-E4D00ACD3CB1}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Model", "src\Model\Model.fsproj", "{70766C20-ADEE-48A3-9CB5-B8482447742C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,9 +20,9 @@ Global
 		{EFFC6E4A-A701-4355-8532-4BC1C5D77BC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EFFC6E4A-A701-4355-8532-4BC1C5D77BC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EFFC6E4A-A701-4355-8532-4BC1C5D77BC7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{824E4FD2-9923-48DB-BE6B-E4D00ACD3CB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{824E4FD2-9923-48DB-BE6B-E4D00ACD3CB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{824E4FD2-9923-48DB-BE6B-E4D00ACD3CB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{824E4FD2-9923-48DB-BE6B-E4D00ACD3CB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70766C20-ADEE-48A3-9CB5-B8482447742C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70766C20-ADEE-48A3-9CB5-B8482447742C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70766C20-ADEE-48A3-9CB5-B8482447742C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70766C20-ADEE-48A3-9CB5-B8482447742C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

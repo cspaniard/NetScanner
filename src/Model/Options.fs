@@ -1,4 +1,4 @@
-namespace NetScanner.Options
+namespace Model.Options
 
 open CommandLine
 
