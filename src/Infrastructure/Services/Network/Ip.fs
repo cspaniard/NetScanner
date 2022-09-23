@@ -14,7 +14,7 @@ type private INetworkBroker = Infrastructure.DI.Brokers.NetworkDI.INetworkBroker
 type Service () =
 
     //----------------------------------------------------------------------------------------------------
-    static let getAllIpStatusInNetworkAsyncTry (timeOut : TimeOut) retries (network : IpNetwork) =
+    static let getAllIpStatusInNetworkAsyncTry timeOut retries (network : IpNetwork) =
 
         [| for i in 1..254 -> IpAddress.create $"%s{network.value}{i}"
                               |> IIpBroker.pingIpAsync timeOut retries
@@ -23,7 +23,7 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let getMacsForActiveIpsAsyncTry (timeOut : TimeOut) (ipInfos : IpInfo[]) =
+    static let getMacsForActiveIpsAsyncTry (timeOut : TimeOut) ipInfos =
 
         Arp.LinuxPingTimeout <- TimeSpan.FromMilliseconds(timeOut.value)
 
@@ -34,14 +34,14 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let ipInfosWithBlankMac (ipInfos : IpInfo[]) =
+    static let ipInfosWithBlankMac ipInfos =
 
         ipInfos
         |> Array.map (fun (IpInfo (ipAddress, active)) -> IpInfoMac (ipAddress, active, ""))
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let ipInfosWithMac (ipInfos : IpInfo[]) (macInfos : MacInfo[]) =
+    static let ipInfosWithMac ipInfos macInfos =
 
         let getIndexFromIp (ipAddress : IpAddress) = ((ipAddress.value |> split ".")[3] |> int) - 1
 
@@ -63,7 +63,7 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member scanNetworkAsync (timeOut : TimeOut) retries showMac (network : IpNetwork) =
+    static member scanNetworkAsync timeOut retries showMac network =
 
         backgroundTask {
 
@@ -81,7 +81,7 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member outputNetworkIpsStatus activeOnly separator showMac (ipInfos : IpInfoMac[]) =
+    static member outputNetworkIpsStatus activeOnly separator showMac ipInfoMacs =
 
         let formatMac (mac : string) =
 
@@ -105,7 +105,7 @@ type Service () =
             Array.map (fun (IpInfoMac (ipAddress, status, mac)) ->
                            $"%s{ipAddress.value}{separator}%b{status}{separator}%s{formatMac mac}")
 
-        ipInfos
+        ipInfoMacs
         |> (if activeOnly then filterFun else id)
         |> (if showMac then withMac else ipInfoOnly)
         |> INetworkBroker.printNetworkIpInfoLines

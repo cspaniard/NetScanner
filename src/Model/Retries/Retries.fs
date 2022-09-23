@@ -1,9 +1,9 @@
 namespace NetScanner.Model
 
-open NetScanner.Model.TimeOutValidation
+open NetScanner.Model.RetriesValidation
 
-type TimeOut =
-    private TimeOut of int
+type Retries =
+    private Retries of int
         static member private validateTry (value : int) =
 
             try
@@ -11,12 +11,12 @@ type TimeOut =
                 |> Array.iter (fun f -> f value)
 
                 value
-            with e -> failwith $"TimeOut: {e.Message}"
+            with e -> failwith $"Retries: {e.Message}"
 
-        member this.value = let (TimeOut value) = this in value
+        member this.value = let (Retries value) = this in value
         override this.ToString() = this.value.ToString()
 
         static member create value =
             value
-            |> TimeOut.validateTry
-            |> TimeOut
+            |> Retries.validateTry
+            |> Retries

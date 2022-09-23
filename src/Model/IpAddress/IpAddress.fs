@@ -11,7 +11,7 @@ type IpAddress =
             |> fun s -> s.Split(".")
             |> join "."
 
-        static member private validate (value : string) =
+        static member private validateTry (value : string) =
 
             try
                 getValidatorsList ()
@@ -27,5 +27,5 @@ type IpAddress =
         static member create (value : string) =
             value
             |> IpAddress.canonicalize
-            |> IpAddress.validate
+            |> IpAddress.validateTry
             |> IpAddress

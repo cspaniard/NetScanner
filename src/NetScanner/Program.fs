@@ -14,9 +14,10 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
     let processTask =
         task {
             let timeOut = TimeOut.create options.TimeOut
+            let retries = Retries.create options.Retries
             let network = IpNetwork.create options.Network
-            let! ipInfosWithMacs = scanNetworkAsync timeOut options.Retries
-                                                    options.ShowMac network
+
+            let! ipInfosWithMacs = scanNetworkAsync timeOut retries options.ShowMac network
 
             ipInfosWithMacs
             |> outputNetworkIpsStatus options.ActiveOnly options.Separator options.ShowMac

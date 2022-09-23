@@ -13,6 +13,8 @@
       <Compile Include="IpNetwork\IpNetwork.fs" />
       <Compile Include="TimeOut\TimeOutValidation.fs" />
       <Compile Include="TimeOut\TimeOut.fs" />
+      <Compile Include="Retries\RetriesValidation.fs" />
+      <Compile Include="Retries\Retries.fs" />
       <Compile Include="Types.fs" />
       <Compile Include="Options.fs" />
       <Compile Include="HelpTextHelper.fs" />

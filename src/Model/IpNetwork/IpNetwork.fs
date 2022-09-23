@@ -11,7 +11,7 @@ type IpNetwork =
             |> fun s -> s.Split(".")
             |> join "."
 
-        static member private validate (value : string) =
+        static member private validateTry (value : string) =
 
             try
                 getValidatorsList ()
@@ -26,6 +26,6 @@ type IpNetwork =
         static member create (value : string) =
             value
             |> IpNetwork.canonicalize
-            |> IpNetwork.validate
+            |> IpNetwork.validateTry
             |> sprintf "%s."
             |> IpNetwork
