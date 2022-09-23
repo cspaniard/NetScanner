@@ -7,10 +7,12 @@
 
     <ItemGroup>
       <Compile Include="ValidationHelper.fs" />
-      <Compile Include="IpNetworkValidation.fs" />
-      <Compile Include="IpNetwork.fs" />
-      <Compile Include="IpAdressValidation.fs" />
-      <Compile Include="IpAddress.fs" />
+      <Compile Include="IpAddress\IpAdressValidation.fs" />
+      <Compile Include="IpAddress\IpAddress.fs" />
+      <Compile Include="IpNetwork\IpNetworkValidation.fs" />
+      <Compile Include="IpNetwork\IpNetwork.fs" />
+      <Compile Include="TimeOut\TimeOutValidation.fs" />
+      <Compile Include="TimeOut\TimeOut.fs" />
       <Compile Include="Types.fs" />
       <Compile Include="Options.fs" />
       <Compile Include="HelpTextHelper.fs" />

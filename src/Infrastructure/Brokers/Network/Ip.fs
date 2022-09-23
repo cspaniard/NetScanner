@@ -11,7 +11,7 @@ open Brokers.Network.Ip.Exceptions
 type Broker () =
 
     //----------------------------------------------------------------------------------------------------
-    static member pingIpAsync timeOut retries (ipAddress: IpAddress) =
+    static member pingIpAsync (timeOut : TimeOut) retries (ipAddress: IpAddress) =
 
         backgroundTask {
             let ping = new Ping()
@@ -19,7 +19,7 @@ type Broker () =
             let mutable resultStatus = IPStatus.Unknown
 
             while retryCount > 0 do
-                let! pingReply = ping.SendPingAsync(ipAddress.value, timeOut)
+                let! pingReply = ping.SendPingAsync(ipAddress.value, timeOut.value)
 
                 if pingReply.Status = IPStatus.Success then
                     resultStatus <- pingReply.Status

@@ -14,7 +14,7 @@ type private INetworkBroker = Infrastructure.DI.Brokers.NetworkDI.INetworkBroker
 type Service () =
 
     //----------------------------------------------------------------------------------------------------
-    static let getAllIpStatusInNetworkAsyncTry timeOut retries (network : IpNetwork) =
+    static let getAllIpStatusInNetworkAsyncTry (timeOut : TimeOut) retries (network : IpNetwork) =
 
         [| for i in 1..254 -> IpAddress.create $"%s{network.value}{i}"
                               |> IIpBroker.pingIpAsync timeOut retries
@@ -23,9 +23,9 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let getMacsForActiveIpsAsyncTry (timeOut : int) (ipInfos : IpInfo[]) =
+    static let getMacsForActiveIpsAsyncTry (timeOut : TimeOut) (ipInfos : IpInfo[]) =
 
-        Arp.LinuxPingTimeout <- TimeSpan.FromMilliseconds(timeOut)
+        Arp.LinuxPingTimeout <- TimeSpan.FromMilliseconds(timeOut.value)
 
         ipInfos
         |> Array.filter (fun (IpInfo (_, active)) -> active)
@@ -63,7 +63,7 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member scanNetworkAsync timeOut retries showMac (network : IpNetwork) =
+    static member scanNetworkAsync (timeOut : TimeOut) retries showMac (network : IpNetwork) =
 
         backgroundTask {
 
