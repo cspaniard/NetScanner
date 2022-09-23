@@ -10,7 +10,10 @@ type IpInfo =
 type IpInfoMac = IpInfoMac of IpAddress * active : bool * mac : string
 type MacInfo = MacInfo of IpAddress * mac : string
 
-type ArgLinesInfo = ArgLinesInfo of paramNames : string * helpText : string
+type ArgLineInfo = ArgLineInfo of paramNames : string * helpText : string
+
+type Parsed = Parsed<ArgumentOptions>
+type NotParsed = NotParsed<ArgumentOptions>
 
 type AppErrors =
     | ArgErrors of seq<Error>

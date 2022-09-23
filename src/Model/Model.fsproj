@@ -15,8 +15,8 @@
       <Compile Include="TimeOut\TimeOut.fs" />
       <Compile Include="Retries\RetriesValidation.fs" />
       <Compile Include="Retries\Retries.fs" />
-      <Compile Include="Types.fs" />
       <Compile Include="Options.fs" />
+      <Compile Include="Types.fs" />
       <Compile Include="Constants.fs" />
     </ItemGroup>
 

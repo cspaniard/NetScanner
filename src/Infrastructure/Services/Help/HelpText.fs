@@ -30,7 +30,7 @@ type Service () =
         if option.Default <> null then
             sbRight.Append($" (def: {option.Default})") |> ignore
 
-        ArgLinesInfo (sbLeft.ToString(), sbRight.ToString())
+        ArgLineInfo (sbLeft.ToString(), sbRight.ToString())
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ type Service () =
         if valAttr.Default <> null then
             sbRight.Append($" (def: {valAttr.Default})") |> ignore
 
-        ArgLinesInfo (sbLeft.ToString(), sbRight.ToString())
+        ArgLineInfo (sbLeft.ToString(), sbRight.ToString())
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
@@ -68,17 +68,17 @@ type Service () =
                 match customAttributes[0] with
                 | :? OptionAttribute as opt -> buildOptionAttributeLine opt
                 | :? ValueAttribute as value -> buildValueAttributeLine value
-                | :? VerbAttribute as verb -> ArgLinesInfo (verb.Name, verb.HelpText)
+                | :? VerbAttribute as verb -> ArgLineInfo (verb.Name, verb.HelpText)
                 | _ -> failwith "Atributo no identificado."
 
-            ArgLinesInfo ($"""{"".PadLeft LEFT_MARGIN}     --help""", "Muestra esta ayuda y sale.")
-            ArgLinesInfo ($"""{"".PadLeft LEFT_MARGIN}     --version""",
-                          "Devuelve información de la versión y sale.")
+            ArgLineInfo ($"""{"".PadLeft LEFT_MARGIN}     --help""", "Muestra esta ayuda y sale.")
+            ArgLineInfo ($"""{"".PadLeft LEFT_MARGIN}     --version""",
+                         "Devuelve información de la versión y sale.")
         |]
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member showHelpText (errors : AppErrors) =
+    static member showHelp (errors : AppErrors) =
 
         //------------------------------------------------------------------------------------------------
         let printHelpText (errorList : seq<string>) =

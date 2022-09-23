@@ -2,4 +2,4 @@ namespace Infrastructure.DI.Services
 
 module HelpDI =
 
-    type IIHelpTextService = Services.Help.HelpText.Service
+    type IHelpService = Services.Help.HelpText.Service

@@ -24,13 +24,13 @@ type Broker () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member printArgsHelp (argLinesInfo : ArgLinesInfo[]) =
+    static member printArgsHelp (argLinesInfo : ArgLineInfo[]) =
 
-        let maxWidth = argLinesInfo |> Array.map (fun (ArgLinesInfo (n, _)) -> n.Length) |> Array.max
+        let maxWidth = argLinesInfo |> Array.map (fun (ArgLineInfo (n, _)) -> n.Length) |> Array.max
         Console.WriteLine ()
 
         argLinesInfo
-        |> Array.iter (fun (ArgLinesInfo (n, h)) -> Console.WriteLine $"{n.PadRight maxWidth}    {h}\n")
+        |> Array.iter (fun (ArgLineInfo (n, h)) -> Console.WriteLine $"{n.PadRight maxWidth}    {h}\n")
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
