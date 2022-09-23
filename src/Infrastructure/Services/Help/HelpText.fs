@@ -57,9 +57,9 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let getArgLinesInfo (err : NotParsed<ArgumentOptions>) =
+    static let getArgLinesInfo () =
 
-        let properties = err.TypeInfo.Current.GetProperties()
+        let properties = typeof<ArgumentOptions>.GetProperties()
 
         [|
             for property in properties do
@@ -73,26 +73,44 @@ type Service () =
         |]
     //----------------------------------------------------------------------------------------------------
 
-    static member showHelpText (errors : NotParsed<ArgumentOptions>) =
+    //----------------------------------------------------------------------------------------------------
+    static member showHelpText (errors : AppErrors) =
 
-        //----------------------------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------------
         let printHelpText (errorList : seq<string>) =
 
             printHeader ()
 
             match Seq.head errorList with
-            | "HELP" -> printUsage () ; getArgLinesInfo errors |> printArgsHelp
+            | "HELP" -> printUsage () ; getArgLinesInfo () |> printArgsHelp
             | "VERSION" -> ()
-            | _ -> printUsage () ; printErrorList errorList ; getArgLinesInfo errors |> printArgsHelp
-        //----------------------------------------------------------------------------------------------------
+            | _ -> printUsage () ; printErrorList errorList ; getArgLinesInfo () |> printArgsHelp
+        //------------------------------------------------------------------------------------------------
 
-        errors.Errors
-        |> Seq.map (fun error ->
-            match error with
-            | :? HelpRequestedError -> "HELP"
-            | :? VersionRequestedError -> "VERSION"
-            | :? MissingRequiredOptionError -> "Falta una opción requerida."
-            | :? UnknownOptionError as e -> $"Opción desconocida: {e.Token}"
-            | :? BadFormatConversionError as e -> $"Error de conversión de valores: {e.NameInfo.NameText}"
-            | _ -> $"Error desconocido. %A{error}")
-        |> printHelpText
+        //------------------------------------------------------------------------------------------------
+        let processArgErrors (errors : seq<Error>) =
+
+            errors
+            |> Seq.map (fun error ->
+                match error with
+                | :? HelpRequestedError -> "HELP"
+                | :? VersionRequestedError -> "VERSION"
+                | :? MissingRequiredOptionError -> "Falta una opción requerida."
+                | :? UnknownOptionError as e -> $"Opción desconocida: {e.Token}"
+                | :? BadFormatConversionError as e -> $"Error de conversión de valores: {e.NameInfo.NameText}"
+                | _ -> $"Error desconocido. %A{error}")
+            |> printHelpText
+        //------------------------------------------------------------------------------------------------
+
+        //------------------------------------------------------------------------------------------------
+        let processInternalErrors (exceptions : seq<Exception>) =
+
+            exceptions
+            |> Seq.map (fun e -> e.Message)
+            |> printHelpText
+        //------------------------------------------------------------------------------------------------
+
+        match errors with
+        | ArgErrors argErrors -> processArgErrors argErrors
+        | ExceptionErrors exceptions -> processInternalErrors exceptions
+    //----------------------------------------------------------------------------------------------------

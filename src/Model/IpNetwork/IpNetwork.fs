@@ -18,7 +18,7 @@ type IpNetwork =
                 |> Array.iter (fun f -> f value)
 
                 value
-            with e -> failwith $"IpNetwork: {e.Message}"
+            with e -> failwith $"red: {e.Message}"
 
         member this.value = let (IpNetwork value) = this in value
         override this.ToString() = this.value

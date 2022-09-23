@@ -11,7 +11,7 @@ type TimeOut =
                 |> Array.iter (fun f -> f value)
 
                 value
-            with e -> failwith $"TimeOut: {e.Message}"
+            with e -> failwith $"timeout: {e.Message}"
 
         member this.value = let (TimeOut value) = this in value
         override this.ToString() = this.value.ToString()
