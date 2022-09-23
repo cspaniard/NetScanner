@@ -17,7 +17,7 @@
       <Compile Include="Retries\Retries.fs" />
       <Compile Include="Types.fs" />
       <Compile Include="Options.fs" />
-      <Compile Include="HelpTextHelper.fs" />
+      <Compile Include="Constants.fs" />
     </ItemGroup>
 
     <ItemGroup>

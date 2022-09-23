@@ -1,13 +1,14 @@
-namespace NetScanner.Model
+namespace Model
 
 open Motsoft.Util
-open NetScanner.Model.IpNetworkValidation
+open Model.IpNetworkValidation
 
 type IpNetwork =
     private IpNetwork of string
         static member private canonicalize (value : string) =
             value
             |> trim
+            |> fun s -> s.Trim([|'.'|])
             |> fun s -> s.Split(".")
             |> join "."
 

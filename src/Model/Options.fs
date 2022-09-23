@@ -1,4 +1,4 @@
-namespace Model.Options
+namespace Model
 
 open CommandLine
 

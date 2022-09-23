@@ -1,6 +1,6 @@
-namespace NetScanner.Model
+namespace Model
 
-open NetScanner.Model.TimeOutValidation
+open Model.TimeOutValidation
 
 type TimeOut =
     private TimeOut of int

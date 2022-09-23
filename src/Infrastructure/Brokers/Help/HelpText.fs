@@ -2,7 +2,8 @@ namespace Brokers.Help.HelpText
 
 open System
 open System.Reflection
-open Model.HelpTextHelper
+open Model
+open Model.Constants
 
 type Broker () =
 
@@ -10,7 +11,9 @@ type Broker () =
     static member printHeader () =
 
         let assemblyName = Assembly.GetEntryAssembly().GetName()
-        Console.WriteLine($"{assemblyName.Name} - {assemblyName.Version}")
+        let version = assemblyName.Version
+
+        Console.WriteLine($"{assemblyName.Name} - {version.Major}.{version.Minor}.{version.Build}")
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
@@ -23,11 +26,11 @@ type Broker () =
     //----------------------------------------------------------------------------------------------------
     static member printArgsHelp (argLinesInfo : ArgLinesInfo[]) =
 
-        let maxWidth = argLinesInfo |> Array.map (fun (ArgLinesInfo (l, _)) -> l.Length) |> Array.max
+        let maxWidth = argLinesInfo |> Array.map (fun (ArgLinesInfo (n, _)) -> n.Length) |> Array.max
         Console.WriteLine ()
 
         argLinesInfo
-        |> Array.iter (fun (ArgLinesInfo (l, r)) -> Console.WriteLine $"{l.PadRight maxWidth}    {r}\n")
+        |> Array.iter (fun (ArgLinesInfo (n, h)) -> Console.WriteLine $"{n.PadRight maxWidth}    {h}\n")
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------

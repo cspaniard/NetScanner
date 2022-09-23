@@ -1,4 +1,4 @@
-module NetScanner.Model.TimeOutValidation
+module Model.TimeOutValidation
 
 open Motsoft.Util
 

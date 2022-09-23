@@ -1,4 +1,7 @@
-namespace NetScanner.Model
+namespace Model
+
+open System
+open CommandLine
 
 type IpInfo =
     IpInfo of IpAddress * active : bool
@@ -6,3 +9,9 @@ type IpInfo =
 
 type IpInfoMac = IpInfoMac of IpAddress * active : bool * mac : string
 type MacInfo = MacInfo of IpAddress * mac : string
+
+type ArgLinesInfo = ArgLinesInfo of paramNames : string * helpText : string
+
+type AppErrors =
+    | ArgErrors of seq<Error>
+    | ExceptionErrors of seq<Exception>

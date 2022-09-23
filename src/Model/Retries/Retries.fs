@@ -1,6 +1,6 @@
-namespace NetScanner.Model
+namespace Model
 
-open NetScanner.Model.RetriesValidation
+open Model.RetriesValidation
 
 type Retries =
     private Retries of int

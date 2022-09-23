@@ -1,7 +1,7 @@
-namespace NetScanner.Model
+namespace Model
 
 open Motsoft.Util
-open NetScanner.Model.IpAddressValidation
+open Model.IpAddressValidation
 
 type IpAddress =
     private IpAddress of string

@@ -1,4 +1,4 @@
-module NetScanner.Model.RetriesValidation
+module Model.RetriesValidation
 
 open Motsoft.Util
 

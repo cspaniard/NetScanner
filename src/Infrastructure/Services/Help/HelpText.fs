@@ -3,8 +3,8 @@ namespace Services.Help.HelpText
 open System
 open System.Text
 open CommandLine
-open Model.Options
-open Model.HelpTextHelper
+open Model
+open Model.Constants
 
 open type Infrastructure.DI.Brokers.HelpDI.IIHelpTextBroker
 
@@ -70,6 +70,10 @@ type Service () =
                 | :? ValueAttribute as value -> buildValueAttributeLine value
                 | :? VerbAttribute as verb -> ArgLinesInfo (verb.Name, verb.HelpText)
                 | _ -> failwith "Atributo no identificado."
+
+            ArgLinesInfo ($"""{"".PadLeft LEFT_MARGIN}     --help""", "Muestra esta ayuda y sale.")
+            ArgLinesInfo ($"""{"".PadLeft LEFT_MARGIN}     --version""",
+                          "Devuelve información de la versión y sale.")
         |]
     //----------------------------------------------------------------------------------------------------
 
@@ -97,9 +101,13 @@ type Service () =
                 | :? VersionRequestedError -> "VERSION"
                 | :? MissingRequiredOptionError -> "Falta una opción requerida."
                 | :? UnknownOptionError as e -> $"Opción desconocida: {e.Token}"
-                | :? BadFormatConversionError as e -> $"Error de conversión de valores: {e.NameInfo.NameText}"
+                | :? BadFormatConversionError as e -> $"{e.NameInfo.LongName}: Error de conversión de valores."
                 | _ -> $"Error desconocido. %A{error}")
             |> printHelpText
+
+            match Seq.head errors with
+            | :? HelpRequestedError | :? VersionRequestedError -> EXIT_CODE_OK
+            | _ -> EXIT_CODE_ARG_ERROR
         //------------------------------------------------------------------------------------------------
 
         //------------------------------------------------------------------------------------------------
@@ -108,6 +116,8 @@ type Service () =
             exceptions
             |> Seq.map (fun e -> e.Message)
             |> printHelpText
+
+            EXIT_CODE_EXCEPTION
         //------------------------------------------------------------------------------------------------
 
         match errors with

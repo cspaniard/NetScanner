@@ -5,7 +5,7 @@ open System.Net.NetworkInformation
 open ArpLookup
 open Motsoft.Util
 
-open NetScanner.Model
+open Model
 open Brokers.Network.Ip.Exceptions
 
 type Broker () =

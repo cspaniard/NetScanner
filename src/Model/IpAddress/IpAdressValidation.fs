@@ -1,4 +1,4 @@
-module NetScanner.Model.IpAddressValidation
+module Model.IpAddressValidation
 
 open Model.ValidationHelper
 

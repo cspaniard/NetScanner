@@ -6,7 +6,7 @@ open System.Threading.Tasks
 open ArpLookup
 open Motsoft.Util
 
-open NetScanner.Model
+open Model
 
 type private IIpBroker = Infrastructure.DI.Brokers.NetworkDI.IIpBroker
 type private INetworkBroker = Infrastructure.DI.Brokers.NetworkDI.INetworkBroker

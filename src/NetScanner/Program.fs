@@ -1,9 +1,8 @@
 open System
 open System.Threading.Tasks
 open CommandLine
-open Model.Options
-open Model.HelpTextHelper
-open NetScanner.Model
+
+open Model
 
 open type Infrastructure.DI.Services.NetworkDI.IIpService
 open type Infrastructure.DI.Services.HelpDI.IIHelpTextService
@@ -31,10 +30,8 @@ try
 
     match parser.ParseArguments<ArgumentOptions> argv with
     | :? Parsed<ArgumentOptions> as opts -> scanAndOutputNetwork opts.Value
-    | :? NotParsed<ArgumentOptions> as notParsed -> showHelpText <| ArgErrors notParsed.Errors
-                                                    exit 1
+    | :? NotParsed<ArgumentOptions> as notParsed -> showHelpText <| ArgErrors notParsed.Errors |> exit
     | _ -> Console.WriteLine "No debiéramos llegar aquí."
 with
-| :? AggregateException as ae -> showHelpText <| ExceptionErrors ae.InnerExceptions
-                                 exit 2
+| :? AggregateException as ae -> showHelpText <| ExceptionErrors ae.InnerExceptions |> exit
 | e -> Console.WriteLine $"Raro que lleguemos aquí, pero: {e.Message}"
