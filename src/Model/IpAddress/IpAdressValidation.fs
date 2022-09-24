@@ -13,8 +13,8 @@ IpAdressErrors.Add(OctectIncorrectCount, "La IP tiene un número erróneo de oct
 
 let getValidatorsList () =
     [|
-        checkEmpty IpAdressErrors
-        checkOctectsForSpacesOrEmpty IpAdressErrors
-        checkOctectCount IpAdressErrors 4
-        checkOctectsAreIntsInRange IpAdressErrors
+        checkEmptyTry IpAdressErrors
+        checkOctectsForSpacesOrEmptyTry IpAdressErrors
+        checkOctectCountTry IpAdressErrors 4
+        checkOctectsAreIntsInRangeTry IpAdressErrors
     |]

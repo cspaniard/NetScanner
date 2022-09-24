@@ -13,8 +13,8 @@ IpNetworkErrors.Add(OctectIncorrectCount, "La red tiene un número erróneo de o
 
 let getValidatorsList () =
     [|
-        checkEmpty IpNetworkErrors
-        checkOctectsForSpacesOrEmpty IpNetworkErrors
-        checkOctectsAreIntsInRange IpNetworkErrors
-        checkOctectCount IpNetworkErrors 3
+        checkEmptyTry IpNetworkErrors
+        checkOctectsForSpacesOrEmptyTry IpNetworkErrors
+        checkOctectsAreIntsInRangeTry IpNetworkErrors
+        checkOctectCountTry IpNetworkErrors 3
     |]

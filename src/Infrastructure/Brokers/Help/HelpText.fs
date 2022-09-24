@@ -26,23 +26,26 @@ type Broker () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member printArgsInfo argLineInfoList =
-
-        let maxWidth = argLineInfoList |> Array.map (fun (ArgLineInfo (n, _)) -> n.Length) |> Array.max
-        let leftMargin = "".PadLeft LEFT_MARGIN
-        Console.WriteLine ()
-
-        argLineInfoList
-        |> Array.iter (fun (ArgLineInfo (names, helpText)) ->
-                           Console.WriteLine $"{leftMargin}{names.PadRight maxWidth}    {helpText}\n")
-    //----------------------------------------------------------------------------------------------------
-
-    //----------------------------------------------------------------------------------------------------
     static member printErrorList errorList =
+
+        let leftMargin = String(' ', LEFT_MARGIN)
 
         Console.WriteLine "\nERRORES:"
 
         errorList
         |> Seq.filter (not << String.IsNullOrWhiteSpace)
-        |> Seq.iter (fun errorLine -> Console.WriteLine $"""{"".PadLeft LEFT_MARGIN}{errorLine}""")
+        |> Seq.iter (fun errorLine -> Console.WriteLine $"{leftMargin}{errorLine}")
+    //----------------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------------------------
+    static member printArgsInfo argLineInfoList =
+
+        let maxWidth = argLineInfoList |> Array.map (fun (ArgLineInfo (n, _)) -> n.Length) |> Array.max
+        let leftMargin = String(' ', LEFT_MARGIN)
+
+        Console.WriteLine ()
+
+        argLineInfoList
+        |> Array.iter (fun (ArgLineInfo (names, helpText)) ->
+                           Console.WriteLine $"{leftMargin}{names.PadRight maxWidth}    {helpText}\n")
     //----------------------------------------------------------------------------------------------------

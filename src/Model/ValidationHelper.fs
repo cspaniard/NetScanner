@@ -14,16 +14,16 @@ type Errors =
 
 type ErrorDict = Dictionary<Errors, string>
 
-let checkEmpty (errors : ErrorDict) (value : string) =
+let checkEmptyTry (errors : ErrorDict) (value : string) =
     value |> String.IsNullOrWhiteSpace |> failWithIfTrue errors[ValueIsEmpty]
 
-let checkOctectsForSpacesOrEmpty (errors : ErrorDict) (value : string) =
+let checkOctectsForSpacesOrEmptyTry (errors : ErrorDict) (value : string) =
     value
     |> splitWitchOptionsByStringChars "." StringSplitOptions.None
     |> Array.iter (fun o -> o.Contains " " |> failWithIfTrue errors[ValueContainsSpaces]
                             o |> String.IsNullOrWhiteSpace |> failWithIfTrue errors[OctectIsEmpty])
 
-let checkOctectsAreIntsInRange (errors : ErrorDict) (value : string) =
+let checkOctectsAreIntsInRangeTry (errors : ErrorDict) (value : string) =
     value
     |> split "."
     |> Array.iter
@@ -32,5 +32,5 @@ let checkOctectsAreIntsInRange (errors : ErrorDict) (value : string) =
                      | true, intVal when intVal < 0 || intVal > 254 -> failwith errors[OctectOutOfRange]
                      | _ -> ())
 
-let checkOctectCount (errors : ErrorDict) octet (value : string) =
+let checkOctectCountTry (errors : ErrorDict) octet (value : string) =
     (value |> split "." |> Array.length <> octet) |> failWithIfTrue errors[OctectIncorrectCount]

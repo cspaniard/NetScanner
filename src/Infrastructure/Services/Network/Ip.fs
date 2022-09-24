@@ -14,7 +14,7 @@ type private INetworkBroker = Infrastructure.DI.Brokers.NetworkDI.INetworkBroker
 type Service () =
 
     //----------------------------------------------------------------------------------------------------
-    static let getAllIpStatusInNetworkAsyncTry timeOut retries (network : IpNetwork) =
+    static let getAllIpInfosForNetworkAsyncTry timeOut retries (network : IpNetwork) =
 
         [| for i in 1..254 -> IpAddress.create $"%s{network.value}{i}"
                               |> IIpBroker.pingIpAsync timeOut retries
@@ -51,15 +51,10 @@ type Service () =
         |> Array.iter
                (fun (MacInfo (ipAddress, macInfoMac)) ->
                     let idx = getIndexFromIp ipAddress
-                    let (IpInfo (ipInfoIp, ipInfoActive)) = ipInfos[idx]
-                    fullInfos[idx] <- IpInfoMac (ipInfoIp, ipInfoActive, macInfoMac))
+                    let (IpInfo (ipInfoAddress, ipInfoActive)) = ipInfos[idx]
+                    fullInfos[idx] <- IpInfoMac (ipInfoAddress, ipInfoActive, macInfoMac))
 
         fullInfos
-    //----------------------------------------------------------------------------------------------------
-
-    //----------------------------------------------------------------------------------------------------
-    static member getNetworksListAsyncTry () =
-        IIpBroker.getIpV4NetworkClassesAsyncTry ()
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
@@ -67,16 +62,14 @@ type Service () =
 
         backgroundTask {
 
-            let! ipInfos = getAllIpStatusInNetworkAsyncTry timeOut retries network
+            let! ipInfos = getAllIpInfosForNetworkAsyncTry timeOut retries network
 
             if showMac then
                 let! macInfos = ipInfos |> getMacsForActiveIpsAsyncTry timeOut
 
-                return
-                    ipInfosWithMac ipInfos macInfos
+                return ipInfosWithMac ipInfos macInfos
             else
-                return
-                    ipInfos |> ipInfosWithBlankMac
+                return ipInfosWithBlankMac ipInfos
         }
     //----------------------------------------------------------------------------------------------------
 

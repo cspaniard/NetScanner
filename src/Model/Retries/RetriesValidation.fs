@@ -2,11 +2,11 @@ module Model.RetriesValidation
 
 open Motsoft.Util
 
-let checkPostive value =
+let checkPostiveTry value =
     value >= 0 |> failWithIfFalse "El valor tiene que ser positivo."
 
 
 let getValidatorsList () =
     [|
-        checkPostive
+        checkPostiveTry
     |]
