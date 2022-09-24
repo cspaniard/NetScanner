@@ -1,7 +1,5 @@
 namespace Services.Help.HelpText
 
-open System
-open System.Text
 open CommandLine
 open Model
 open Model.Constants
@@ -11,67 +9,18 @@ open type Infrastructure.DI.Brokers.HelpDI.IIHelpTextBroker
 type Service () =
 
     //----------------------------------------------------------------------------------------------------
-    static let buildOptionAttributeLine (option : OptionAttribute) =
-
-        let sbLeft = StringBuilder()
-
-        sbLeft
-            .Append("".PadLeft LEFT_MARGIN)
-            .Append($"-{option.ShortName}")
-        |> ignore
-
-        if option.LongName |> (not << String.IsNullOrWhiteSpace) then
-            sbLeft.Append($",  --{option.LongName}") |> ignore
-
-
-        let sbRight = StringBuilder()
-        sbRight.Append option.HelpText |> ignore
-
-        if option.Default <> null then
-            sbRight.Append($" (def: {option.Default})") |> ignore
-
-        ArgLineInfo (sbLeft.ToString(), sbRight.ToString())
-    //----------------------------------------------------------------------------------------------------
-
-    //----------------------------------------------------------------------------------------------------
-    static let buildValueAttributeLine (valAttr : ValueAttribute) =
-
-        let sbLeft = StringBuilder()
-
-        sbLeft
-            .Append("".PadLeft LEFT_MARGIN)
-            .Append(valAttr.MetaName)
-        |> ignore
-
-        if valAttr.Required then
-            sbLeft.Append(" (requerido)") |> ignore
-
-
-        let sbRight = StringBuilder()
-        sbRight.Append valAttr.HelpText |> ignore
-
-        if valAttr.Default <> null then
-            sbRight.Append($" (def: {valAttr.Default})") |> ignore
-
-        ArgLineInfo (sbLeft.ToString(), sbRight.ToString())
-    //----------------------------------------------------------------------------------------------------
-
-    //----------------------------------------------------------------------------------------------------
     static let getArgLinesInfo () =
 
-        let properties = typeof<ArgumentOptions>.GetProperties()
+        let leftSpaces = "".PadLeft 5
 
         [|
-            for property in properties do
-                let customAttributes = property.GetCustomAttributes(true)
+            ArgLineInfo ("-w,  --timeout", "Tiempo en ms de espera en cada ping. (def: 500)")
+            ArgLineInfo ("-r,  --retries", "Número pings hasta dar la IP por inactiva. (def: 3)")
+            ArgLineInfo ("-s,  --separador", "Separador entre campos. (def: \\t)")
+            ArgLineInfo ("-a,  --activos", "Sólo devuelve las IPs activas. (def: False)")
+            ArgLineInfo ("-m,  --mac", "Muestra la MAC de cada IP activa. (def: False)")
+            ArgLineInfo ("red (requerido)", "La red a escanear.")
 
-                match customAttributes[0] with
-                | :? OptionAttribute as opt -> buildOptionAttributeLine opt
-                | :? ValueAttribute as value -> buildValueAttributeLine value
-                | :? VerbAttribute as verb -> ArgLineInfo (verb.Name, verb.HelpText)
-                | _ -> failwith "Atributo no identificado."
-
-            let leftSpaces = "".PadLeft (LEFT_MARGIN + 5)
             ArgLineInfo ($"{leftSpaces}--help", "Muestra esta ayuda y sale.")
             ArgLineInfo ($"{leftSpaces}--version", "Devuelve información de la versión y sale.")
         |]
@@ -86,9 +35,9 @@ type Service () =
             printHeader ()
 
             match Seq.head errorMessages with
-            | "HELP" -> printUsage () ; getArgLinesInfo () |> printArgsHelp
+            | "HELP" -> printUsage () ; getArgLinesInfo () |> printArgsInfo
             | "VERSION" -> ()
-            | _ -> printUsage () ; printErrorList errorMessages ; getArgLinesInfo () |> printArgsHelp
+            | _ -> printUsage () ; printErrorList errorMessages ; getArgLinesInfo () |> printArgsInfo
         //------------------------------------------------------------------------------------------------
 
         //------------------------------------------------------------------------------------------------
