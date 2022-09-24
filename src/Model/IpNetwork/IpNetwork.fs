@@ -1,5 +1,6 @@
 namespace Model
 
+open System
 open Motsoft.Util
 open Model.IpNetworkValidation
 
@@ -7,9 +8,8 @@ type IpNetwork =
     private IpNetwork of string
         static member private canonicalize (value : string) =
             value
-            |> trim
-            |> fun s -> s.Trim([|'.'|])
-            |> fun s -> s.Split(".")
+            |> trimStringChars " ."
+            |> splitWitchOptionsByStringChars "." StringSplitOptions.None
             |> join "."
 
         static member private validateTry (value : string) =

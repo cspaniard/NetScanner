@@ -19,7 +19,7 @@ let checkEmpty (errors : ErrorDict) (value : string) =
 
 let checkOctectsForSpacesOrEmpty (errors : ErrorDict) (value : string) =
     value
-    |> fun s -> s.Split(".")
+    |> splitWitchOptionsByStringChars "." StringSplitOptions.None
     |> Array.iter (fun o -> o.Contains " " |> failWithIfTrue errors[ValueContainsSpaces]
                             o |> String.IsNullOrWhiteSpace |> failWithIfTrue errors[OctectIsEmpty])
 

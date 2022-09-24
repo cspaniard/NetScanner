@@ -1,5 +1,6 @@
 namespace Model
 
+open System
 open Motsoft.Util
 open Model.IpAddressValidation
 
@@ -8,7 +9,7 @@ type IpAddress =
         static member private canonicalize (value : string) =
             value
             |> trim
-            |> fun s -> s.Split(".")
+            |> splitWitchOptionsByStringChars "." StringSplitOptions.None
             |> join "."
 
         static member private validateTry (value : string) =

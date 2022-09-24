@@ -71,9 +71,9 @@ type Service () =
                 | :? VerbAttribute as verb -> ArgLineInfo (verb.Name, verb.HelpText)
                 | _ -> failwith "Atributo no identificado."
 
-            ArgLineInfo ($"""{"".PadLeft LEFT_MARGIN}     --help""", "Muestra esta ayuda y sale.")
-            ArgLineInfo ($"""{"".PadLeft LEFT_MARGIN}     --version""",
-                         "Devuelve información de la versión y sale.")
+            let leftSpaces = "".PadLeft (LEFT_MARGIN + 5)
+            ArgLineInfo ($"{leftSpaces}--help", "Muestra esta ayuda y sale.")
+            ArgLineInfo ($"{leftSpaces}--version", "Devuelve información de la versión y sale.")
         |]
     //----------------------------------------------------------------------------------------------------
 
@@ -81,14 +81,14 @@ type Service () =
     static member showHelp (appErrors : AppErrors) =
 
         //------------------------------------------------------------------------------------------------
-        let printHelpText (errorList : seq<string>) =
+        let showHelpText (errorMessages : seq<string>) =
 
             printHeader ()
 
-            match Seq.head errorList with
+            match Seq.head errorMessages with
             | "HELP" -> printUsage () ; getArgLinesInfo () |> printArgsHelp
             | "VERSION" -> ()
-            | _ -> printUsage () ; printErrorList errorList ; getArgLinesInfo () |> printArgsHelp
+            | _ -> printUsage () ; printErrorList errorMessages ; getArgLinesInfo () |> printArgsHelp
         //------------------------------------------------------------------------------------------------
 
         //------------------------------------------------------------------------------------------------
@@ -103,7 +103,7 @@ type Service () =
                 | :? UnknownOptionError as e -> $"Opción desconocida: {e.Token}"
                 | :? BadFormatConversionError as e -> $"{e.NameInfo.LongName}: Error de conversión de valores."
                 | _ -> $"Error desconocido. %A{error}")
-            |> printHelpText
+            |> showHelpText
 
             match Seq.head argErrors with
             | :? HelpRequestedError | :? VersionRequestedError -> EXIT_CODE_OK
@@ -115,7 +115,7 @@ type Service () =
 
             exceptionErrors
             |> Seq.map (fun e -> e.Message)
-            |> printHelpText
+            |> showHelpText
 
             EXIT_CODE_EXCEPTION
         //------------------------------------------------------------------------------------------------
