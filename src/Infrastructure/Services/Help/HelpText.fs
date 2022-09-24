@@ -78,7 +78,7 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member showHelp (errors : AppErrors) =
+    static member showHelp (appErrors : AppErrors) =
 
         //------------------------------------------------------------------------------------------------
         let printHelpText (errorList : seq<string>) =
@@ -92,9 +92,9 @@ type Service () =
         //------------------------------------------------------------------------------------------------
 
         //------------------------------------------------------------------------------------------------
-        let processArgErrors (errors : seq<Error>) =
+        let processArgErrors (argErrors : ArgErrors) =
 
-            errors
+            argErrors
             |> Seq.map (fun error ->
                 match error with
                 | :? HelpRequestedError -> "HELP"
@@ -105,22 +105,22 @@ type Service () =
                 | _ -> $"Error desconocido. %A{error}")
             |> printHelpText
 
-            match Seq.head errors with
+            match Seq.head argErrors with
             | :? HelpRequestedError | :? VersionRequestedError -> EXIT_CODE_OK
             | _ -> EXIT_CODE_ARG_ERROR
         //------------------------------------------------------------------------------------------------
 
         //------------------------------------------------------------------------------------------------
-        let processInternalErrors (exceptions : seq<Exception>) =
+        let processExceptionErrors (exceptionErrors : ExceptionErrors) =
 
-            exceptions
+            exceptionErrors
             |> Seq.map (fun e -> e.Message)
             |> printHelpText
 
             EXIT_CODE_EXCEPTION
         //------------------------------------------------------------------------------------------------
 
-        match errors with
+        match appErrors with
         | ArgErrors argErrors -> processArgErrors argErrors
-        | ExceptionErrors exceptions -> processInternalErrors exceptions
+        | ExceptionErrors exceptionErrors -> processExceptionErrors exceptionErrors
     //----------------------------------------------------------------------------------------------------

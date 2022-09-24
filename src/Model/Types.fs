@@ -15,6 +15,9 @@ type ArgLineInfo = ArgLineInfo of paramNames : string * helpText : string
 type Parsed = Parsed<ArgumentOptions>
 type NotParsed = NotParsed<ArgumentOptions>
 
+type ArgErrors = seq<Error>
+type ExceptionErrors = seq<Exception>
+
 type AppErrors =
-    | ArgErrors of seq<Error>
-    | ExceptionErrors of seq<Exception>
+    | ArgErrors of ArgErrors
+    | ExceptionErrors of ExceptionErrors
