@@ -32,6 +32,8 @@ type Broker () =
 
         Console.WriteLine "\nERRORES:"
 
+        if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then Console.WriteLine ""
+
         errorList
         |> Seq.filter (not << String.IsNullOrWhiteSpace)
         |> Seq.iter (fun errorLine -> Console.WriteLine $"{leftMargin}{errorLine}")
