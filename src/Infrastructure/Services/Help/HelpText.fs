@@ -48,7 +48,7 @@ type Service () =
                 match error with
                 | :? HelpRequestedError -> "HELP"
                 | :? VersionRequestedError -> "VERSION"
-                | :? MissingRequiredOptionError -> "Falta una opción requerida."
+                | :? MissingRequiredOptionError -> "red: Este valor es requerido."
                 | :? UnknownOptionError as e -> $"Opción desconocida: {e.Token}"
                 | :? BadFormatConversionError as e -> $"{e.NameInfo.LongName}: Error de conversión de valores."
                 | _ -> $"Error desconocido. %A{error}")
