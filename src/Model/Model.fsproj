@@ -6,17 +6,20 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Include="Options.fs" />
       <Compile Include="ValidationHelper.fs" />
       <Compile Include="IpAddress\IpAdressValidation.fs" />
       <Compile Include="IpAddress\IpAddress.fs" />
+      <Compile Include="Types.fs" />
       <Compile Include="IpNetwork\IpNetworkValidation.fs" />
       <Compile Include="IpNetwork\IpNetwork.fs" />
       <Compile Include="TimeOut\TimeOutValidation.fs" />
       <Compile Include="TimeOut\TimeOut.fs" />
       <Compile Include="Retries\RetriesValidation.fs" />
       <Compile Include="Retries\Retries.fs" />
-      <Compile Include="Options.fs" />
-      <Compile Include="Types.fs" />
+      <Compile Include="NameInfoArray\NameInfoArray.fs" />
+      <Compile Include="IpStatusArray\IpStatusArray.fs" />
+      <Compile Include="MacInfoArray\MacInfoArray.fs" />
       <Compile Include="Constants.fs" />
     </ItemGroup>
 

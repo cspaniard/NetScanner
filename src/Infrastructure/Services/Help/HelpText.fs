@@ -1,5 +1,6 @@
 namespace Services.Help.HelpText
 
+open System
 open CommandLine
 open Model
 open Model.Constants
@@ -11,14 +12,16 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
     static let getArgLinesInfo () =
 
-        let leftSpaces = "".PadLeft 5
+        let leftSpaces = String(' ', 5)
 
         [|
-            ArgLineInfo ("-w,  --timeout", "Tiempo en ms de espera en cada ping. (def: 500)")
+            ArgLineInfo ("-w,  --ping-timeout", "Tiempo de espera en ms para cada ping. (def: 500)")
             ArgLineInfo ("-r,  --retries", "Número pings hasta dar la IP por inactiva. (def: 3)")
             ArgLineInfo ("-s,  --separador", "Separador entre campos. (def: \\t)")
             ArgLineInfo ("-a,  --activos", "Sólo devuelve las IPs activas. (def: False)")
             ArgLineInfo ("-m,  --mac", "Muestra la MAC de cada IP activa. (def: False)")
+            ArgLineInfo ("-l,  --name-timeout",
+                         "Tiempo de espera en ms para cada resolución de nombre. (def: 1000)")
             ArgLineInfo ("red (requerido)", "La red a escanear.")
 
             ArgLineInfo ($"{leftSpaces}--help", "Muestra esta ayuda y sale.")

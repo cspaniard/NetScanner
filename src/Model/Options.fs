@@ -3,8 +3,8 @@ namespace Model
 open CommandLine
 
 type ArgumentOptions = {
-    [<Option ('w', "timeout", Default = 500)>]
-    TimeOut : int
+    [<Option ('w', "ping-timeout", Default = 500)>]
+    PingTimeOut : int
 
     [<Option ('r', "retries", Default = 3)>]
     Retries : int
@@ -17,6 +17,9 @@ type ArgumentOptions = {
 
     [<Option ('m', "mac", Default = false)>]
     ShowMac : bool
+
+    [<Option ('l', "name-timeout", Default = 1000)>]
+    NameLookUpTimeOut : int
 
     [<Value (0, MetaName="red", Required = true)>]
     Network : string

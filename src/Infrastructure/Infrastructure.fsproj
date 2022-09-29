@@ -6,6 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Include="Brokers\Processes\Process.fs" />
+      <Compile Include="Brokers\Processes\ProcessesDI.fs" />
       <Compile Include="Brokers\Network\Ip.Exceptions.fs" />
       <Compile Include="Brokers\Network\Ip.fs" />
       <Compile Include="Brokers\Network\Network.fs" />

@@ -14,62 +14,81 @@ type private INetworkBroker = Infrastructure.DI.Brokers.NetworkDI.INetworkBroker
 type Service () =
 
     //----------------------------------------------------------------------------------------------------
-    static let getAllIpInfosForNetworkAsyncTry timeOut retries (network : IpNetwork) =
+    static let getAllIpInfosForNetworkAsyncTry pingTimeOut retries (network : IpNetwork) =
 
-        [| for i in 1..254 -> IpAddress.create $"%s{network.value}{i}"
-                              |> IIpBroker.pingIpAsync timeOut retries
+        [|
+           for i in 1..254 -> IpAddress.create $"%s{network.value}{i}"
+                              |> IIpBroker.pingIpAsync pingTimeOut retries
         |]
         |> Task.WhenAll
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let getMacsForActiveIpsAsyncTry (timeOut : TimeOut) ipInfos =
+    static let getMacsForActiveIpsAsyncTry (timeOut : TimeOut) (ipStatuses : IpStatusArray) =
 
         Arp.LinuxPingTimeout <- TimeSpan.FromMilliseconds(timeOut.value)
 
-        ipInfos
-        |> Array.filter (fun (IpInfo (_, active)) -> active)
-        |> Array.map (fun (IpInfo (ipAddress, _)) -> IIpBroker.getMacForIpAsync ipAddress)
+        ipStatuses.value
+        |> Array.filter (fun (IpStatus.IpStatus (_, active)) -> active)
+        |> Array.map (fun (IpStatus.IpStatus (ipAddress, _)) -> IIpBroker.getMacForIpAsync ipAddress)
         |> Task.WhenAll
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let ipInfosWithBlankMac ipInfos =
+    static let getAllNamesForNetworkAsyncTry (nameLookUpTimeOut : TimeOut) (network : IpNetwork) =
 
-        ipInfos
-        |> Array.map (fun (IpInfo (ipAddress, active)) -> IpInfoMac (ipAddress, active, ""))
+        [|
+            for i in 1..254 -> IpAddress.create $"%s{network.value}{i}"
+                               |> IIpBroker.getNameInfoForIpAsyncTry nameLookUpTimeOut
+        |]
+        |> Task.WhenAll
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let ipInfosWithMac ipInfos macInfos =
+    static let ipInfosWithBlankMac (ipStatuses : IpStatusArray) =
+
+        // Todo: Arreglar pasando los nombres.
+        ipStatuses.value
+        |> Array.map (fun (IpStatus.IpStatus (ipAddress, active)) -> DeviceInfo (ipAddress, active, "", "dev_name"))
+    //----------------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------------------------
+    static let deviceInfosWithMac (ipStatuses : IpStatusArray) (macInfos : MacInfoArray)
+                                  (nameInfos : NameInfoArray) =
 
         let getIndexFromIp (ipAddress : IpAddress) = ((ipAddress.value |> split ".")[3] |> int) - 1
 
-        let fullInfos = ipInfos |> ipInfosWithBlankMac
+        let fullInfos = ipStatuses |> ipInfosWithBlankMac
 
-        macInfos
+        macInfos.value
         |> Array.iter
                (fun (MacInfo (ipAddress, macInfoMac)) ->
                     let idx = getIndexFromIp ipAddress
-                    let (IpInfo (ipInfoAddress, ipInfoActive)) = ipInfos[idx]
-                    fullInfos[idx] <- IpInfoMac (ipInfoAddress, ipInfoActive, macInfoMac))
+                    let (IpStatus.IpStatus (ipInfoAddress, ipInfoActive)) = ipStatuses.value[idx]
+                    let (NameInfo.NameInfo (_, deviceName)) = nameInfos.value[idx]
+                    fullInfos[idx] <- DeviceInfo (ipInfoAddress, ipInfoActive, macInfoMac, deviceName))
 
         fullInfos
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member scanNetworkAsync timeOut retries showMac network =
+    static member scanNetworkAsync pingTimeOut retries showMac nameLookupTimeOut network =
 
         backgroundTask {
 
-            let! ipInfos = getAllIpInfosForNetworkAsyncTry timeOut retries network
+            let ipStatusesTask = getAllIpInfosForNetworkAsyncTry pingTimeOut retries network
+            let nameInfosTask = getAllNamesForNetworkAsyncTry nameLookupTimeOut network
+
+            let! ipInfos = Task.WhenAll [ ipStatusesTask ; nameInfosTask ]
+            let ipStatuses = ipInfos[0] |> IpStatusArray.OfIpInfoArray
+            let nameInfos = ipInfos[1] |> NameInfoArray.OfIpInfoArray
 
             if showMac then
-                let! macInfos = ipInfos |> getMacsForActiveIpsAsyncTry timeOut
+                let! macInfos = ipStatuses |> getMacsForActiveIpsAsyncTry pingTimeOut
 
-                return ipInfosWithMac ipInfos macInfos
+                return deviceInfosWithMac ipStatuses (MacInfoArray.OfArray macInfos) nameInfos
             else
-                return ipInfosWithBlankMac ipInfos
+                return ipInfosWithBlankMac ipStatuses
         }
     //----------------------------------------------------------------------------------------------------
 
@@ -87,16 +106,17 @@ type Service () =
                 |> join "-"
                 |> toUpper
 
-        let filterFun = Array.filter (fun (IpInfoMac (_, active, _)) -> active)
+        let filterFun = Array.filter (fun (DeviceInfo (_, active,_ , _)) -> active)
         let separator = Regex.Unescape(separator)
 
         let ipInfoOnly =
-            Array.map (fun (IpInfoMac (ipAddress, status, _)) ->
+            Array.map (fun (DeviceInfo (ipAddress, status, _, _)) ->
                            $"%s{ipAddress.value}{separator}%b{status}")
 
         let withMac =
-            Array.map (fun (IpInfoMac (ipAddress, status, mac)) ->
-                           $"%s{ipAddress.value}{separator}%b{status}{separator}%s{formatMac mac}")
+            Array.map (fun (DeviceInfo (ipAddress, status, mac, deviceName)) ->
+                           $"%s{ipAddress.value}{separator}%b{status}{separator}%s{formatMac mac}" +
+                           $"{separator}{deviceName}")
 
         ipInfoMacs
         |> (if activeOnly then filterFun else id)
