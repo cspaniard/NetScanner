@@ -11,6 +11,8 @@ type IpInfo =
     | IpStatus of IpStatus
     | NameInfo of NameInfo
 
+// TODO: Poner en tipos con validación.
+// TODO: DeviceInfo evaluar si queremos tipos boxed vs. primitivas.
 type DeviceInfo = DeviceInfo of IpAddress * active : bool * mac : string * name : string
 type MacInfo = MacInfo of IpAddress * mac : string
 

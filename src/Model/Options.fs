@@ -18,7 +18,7 @@ type ArgumentOptions = {
     [<Option ('m', "mac", Default = false)>]
     ShowMac : bool
 
-    [<Option ('l', "name-timeout", Default = 1000)>]
+    [<Option ('l', "name-timeout", Default = 500)>]
     NameLookUpTimeOut : int
 
     [<Value (0, MetaName="red", Required = true)>]

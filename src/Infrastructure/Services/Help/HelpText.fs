@@ -21,7 +21,7 @@ type Service () =
             ArgLineInfo ("-a,  --activos", "Sólo devuelve las IPs activas. (def: False)")
             ArgLineInfo ("-m,  --mac", "Muestra la MAC de cada IP activa. (def: False)")
             ArgLineInfo ("-l,  --name-timeout",
-                         "Tiempo de espera en ms para cada resolución de nombre. (def: 1000)")
+                         "Tiempo de espera en ms para cada resolución de nombre. (def: 500)")
             ArgLineInfo ("red (requerido)", "La red a escanear.")
 
             ArgLineInfo ($"{leftSpaces}--help", "Muestra esta ayuda y sale.")

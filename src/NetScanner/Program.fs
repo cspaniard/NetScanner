@@ -22,7 +22,7 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
                                                                nameLookUpTimeOut network
 
             ipInfosWithMacs
-            |> IIpService.outputNetworkIpsStatus options.ActiveOnly options.Separator options.ShowMac
+            |> IIpService.outputNetworkIpInfos options.ActiveOnly options.Separator options.ShowMac
         } :> Task
 
     processTask.Wait()

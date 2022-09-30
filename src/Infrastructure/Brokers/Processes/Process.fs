@@ -1,19 +1,52 @@
 namespace Brokers.Processes.Process
 
 open System.Diagnostics
+open System.Threading.Tasks
+open Model
+open Motsoft.Util
 
 type Broker () =
 
     //----------------------------------------------------------------------------------------------------
-    static member startProcessTry processName arguments =
+    static member startProcessTry (processName : string) (arguments : string) =
 
-        Process.Start((processName : string), (arguments : string))
+        Process.Start(processName, arguments)
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
     static member startProcessWithStartInfoTry (startInfo : ProcessStartInfo) =
 
         Process.Start(startInfo)
+    //----------------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------------------------
+    static member startProcessWithTimeOutAsync processName (timeOut : TimeOut) arguments =
+
+        let startInfo = ProcessStartInfo(RedirectStandardOutput = true,
+                                         RedirectStandardError = true,
+                                         FileName = processName,
+                                         Arguments = arguments,
+                                         WindowStyle = ProcessWindowStyle.Hidden,
+                                         UseShellExecute = false,
+                                         CreateNoWindow = true)
+
+        backgroundTask {
+
+            let proc = Broker.startProcessWithStartInfoTry startInfo
+
+            let processTask = task { do! proc.WaitForExitAsync() } :> Task
+            let timeOutTask = task { do! Task.Delay(timeOut.value)
+                                     return Unchecked.defaultof<Process> }
+
+            let! winnerTask = Task.WhenAny [ processTask ; timeOutTask ]
+
+            if winnerTask = timeOutTask then
+                proc.Kill()
+                return None
+            else
+                return Some proc
+        }
+
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
