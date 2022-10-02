@@ -13,16 +13,18 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
 
     let processTask =
         task {
-            let pingTimeOut = TimeOut.create options.PingTimeOut
-            let retries = Retries.create options.Retries
-            let network = IpNetwork.create options.Network
-            let nameLookUpTimeOut = TimeOut.create options.NameLookUpTimeOut
+                let pingTimeOut = TimeOut.create options.PingTimeOut
+                let retries = Retries.create options.Retries
+                let network = IpNetwork.create options.Network
+                let nameLookUpTimeOut = TimeOut.create options.NameLookUpTimeOut
 
-            let! ipInfosWithMacs = IIpService.scanNetworkAsync pingTimeOut retries options.ShowMac
-                                                               nameLookUpTimeOut network
+            try
+                let! ipInfosWithMacs = IIpService.scanNetworkAsync pingTimeOut retries options.ShowMac
+                                                                   nameLookUpTimeOut network
 
-            ipInfosWithMacs
-            |> IIpService.outputNetworkIpInfos options.ActiveOnly options.Separator options.ShowMac
+                ipInfosWithMacs
+                |> IIpService.outputNetworkIpInfos options.ActiveOnly options.Separator options.ShowMac
+            with e -> Console.WriteLine $"Error interno: {e.Message}"
         } :> Task
 
     processTask.Wait()
