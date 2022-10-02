@@ -14,11 +14,15 @@
       <Compile Include="Brokers\Network\NetworkDI.fs" />
       <Compile Include="Brokers\Help\HelpText.fs" />
       <Compile Include="Brokers\Help\HelpDI.fs" />
+      <Compile Include="Brokers\Exceptions\Exception.fs" />
+      <Compile Include="Brokers\Exceptions\ExceptionsDI.fs" />
       <Compile Include="Services\Network\Ip.Exceptions.fs" />
       <Compile Include="Services\Network\Ip.fs" />
       <Compile Include="Services\Network\NetworkDI.fs" />
       <Compile Include="Services\Help\HelpText.fs" />
       <Compile Include="Services\Help\HelpDI.fs" />
+      <Compile Include="Services\Exceptions\Exception.fs" />
+      <Compile Include="Services\Exceptions\ExceptionsDI.fs" />
     </ItemGroup>
 
     <ItemGroup>

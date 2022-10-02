@@ -6,6 +6,7 @@ open Model
 
 type private IIpService = Infrastructure.DI.Services.NetworkDI.IIpService
 type private IHelpService = Infrastructure.DI.Services.HelpDI.IHelpService
+type private IExceptionService = Infrastructure.DI.Services.ExceptionsDI.IExceptionService
 
 let argv = Environment.GetCommandLineArgs() |> Array.tail
 
@@ -24,7 +25,7 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
 
                 ipInfosWithMacs
                 |> IIpService.outputNetworkIpInfos options.ActiveOnly options.Separator options.ShowMac
-            with e -> Console.WriteLine $"Error interno: {e.Message}"
+            with e -> IExceptionService.outputException e
         } :> Task
 
     processTask.Wait()
@@ -35,7 +36,7 @@ try
     match parser.ParseArguments<ArgumentOptions> argv with
     | :? Parsed as opts -> scanAndOutputNetwork opts.Value
     | :? NotParsed as notParsed -> IHelpService.showHelp <| ArgErrors notParsed.Errors |> exit
-    | _ -> Console.WriteLine "No debiéramos llegar aquí."
+    | _ -> Exception("No debiéramos llegar aquí.") |> IExceptionService.outputException
 with
 | :? AggregateException as ae -> IHelpService.showHelp <| ExceptionErrors ae.InnerExceptions |> exit
-| e -> Console.WriteLine $"Raro que lleguemos aquí, pero: {e.Message}"
+| e -> Exception($"Raro que lleguemos aquí, pero: {e.Message}") |> IExceptionService.outputException
