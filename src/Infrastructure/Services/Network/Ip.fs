@@ -50,67 +50,67 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
+    static let buildDeviceInfosFromStatusArray (ipStatusArray : IpStatusArray) =
+
+        ipStatusArray.value
+        |> Array.map (fun (IpStatus (ipAddress, active)) ->
+                          DeviceInfo (ipAddress, active, Mac.create "", ""))
+    //----------------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------------------------
+    static let scanMacInfo pingTimeOut showMacs deviceInfos =
+
+        let mergeInfos deviceInfos (macInfoArray : MacInfoArray) =
+
+           (deviceInfos, macInfoArray.value)
+           ||> Array.map2 (fun (DeviceInfo (ipAddress, active, _, name)) (MacInfo (_, mac)) ->
+                               DeviceInfo (ipAddress, active, mac, name))
+
+
+        backgroundTask {
+            if showMacs then
+                let! activeMacInfos = deviceInfos |> getMacsForActiveIpsAsyncTry pingTimeOut
+
+                return mergeInfos deviceInfos (MacInfoArray.OfArray activeMacInfos)
+            else
+                return deviceInfos
+        }
+    //----------------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------------------------
+    static let scanNameInfo nameLookUpTimeOut showNames deviceInfos =
+
+        let mergeInfos deviceInfos (nameInfoArray : NameInfoArray) =
+
+           (deviceInfos, nameInfoArray.value)
+           ||> Array.map2 (fun (DeviceInfo (ipAddress, active, mac, _)) (NameInfo (_, name)) ->
+                               DeviceInfo (ipAddress, active, mac, name))
+
+        backgroundTask {
+            if showNames then
+                let! activeNameInfos = deviceInfos |> getNamesForActiveIpsAsyncTry nameLookUpTimeOut
+
+                return mergeInfos deviceInfos (NameInfoArray.OfArray activeNameInfos)
+            else
+                return deviceInfos
+        }
+    //----------------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------------------------
     static member scanNetworkAsync (scanParams : ScanNetworkParams) =
-
-        //------------------------------------------------------------------------------------------------
-        let buildDeviceArrayFromStatusArray (ipStatusArray : IpStatusArray) =
-
-            ipStatusArray.value
-            |> Array.map (fun (IpStatus (ipAddress, active)) ->
-                              DeviceInfo (ipAddress, active, Mac.create "", ""))
-        //------------------------------------------------------------------------------------------------
-
-        //------------------------------------------------------------------------------------------------
-        let addMacInfo pingTimeOut showMacs deviceInfos =
-
-            let mergeInfos deviceInfos (macInfoArray : MacInfoArray) =
-
-               (deviceInfos, macInfoArray.value)
-               ||> Array.map2 (fun (DeviceInfo (ipAddress, active, _, name)) (MacInfo (_, mac)) ->
-                                   DeviceInfo (ipAddress, active, mac, name))
-
-
-            backgroundTask {
-                if showMacs then
-                    let! activeMacInfos = deviceInfos |> getMacsForActiveIpsAsyncTry pingTimeOut
-
-                    return mergeInfos deviceInfos (MacInfoArray.OfArray activeMacInfos)
-                else
-                    return deviceInfos
-            }
-        //------------------------------------------------------------------------------------------------
-
-        //------------------------------------------------------------------------------------------------
-        let addNameInfo nameLookUpTimeOut showNames deviceInfos =
-
-            let mergeInfos deviceInfos (nameInfoArray : NameInfoArray) =
-
-               (deviceInfos, nameInfoArray.value)
-               ||> Array.map2 (fun (DeviceInfo (ipAddress, active, mac, _)) (NameInfo (_, name)) ->
-                                   DeviceInfo (ipAddress, active, mac, name))
-
-            backgroundTask {
-                if showNames then
-                    let! activeNameInfos = deviceInfos |> getNamesForActiveIpsAsyncTry nameLookUpTimeOut
-
-                    return mergeInfos deviceInfos (NameInfoArray.OfArray activeNameInfos)
-                else
-                    return deviceInfos
-            }
-        //------------------------------------------------------------------------------------------------
 
         backgroundTask {
 
             let! ipStatuses =
                 getAllIpInfosForNetworkAsyncTry scanParams.PingTimeOut scanParams.Retries scanParams.Network
 
-            let deviceInfos = buildDeviceArrayFromStatusArray <| IpStatusArray.OfArray ipStatuses
+            let deviceInfos = buildDeviceInfosFromStatusArray <| IpStatusArray.OfArray ipStatuses
 
             let! deviceInfos = deviceInfos
-                               |> addMacInfo scanParams.PingTimeOut scanParams.ShowMacs
+                               |> scanMacInfo scanParams.PingTimeOut scanParams.ShowMacs
 
             let! deviceInfos = deviceInfos
-                               |> addNameInfo scanParams.NameLookUpTimeOut scanParams.ShowNames
+                               |> scanNameInfo scanParams.NameLookUpTimeOut scanParams.ShowNames
 
             return deviceInfos
         }
