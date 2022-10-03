@@ -2,6 +2,7 @@ open System
 open System.Threading.Tasks
 open CommandLine
 
+open Microsoft.FSharp.Core
 open Model
 
 type private IIpService = Infrastructure.DI.Services.NetworkDI.IIpService
@@ -24,7 +25,7 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
                                                                    options.ShowNames nameLookUpTimeOut network
 
                 ipInfosWithMacs
-                |> IIpService.outputNetworkIpInfos options.ActiveOnly options.Separator options.ShowMac
+                |> IIpService.outputDeviceInfos options.ActiveOnly options.Separator options.ShowMac options.ShowNames
             with e -> IExceptionService.outputException e
         } :> Task
 
