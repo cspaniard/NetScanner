@@ -12,13 +12,13 @@
       <Compile Include="IpAddress\IpAddress.fs" />
       <Compile Include="Mac\MacValidation.fs" />
       <Compile Include="Mac\Mac.fs" />
-      <Compile Include="Types.fs" />
-      <Compile Include="IpNetwork\IpNetworkValidation.fs" />
-      <Compile Include="IpNetwork\IpNetwork.fs" />
       <Compile Include="TimeOut\TimeOutValidation.fs" />
       <Compile Include="TimeOut\TimeOut.fs" />
       <Compile Include="Retries\RetriesValidation.fs" />
       <Compile Include="Retries\Retries.fs" />
+      <Compile Include="IpNetwork\IpNetworkValidation.fs" />
+      <Compile Include="IpNetwork\IpNetwork.fs" />
+      <Compile Include="Types.fs" />
       <Compile Include="NameInfoArray\NameInfoArray.fs" />
       <Compile Include="IpStatusArray\IpStatusArray.fs" />
       <Compile Include="MacInfoArray\MacInfoArray.fs" />

@@ -4,8 +4,8 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
         <AssemblyName>netscanner</AssemblyName>
-        <AssemblyVersion>2.5.0</AssemblyVersion>
-        <FileVersion>2.5.0</FileVersion>
+        <AssemblyVersion>2.5.4</AssemblyVersion>
+        <FileVersion>2.5.4</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>

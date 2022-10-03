@@ -50,7 +50,7 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member scanNetworkAsync pingTimeOut retries showMac showNames nameLookupTimeOut network =
+    static member scanNetworkAsync (scanParams : ScanNetworkParams) =
 
         //------------------------------------------------------------------------------------------------
         let buildDeviceArrayFromStatusArray (ipStatusArray : IpStatusArray) =
@@ -61,7 +61,7 @@ type Service () =
         //------------------------------------------------------------------------------------------------
 
         //------------------------------------------------------------------------------------------------
-        let addMacInfo (deviceInfos : DeviceInfo[]) =
+        let addMacInfo pingTimeOut showMacs deviceInfos =
 
             let mergeInfos deviceInfos (macInfoArray : MacInfoArray) =
 
@@ -71,7 +71,7 @@ type Service () =
 
 
             backgroundTask {
-                if showMac then
+                if showMacs then
                     let! activeMacInfos = deviceInfos |> getMacsForActiveIpsAsyncTry pingTimeOut
 
                     return mergeInfos deviceInfos (MacInfoArray.OfArray activeMacInfos)
@@ -81,7 +81,7 @@ type Service () =
         //------------------------------------------------------------------------------------------------
 
         //------------------------------------------------------------------------------------------------
-        let addNameInfo (deviceInfos : DeviceInfo[]) =
+        let addNameInfo nameLookUpTimeOut showNames deviceInfos =
 
             let mergeInfos deviceInfos (nameInfoArray : NameInfoArray) =
 
@@ -91,7 +91,7 @@ type Service () =
 
             backgroundTask {
                 if showNames then
-                    let! activeNameInfos = deviceInfos |> getNamesForActiveIpsAsyncTry nameLookupTimeOut
+                    let! activeNameInfos = deviceInfos |> getNamesForActiveIpsAsyncTry nameLookUpTimeOut
 
                     return mergeInfos deviceInfos (NameInfoArray.OfArray activeNameInfos)
                 else
@@ -101,13 +101,18 @@ type Service () =
 
         backgroundTask {
 
-            let! ipStatuses = getAllIpInfosForNetworkAsyncTry pingTimeOut retries network
-            let deviceArray = buildDeviceArrayFromStatusArray <| IpStatusArray.OfArray ipStatuses
+            let! ipStatuses =
+                getAllIpInfosForNetworkAsyncTry scanParams.PingTimeOut scanParams.Retries scanParams.Network
 
-            let! deviceArray = addMacInfo deviceArray
-            let! deviceArray = addNameInfo deviceArray
+            let deviceInfos = buildDeviceArrayFromStatusArray <| IpStatusArray.OfArray ipStatuses
 
-            return deviceArray
+            let! deviceInfos = deviceInfos
+                               |> addMacInfo scanParams.PingTimeOut scanParams.ShowMacs
+
+            let! deviceInfos = deviceInfos
+                               |> addNameInfo scanParams.NameLookUpTimeOut scanParams.ShowNames
+
+            return deviceInfos
         }
     //----------------------------------------------------------------------------------------------------
 
@@ -126,5 +131,5 @@ type Service () =
         outputParams.DeviceInfos
         |> (if outputParams.ActivesOnly then filterFun else id)
         |> buildInfoLines
-        |> INetworkBroker.outputNetworkIpInfoLines
+        |> INetworkBroker.outputNetworkInfoLines
     //----------------------------------------------------------------------------------------------------

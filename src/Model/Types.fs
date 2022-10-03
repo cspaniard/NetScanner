@@ -22,6 +22,15 @@ type AppErrors =
     | ArgErrors of ArgErrors
     | ExceptionErrors of ExceptionErrors
 
+type ScanNetworkParams = {
+    PingTimeOut : TimeOut
+    Retries : Retries
+    ShowMacs : bool
+    ShowNames : bool
+    NameLookUpTimeOut : TimeOut
+    Network : IpNetwork
+}
+
 type OutputDeviceInfosParams = {
     ActivesOnly : bool
     Separator : string

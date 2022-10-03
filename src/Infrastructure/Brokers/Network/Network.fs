@@ -5,7 +5,7 @@ open System
 type Broker () =
 
     //----------------------------------------------------------------------------------------------------
-    static member outputNetworkIpInfoLines (ipsInfoLines : string[]) =
+    static member outputNetworkInfoLines (ipsInfoLines : string[]) =
 
         ipsInfoLines
         |> Array.iter Console.WriteLine

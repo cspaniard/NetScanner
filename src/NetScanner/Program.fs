@@ -9,8 +9,6 @@ type private IIpService = Infrastructure.DI.Services.NetworkDI.IIpService
 type private IHelpService = Infrastructure.DI.Services.HelpDI.IHelpService
 type private IExceptionService = Infrastructure.DI.Services.ExceptionsDI.IExceptionService
 
-let argv = Environment.GetCommandLineArgs() |> Array.tail
-
 let scanAndOutputNetwork (options : ArgumentOptions) =
 
     let processTask =
@@ -21,8 +19,15 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
             let nameLookUpTimeOut = TimeOut.create options.NameLookUpTimeOut
 
             try
-                let! deviceInfos = IIpService.scanNetworkAsync pingTimeOut retries options.ShowMacs
-                                                               options.ShowNames nameLookUpTimeOut network
+                let! deviceInfos =
+                    IIpService.scanNetworkAsync
+                        { PingTimeOut = pingTimeOut
+                          Retries = retries
+                          ShowMacs = options.ShowMacs
+                          ShowNames = options.ShowNames
+                          NameLookUpTimeOut = nameLookUpTimeOut
+                          Network = network }
+
 
                 IIpService.outputDeviceInfos
                     { ActivesOnly = options.ActivesOnly
@@ -37,6 +42,7 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
     processTask.Wait()
 
 try
+    let argv = Environment.GetCommandLineArgs() |> Array.tail
     let parser = new Parser(fun o -> o.HelpWriter <- null)
 
     match parser.ParseArguments<ArgumentOptions> argv with
