@@ -24,77 +24,95 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let getMacsForActiveIpsAsyncTry (timeOut : TimeOut) (ipStatuses : IpStatusArray) =
+    static let getMacsForActiveIpsAsyncTry (timeOut : TimeOut) (deviceInfos : DeviceInfo[]) =
 
         Arp.LinuxPingTimeout <- TimeSpan.FromMilliseconds(timeOut.value)
 
-        ipStatuses.value
-        |> Array.filter (fun (IpStatus.IpStatus (_, active)) -> active)
-        |> Array.map (fun (IpStatus.IpStatus (ipAddress, _)) -> IIpBroker.getMacForIpAsync ipAddress)
+        deviceInfos
+        |> Array.map (fun (DeviceInfo (ipAddress, active, _, _)) ->
+                          if active then
+                              IIpBroker.getMacForIpAsync ipAddress
+                          else
+                              backgroundTask { return MacInfo (ipAddress, Mac.create "") })
         |> Task.WhenAll
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let getAllNamesForNetworkAsyncTry (timeOut : TimeOut) (network : IpNetwork) =
+    static let getNamesForActiveIpsAsyncTry (timeOut : TimeOut) (deviceInfos : DeviceInfo[]) =
 
-        [|
-            for i in 1..254 -> IpAddress.create $"%s{network.value}{i}"
-                               |> IIpBroker.getNameInfoForIpAsyncTry timeOut
-        |]
+        deviceInfos
+        |> Array.map(fun (DeviceInfo (ipAddress, active, _, _)) ->
+                         if active then
+                             IIpBroker.getNameInfoForIpAsyncTry timeOut ipAddress
+                         else
+                             backgroundTask { return NameInfo (ipAddress, "") })
         |> Task.WhenAll
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let ipInfosWithNoMac (ipStatuses : IpStatusArray) (nameInfos : NameInfoArray) =
+    static member scanNetworkAsync pingTimeOut retries showMac showNames nameLookupTimeOut network =
 
-        (ipStatuses.value, nameInfos.value)
-        ||> Array.map2 (fun (IpStatus.IpStatus (ipAddress, active)) (NameInfo.NameInfo (_, name)) ->
-                            DeviceInfo (ipAddress, active, Mac.create "", name))
-    //----------------------------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------------
+        let buildDeviceArrayFromStatusArray (ipStatusArray : IpStatusArray) =
 
-    //----------------------------------------------------------------------------------------------------
-    static let deviceInfosWithMac (ipStatuses : IpStatusArray) (macInfos : MacInfoArray)
-                                  (nameInfos : NameInfoArray) =
+            ipStatusArray.value
+            |> Array.map (fun (IpStatus (ipAddress, active)) ->
+                              DeviceInfo (ipAddress, active, Mac.create "", ""))
+        //------------------------------------------------------------------------------------------------
 
-        let getIndexFromIp (ipAddress : IpAddress) = ((ipAddress.value |> split ".")[3] |> int) - 1
+        //------------------------------------------------------------------------------------------------
+        let addMacInfo (deviceInfos : DeviceInfo[]) =
 
-        let fullInfos = ipInfosWithNoMac ipStatuses nameInfos
+            let mergeInfos deviceInfos (macInfoArray : MacInfoArray) =
 
-        macInfos.value
-        |> Array.iter
-               (fun (MacInfo (ipAddress, macInfoMac)) ->
-                    let idx = getIndexFromIp ipAddress
-                    let (DeviceInfo(ipInfoAddress, ipInfoActive, _, deviceName)) = fullInfos[idx]
+               (deviceInfos, macInfoArray.value)
+               ||> Array.map2 (fun (DeviceInfo (ipAddress, active, _, name)) (MacInfo (_, mac)) ->
+                                   DeviceInfo (ipAddress, active, mac, name))
 
-                    fullInfos[idx] <- DeviceInfo (ipInfoAddress, ipInfoActive, macInfoMac, deviceName))
 
-        fullInfos
-    //----------------------------------------------------------------------------------------------------
+            backgroundTask {
+                if showMac then
+                    let! activeMacInfos = deviceInfos |> getMacsForActiveIpsAsyncTry pingTimeOut
 
-    //----------------------------------------------------------------------------------------------------
-    static member scanNetworkAsync pingTimeOut retries showMac nameLookupTimeOut network =
+                    return mergeInfos deviceInfos (MacInfoArray.OfArray activeMacInfos)
+                else
+                    return deviceInfos
+            }
+        //------------------------------------------------------------------------------------------------
+
+        //------------------------------------------------------------------------------------------------
+        let addNameInfo (deviceInfos : DeviceInfo[]) =
+
+            let mergeInfos deviceInfos (nameInfoArray : NameInfoArray) =
+
+               (deviceInfos, nameInfoArray.value)
+               ||> Array.map2 (fun (DeviceInfo (ipAddress, active, mac, _)) (NameInfo (_, name)) ->
+                                   DeviceInfo (ipAddress, active, mac, name))
+
+            backgroundTask {
+                if showNames then
+                    let! activeNameInfos = deviceInfos |> getNamesForActiveIpsAsyncTry nameLookupTimeOut
+
+                    return mergeInfos deviceInfos (NameInfoArray.OfArray activeNameInfos)
+                else
+                    return deviceInfos
+            }
+        //------------------------------------------------------------------------------------------------
 
         backgroundTask {
 
-            let ipStatusesTask = getAllIpInfosForNetworkAsyncTry pingTimeOut retries network
-            let nameInfosTask = getAllNamesForNetworkAsyncTry nameLookupTimeOut network
+            let! ipStatuses = getAllIpInfosForNetworkAsyncTry pingTimeOut retries network
+            let deviceArray = buildDeviceArrayFromStatusArray <| IpStatusArray.OfArray ipStatuses
 
-            let! ipInfos = Task.WhenAll [ ipStatusesTask ; nameInfosTask ]
+            let! deviceArray = addMacInfo deviceArray
+            let! deviceArray = addNameInfo deviceArray
 
-            let ipStatuses = ipInfos[0] |> IpStatusArray.OfIpInfoArray
-            let nameInfos = ipInfos[1] |> NameInfoArray.OfIpInfoArray
-
-            if showMac then
-                let! macInfos = ipStatuses |> getMacsForActiveIpsAsyncTry pingTimeOut
-
-                return deviceInfosWithMac ipStatuses (MacInfoArray.OfArray macInfos) nameInfos
-            else
-                return ipInfosWithNoMac ipStatuses nameInfos
+            return deviceArray
         }
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member outputNetworkIpInfos activeOnly separator showMac deviceInfos =
+    static member outputNetworkIpInfos activeOnly separator showMacs deviceInfos =
 
         let filterFun = Array.filter (fun (DeviceInfo (_, active,_ , _)) -> active)
         let separator = Regex.Unescape(separator)
@@ -110,6 +128,6 @@ type Service () =
 
         deviceInfos
         |> (if activeOnly then filterFun else id)
-        |> (if showMac then buildInfoLinesWithMac () else buildInfoLinesNoMac ())
+        |> (if showMacs then buildInfoLinesWithMac () else buildInfoLinesNoMac ())
         |> INetworkBroker.outputNetworkIpInfoLines
     //----------------------------------------------------------------------------------------------------

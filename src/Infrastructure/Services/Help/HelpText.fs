@@ -16,11 +16,12 @@ type Service () =
 
         [|
             ArgLineInfo ("-w,  --ping-timeout", "Tiempo de espera en ms para cada ping. (def: 500)")
-            ArgLineInfo ("-r,  --retries", "Número pings hasta dar la IP por inactiva. (def: 3)")
+            ArgLineInfo ("-r,  --reintentos", "Número pings hasta dar la IP por inactiva. (def: 3)")
             ArgLineInfo ("-s,  --separador", "Separador entre campos. (def: \\t)")
             ArgLineInfo ("-a,  --activos", "Sólo devuelve las IPs activas. (def: False)")
             ArgLineInfo ("-m,  --mac", "Muestra la MAC de cada IP activa. (def: False)")
-            ArgLineInfo ("-l,  --name-timeout",
+            ArgLineInfo ("-n,  --nombres", "Muestra los nombres de los dispositivos (def: False)")
+            ArgLineInfo ("-l,  --nombres-timeout",
                          "Tiempo de espera en ms para cada resolución de nombre. (def: 500)")
             ArgLineInfo ("red (requerido)", "La red a escanear.")
 

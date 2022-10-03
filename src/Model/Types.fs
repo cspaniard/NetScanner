@@ -6,15 +6,9 @@ open CommandLine
 
 type IpStatus = IpStatus of IpAddress * active : bool
 type NameInfo = NameInfo of IpAddress * name : string
-
-type IpInfo =
-    | IpStatus of IpStatus
-    | NameInfo of NameInfo
-
-// TODO: Poner en tipos con validación.
+type MacInfo = MacInfo of IpAddress * Mac
 
 type DeviceInfo = DeviceInfo of IpAddress * active : bool * Mac * name : string
-type MacInfo = MacInfo of IpAddress * Mac
 
 type ArgLineInfo = ArgLineInfo of paramNames : string * helpText : string
 

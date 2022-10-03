@@ -14,14 +14,14 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
 
     let processTask =
         task {
-                let pingTimeOut = TimeOut.create options.PingTimeOut
-                let retries = Retries.create options.Retries
-                let network = IpNetwork.create options.Network
-                let nameLookUpTimeOut = TimeOut.create options.NameLookUpTimeOut
+            let pingTimeOut = TimeOut.create options.PingTimeOut
+            let retries = Retries.create options.Retries
+            let network = IpNetwork.create options.Network
+            let nameLookUpTimeOut = TimeOut.create options.NameLookUpTimeOut
 
             try
                 let! ipInfosWithMacs = IIpService.scanNetworkAsync pingTimeOut retries options.ShowMac
-                                                                   nameLookUpTimeOut network
+                                                                   options.ShowNames nameLookUpTimeOut network
 
                 ipInfosWithMacs
                 |> IIpService.outputNetworkIpInfos options.ActiveOnly options.Separator options.ShowMac

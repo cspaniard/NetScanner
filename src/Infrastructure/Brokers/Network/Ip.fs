@@ -22,12 +22,12 @@ type Broker () =
             backgroundTask {
 
                 if proc.ExitCode <> 0 then
-                    return NameInfo.NameInfo (ipAddress, "") |> IpInfo.NameInfo
+                    return NameInfo (ipAddress, "")
                 else
                     let! result = proc.StandardOutput.ReadToEndAsync()
                     let hostFullName = (result |> split "=")[1] |> trim
                     let hostName = (hostFullName |> split ".")[0]
-                    return NameInfo.NameInfo (ipAddress, hostName) |> IpInfo.NameInfo
+                    return NameInfo (ipAddress, hostName)
             }
 
         backgroundTask {
@@ -36,7 +36,7 @@ type Broker () =
 
             match! IIProcessBroker.startProcessWithTimeOutAsync "nslookup" timeOut args with
             | Some proc -> return! processProcInfo proc
-            | None -> return NameInfo.NameInfo (ipAddress, "") |> IpInfo.NameInfo
+            | None -> return NameInfo (ipAddress, "")
         }
     //----------------------------------------------------------------------------------------------------
 
@@ -51,9 +51,9 @@ type Broker () =
             | Some proc ->
                 let! result = proc.StandardOutput.ReadToEndAsync()
                 let hostName = result |> split "[" |> Array.item 0 |> split " " |> Array.last
-                return NameInfo.NameInfo (ipAddress, hostName) |> IpInfo.NameInfo
+                return NameInfo (ipAddress, hostName)
             | None ->
-                return NameInfo.NameInfo (ipAddress, "") |> IpInfo.NameInfo
+                return NameInfo (ipAddress, "")
         }
     //----------------------------------------------------------------------------------------------------
 
@@ -74,7 +74,7 @@ type Broker () =
                 else
                     retryCount <- retryCount - 1
 
-            return IpStatus.IpStatus (ipAddress, (resultStatus = IPStatus.Success)) |> IpInfo.IpStatus
+            return IpStatus (ipAddress, (resultStatus = IPStatus.Success))
         }
     //----------------------------------------------------------------------------------------------------
 
@@ -99,5 +99,5 @@ type Broker () =
         match RuntimeInformation.OSArchitecture with
         | LinuxOs -> getNameForIpLinuxAsync timeOut ip
         | WindowsOs -> getNameForIpWindowsAsync timeOut ip
-        | OtherOs -> backgroundTask { return NameInfo.NameInfo (ip, "") |> IpInfo.NameInfo}
+        | OtherOs -> backgroundTask { return NameInfo (ip, "") }
     //----------------------------------------------------------------------------------------------------
