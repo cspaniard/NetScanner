@@ -49,7 +49,7 @@ type Service () =
 
         (ipStatuses.value, nameInfos.value)
         ||> Array.map2 (fun (IpStatus.IpStatus (ipAddress, active)) (NameInfo.NameInfo (_, name)) ->
-                            DeviceInfo (ipAddress, active, "", name))
+                            DeviceInfo (ipAddress, active, Mac.create "", name))
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
@@ -96,23 +96,12 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
     static member outputNetworkIpInfos activeOnly separator showMac deviceInfos =
 
-        let formatMac (mac : string) =
-
-            if mac |> String.IsNullOrWhiteSpace
-            then ""
-            else
-                mac.ToCharArray()
-                |> Array.splitInto(mac.Length / 2)
-                |> Array.map String
-                |> join "-"
-                |> toUpper
-
         let filterFun = Array.filter (fun (DeviceInfo (_, active,_ , _)) -> active)
         let separator = Regex.Unescape(separator)
 
         let buildInfoLinesWithMac () =
             Array.map (fun (DeviceInfo (ipAddress, status, mac, deviceName)) ->
-                           $"%s{ipAddress.value}{separator}%b{status}{separator}%s{formatMac mac}" +
+                           $"%s{ipAddress.value}{separator}%b{status}{separator}%s{mac.formatted}" +
                            $"{separator}{deviceName}")
 
         let buildInfoLinesNoMac () =

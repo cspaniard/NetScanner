@@ -87,9 +87,9 @@ type Broker () =
             if physicalAddress <> null &&
                 physicalAddress.GetAddressBytes() <> Array.zeroCreate (physicalAddress.GetAddressBytes()).Length
             then
-                return MacInfo (ipAddress, physicalAddress.ToString())
+                return MacInfo (ipAddress, Mac.create (physicalAddress.ToString()))
             else
-                return MacInfo (ipAddress, "")
+                return MacInfo (ipAddress, Mac.create "")
         }
     //----------------------------------------------------------------------------------------------------
 

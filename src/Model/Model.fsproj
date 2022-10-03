@@ -10,6 +10,8 @@
       <Compile Include="ValidationHelper.fs" />
       <Compile Include="IpAddress\IpAdressValidation.fs" />
       <Compile Include="IpAddress\IpAddress.fs" />
+      <Compile Include="Mac\MacValidation.fs" />
+      <Compile Include="Mac\Mac.fs" />
       <Compile Include="Types.fs" />
       <Compile Include="IpNetwork\IpNetworkValidation.fs" />
       <Compile Include="IpNetwork\IpNetwork.fs" />
