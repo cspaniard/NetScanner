@@ -13,10 +13,10 @@ type ArgumentOptions = {
     Separator : string
 
     [<Option ('a', "activos", Default = false)>]
-    ActiveOnly : bool
+    ActivesOnly : bool
 
     [<Option ('m', "mac", Default = false)>]
-    ShowMac : bool
+    ShowMacs : bool
 
     [<Option ('n', "nombres", Default = false)>]
     ShowNames : bool

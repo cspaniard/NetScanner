@@ -112,19 +112,19 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member outputDeviceInfos activeOnly separator showMacs showNames deviceInfos =
+    static member outputDeviceInfos (outputParams : OutputDeviceInfosParams) =
 
         let filterFun = Array.filter (fun (DeviceInfo (_, active,_ , _)) -> active)
-        let separator = Regex.Unescape(separator)
+        let separator = Regex.Unescape(outputParams.Separator)
 
         let buildInfoLines =
             Array.map (fun (DeviceInfo (ipAddress, status, mac, deviceName)) ->
                            $"%s{ipAddress.value}{separator}%b{status}" +
-                           (if showMacs then $"{separator}%s{mac.formatted}" else "") +
-                           (if showNames then $"{separator}{deviceName}" else ""))
+                           (if outputParams.ShowMacs then $"{separator}%s{mac.formatted}" else "") +
+                           (if outputParams.ShowNames then $"{separator}{deviceName}" else ""))
 
-        deviceInfos
-        |> (if activeOnly then filterFun else id)
+        outputParams.DeviceInfos
+        |> (if outputParams.ActivesOnly then filterFun else id)
         |> buildInfoLines
         |> INetworkBroker.outputNetworkIpInfoLines
     //----------------------------------------------------------------------------------------------------

@@ -21,11 +21,16 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
             let nameLookUpTimeOut = TimeOut.create options.NameLookUpTimeOut
 
             try
-                let! ipInfosWithMacs = IIpService.scanNetworkAsync pingTimeOut retries options.ShowMac
-                                                                   options.ShowNames nameLookUpTimeOut network
+                let! deviceInfos = IIpService.scanNetworkAsync pingTimeOut retries options.ShowMacs
+                                                               options.ShowNames nameLookUpTimeOut network
 
-                ipInfosWithMacs
-                |> IIpService.outputDeviceInfos options.ActiveOnly options.Separator options.ShowMac options.ShowNames
+                IIpService.outputDeviceInfos
+                    { ActivesOnly = options.ActivesOnly
+                      Separator = options.Separator
+                      ShowMacs = options.ShowMacs
+                      ShowNames = options.ShowNames
+                      DeviceInfos = deviceInfos }
+
             with e -> IExceptionService.outputException e
         } :> Task
 

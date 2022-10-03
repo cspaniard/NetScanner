@@ -22,6 +22,13 @@ type AppErrors =
     | ArgErrors of ArgErrors
     | ExceptionErrors of ExceptionErrors
 
+type OutputDeviceInfosParams = {
+    ActivesOnly : bool
+    Separator : string
+    ShowMacs : bool
+    ShowNames : bool
+    DeviceInfos : DeviceInfo[]
+}
 
 module Definitions =
 
