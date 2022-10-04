@@ -19,9 +19,11 @@
       <Compile Include="IpNetwork\IpNetworkValidation.fs" />
       <Compile Include="IpNetwork\IpNetwork.fs" />
       <Compile Include="Types.fs" />
+      <Compile Include="DeviceInfoArray\DeviceInfoArray.fs" />
       <Compile Include="NameInfoArray\NameInfoArray.fs" />
       <Compile Include="IpStatusArray\IpStatusArray.fs" />
       <Compile Include="MacInfoArray\MacInfoArray.fs" />
+      <Compile Include="Definitions.fs" />
       <Compile Include="Constants.fs" />
     </ItemGroup>
 

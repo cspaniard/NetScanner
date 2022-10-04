@@ -1,7 +1,6 @@
 namespace Model
 
 open System
-open System.Runtime.InteropServices
 open CommandLine
 
 type IpStatus = IpStatus of IpAddress * active : bool
@@ -21,27 +20,3 @@ type ExceptionErrors = seq<Exception>
 type AppErrors =
     | ArgErrors of ArgErrors
     | ExceptionErrors of ExceptionErrors
-
-type ScanNetworkParams = {
-    PingTimeOut : TimeOut
-    Retries : Retries
-    ShowMacs : bool
-    ShowNames : bool
-    NameLookUpTimeOut : TimeOut
-    Network : IpNetwork
-}
-
-type OutputDeviceInfosParams = {
-    ActivesOnly : bool
-    Separator : string
-    ShowMacs : bool
-    ShowNames : bool
-    DeviceInfos : DeviceInfo[]
-}
-
-module Definitions =
-
-    let (|LinuxOs|WindowsOs|OtherOs|) _ =
-        if RuntimeInformation.IsOSPlatform(OSPlatform.Linux) then LinuxOs
-        else if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then WindowsOs
-        else OtherOs

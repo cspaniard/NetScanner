@@ -4,6 +4,7 @@ open CommandLine
 
 open Microsoft.FSharp.Core
 open Model
+open Model.Definitions
 
 type private IIpService = Infrastructure.DI.Services.NetworkDI.IIpService
 type private IHelpService = Infrastructure.DI.Services.HelpDI.IHelpService
@@ -13,20 +14,16 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
 
     let processTask =
         task {
-            let pingTimeOut = TimeOut.create options.PingTimeOut
-            let retries = Retries.create options.Retries
-            let network = IpNetwork.create options.Network
-            let nameLookUpTimeOut = TimeOut.create options.NameLookUpTimeOut
 
             try
                 let! deviceInfos =
                     IIpService.scanNetworkAsync
-                        { PingTimeOut = pingTimeOut
-                          Retries = retries
+                        { PingTimeOut = TimeOut.create options.PingTimeOut
+                          Retries = Retries.create options.Retries
                           ShowMacs = options.ShowMacs
                           ShowNames = options.ShowNames
-                          NameLookUpTimeOut = nameLookUpTimeOut
-                          Network = network }
+                          NameLookUpTimeOut = TimeOut.create options.NameLookUpTimeOut
+                          Network = IpNetwork.create options.Network }
 
 
                 IIpService.outputDeviceInfos

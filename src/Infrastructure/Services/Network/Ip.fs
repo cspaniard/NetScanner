@@ -7,6 +7,7 @@ open ArpLookup
 open Motsoft.Util
 
 open Model
+open Model.Definitions
 
 type private IIpBroker = Infrastructure.DI.Brokers.NetworkDI.IIpBroker
 type private INetworkBroker = Infrastructure.DI.Brokers.NetworkDI.INetworkBroker
@@ -14,7 +15,7 @@ type private INetworkBroker = Infrastructure.DI.Brokers.NetworkDI.INetworkBroker
 type Service () =
 
     //----------------------------------------------------------------------------------------------------
-    static let getAllIpInfosForNetworkAsyncTry pingTimeOut retries (network : IpNetwork) =
+    static let getAllIpsStatusAsyncTry pingTimeOut retries (network : IpNetwork) =
 
         [|
            for i in 1..254 -> IpAddress.create $"%s{network.value}{i}"
@@ -24,11 +25,11 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let getMacsForActiveIpsAsyncTry (timeOut : TimeOut) (deviceInfos : DeviceInfo[]) =
+    static let getMacsForActiveIpsAsyncTry (timeOut : TimeOut) (deviceInfoArray : DeviceInfoArray) =
 
         Arp.LinuxPingTimeout <- TimeSpan.FromMilliseconds(timeOut.value)
 
-        deviceInfos
+        deviceInfoArray.value
         |> Array.map (fun (DeviceInfo (ipAddress, active, _, _)) ->
                           if active then
                               IIpBroker.getMacForIpAsync ipAddress
@@ -38,9 +39,9 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let getNamesForActiveIpsAsyncTry (timeOut : TimeOut) (deviceInfos : DeviceInfo[]) =
+    static let getNamesForActiveIpsAsyncTry (timeOut : TimeOut) (deviceInfoArray : DeviceInfoArray) =
 
-        deviceInfos
+        deviceInfoArray.value
         |> Array.map(fun (DeviceInfo (ipAddress, active, _, _)) ->
                          if active then
                              IIpBroker.getNameInfoForIpAsyncTry timeOut ipAddress
@@ -50,49 +51,53 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let buildDeviceInfosFromStatusArray (ipStatusArray : IpStatusArray) =
+    static let buildDeviceInfoArray (ipStatusArray : IpStatusArray) =
 
         ipStatusArray.value
         |> Array.map (fun (IpStatus (ipAddress, active)) ->
                           DeviceInfo (ipAddress, active, Mac.create "", ""))
+        |> DeviceInfoArray.OfArray
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let scanMacInfo pingTimeOut showMacs deviceInfos =
+    static let scanMacInfo pingTimeOut showMacs deviceInfoArray =
 
-        let mergeInfos deviceInfos (macInfoArray : MacInfoArray) =
+        let mergeInfos (deviceInfoArray : DeviceInfoArray) (macInfoArray : MacInfoArray) =
 
-           (deviceInfos, macInfoArray.value)
+           (deviceInfoArray.value, macInfoArray.value)
            ||> Array.map2 (fun (DeviceInfo (ipAddress, active, _, name)) (MacInfo (_, mac)) ->
                                DeviceInfo (ipAddress, active, mac, name))
+           |> DeviceInfoArray.OfArray
 
 
         backgroundTask {
             if showMacs then
-                let! activeMacInfos = deviceInfos |> getMacsForActiveIpsAsyncTry pingTimeOut
+                let! activeMacInfos = deviceInfoArray |> getMacsForActiveIpsAsyncTry pingTimeOut
 
-                return mergeInfos deviceInfos (MacInfoArray.OfArray activeMacInfos)
+                return mergeInfos deviceInfoArray (MacInfoArray.OfArray activeMacInfos)
             else
-                return deviceInfos
+                return deviceInfoArray
         }
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let scanNameInfo nameLookUpTimeOut showNames deviceInfos =
+    static let scanNameInfo nameLookUpTimeOut showNames deviceInfoArray =
 
-        let mergeInfos deviceInfos (nameInfoArray : NameInfoArray) =
+        let mergeInfos (deviceInfoArray : DeviceInfoArray) (nameInfoArray : NameInfoArray) =
 
-           (deviceInfos, nameInfoArray.value)
+           (deviceInfoArray.value, nameInfoArray.value)
            ||> Array.map2 (fun (DeviceInfo (ipAddress, active, mac, _)) (NameInfo (_, name)) ->
                                DeviceInfo (ipAddress, active, mac, name))
+           |> DeviceInfoArray.OfArray
+
 
         backgroundTask {
             if showNames then
-                let! activeNameInfos = deviceInfos |> getNamesForActiveIpsAsyncTry nameLookUpTimeOut
+                let! activeNameInfos = deviceInfoArray |> getNamesForActiveIpsAsyncTry nameLookUpTimeOut
 
-                return mergeInfos deviceInfos (NameInfoArray.OfArray activeNameInfos)
+                return mergeInfos deviceInfoArray (NameInfoArray.OfArray activeNameInfos)
             else
-                return deviceInfos
+                return deviceInfoArray
         }
     //----------------------------------------------------------------------------------------------------
 
@@ -102,34 +107,39 @@ type Service () =
         backgroundTask {
 
             let! ipStatuses =
-                getAllIpInfosForNetworkAsyncTry scanParams.PingTimeOut scanParams.Retries scanParams.Network
+                getAllIpsStatusAsyncTry scanParams.PingTimeOut scanParams.Retries scanParams.Network
 
-            let deviceInfos = buildDeviceInfosFromStatusArray <| IpStatusArray.OfArray ipStatuses
+            let deviceInfoArray = IpStatusArray.OfArray ipStatuses
+                                  |> buildDeviceInfoArray
 
-            let! deviceInfos = deviceInfos
-                               |> scanMacInfo scanParams.PingTimeOut scanParams.ShowMacs
+            let! deviceInfoArray = deviceInfoArray
+                                   |> scanMacInfo scanParams.PingTimeOut scanParams.ShowMacs
 
-            let! deviceInfos = deviceInfos
-                               |> scanNameInfo scanParams.NameLookUpTimeOut scanParams.ShowNames
+            let! deviceInfoArray = deviceInfoArray
+                                   |> scanNameInfo scanParams.NameLookUpTimeOut scanParams.ShowNames
 
-            return deviceInfos
+            return deviceInfoArray
         }
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
     static member outputDeviceInfos (outputParams : OutputDeviceInfosParams) =
 
-        let filterFun = Array.filter (fun (DeviceInfo (_, active,_ , _)) -> active)
+        let filterFun =
+            if outputParams.ActivesOnly
+            then Array.filter (fun (DeviceInfo (_, active,_ , _)) -> active)
+            else id
+
         let separator = Regex.Unescape(outputParams.Separator)
 
-        let buildInfoLines =
+        let buildInfoLinesFun =
             Array.map (fun (DeviceInfo (ipAddress, status, mac, deviceName)) ->
-                           $"%s{ipAddress.value}{separator}%b{status}" +
-                           (if outputParams.ShowMacs then $"{separator}%s{mac.formatted}" else "") +
-                           (if outputParams.ShowNames then $"{separator}{deviceName}" else ""))
+                           $"%s{ipAddress.value}%s{separator}%b{status}" +
+                           (if outputParams.ShowMacs then $"%s{separator}%s{mac.formatted}" else "") +
+                           (if outputParams.ShowNames then $"%s{separator}%s{deviceName}" else ""))
 
-        outputParams.DeviceInfos
-        |> (if outputParams.ActivesOnly then filterFun else id)
-        |> buildInfoLines
-        |> INetworkBroker.outputNetworkInfoLines
+        outputParams.DeviceInfos.value
+        |> filterFun
+        |> buildInfoLinesFun
+        |> INetworkBroker.outputDeviceInfoLines
     //----------------------------------------------------------------------------------------------------
