@@ -9,8 +9,8 @@ open Motsoft.Util
 open Model
 open Model.Definitions
 
-type private IIpBroker = Infrastructure.DI.Brokers.NetworkDI.IIpBroker
-type private INetworkBroker = Infrastructure.DI.Brokers.NetworkDI.INetworkBroker
+type private IIpBroker = DI.Brokers.NetworkDI.IIpBroker
+type private INetworkBroker = DI.Brokers.NetworkDI.INetworkBroker
 
 type Service () =
 

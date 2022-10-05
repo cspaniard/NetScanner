@@ -1,4 +1,4 @@
-namespace Infrastructure.DI.Brokers
+namespace DI.Brokers
 
 module ProcessesDI =
 

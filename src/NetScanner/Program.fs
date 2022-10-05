@@ -6,9 +6,9 @@ open Microsoft.FSharp.Core
 open Model
 open Model.Definitions
 
-type private IIpService = Infrastructure.DI.Services.NetworkDI.IIpService
-type private IHelpService = Infrastructure.DI.Services.HelpDI.IHelpService
-type private IExceptionService = Infrastructure.DI.Services.ExceptionsDI.IExceptionService
+type private IIpService = DI.Services.NetworkDI.IIpService
+type private IHelpService = DI.Services.HelpDI.IHelpService
+type private IExceptionService = DI.Services.ExceptionsDI.IExceptionService
 
 let scanAndOutputNetwork (options : ArgumentOptions) =
 

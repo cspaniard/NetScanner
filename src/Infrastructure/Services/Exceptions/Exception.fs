@@ -2,7 +2,7 @@ namespace Services.Exceptions.Exception
 
 open System
 
-type IExceptionBroker = Infrastructure.DI.Brokers.ExceptionsDI.IExceptionBroker
+type IExceptionBroker = DI.Brokers.ExceptionsDI.IExceptionBroker
 
 type Service () =
 

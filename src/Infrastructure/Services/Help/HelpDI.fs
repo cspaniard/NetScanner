@@ -1,4 +1,4 @@
-namespace Infrastructure.DI.Services
+namespace DI.Services
 
 module HelpDI =
 

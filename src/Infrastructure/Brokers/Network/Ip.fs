@@ -10,7 +10,7 @@ open Motsoft.Util
 open Model
 open Model.Definitions
 
-type private IIProcessBroker = Infrastructure.DI.Brokers.ProcessesDI.IProcessBroker
+type private IIProcessBroker = DI.Brokers.ProcessesDI.IProcessBroker
 
 type Broker () =
 
