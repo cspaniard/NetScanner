@@ -3,7 +3,6 @@ namespace Model
 open System
 open CommandLine
 
-type IpStatus = IpStatus of IpAddress * active : bool
 type NameInfo = NameInfo of IpAddress * name : string
 type MacInfo = MacInfo of IpAddress * Mac
 

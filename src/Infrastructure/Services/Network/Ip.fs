@@ -15,11 +15,11 @@ type private INetworkBroker = DI.Brokers.NetworkDI.INetworkBroker
 type Service () =
 
     //----------------------------------------------------------------------------------------------------
-    static let getAllIpsStatusAsyncTry pingTimeOut retries (network : IpNetwork) =
+    static let scanAllIpsAsyncTry pingTimeOut retries (network : IpNetwork) =
 
         [|
            for i in 1..254 -> IpAddress.create $"%s{network.value}{i}"
-                              |> IIpBroker.pingIpAsync pingTimeOut retries
+                              |> IIpBroker.getDeviceInfoStatus pingTimeOut retries
         |]
         |> Task.WhenAll
     //----------------------------------------------------------------------------------------------------
@@ -48,15 +48,6 @@ type Service () =
                          else
                              backgroundTask { return NameInfo (ipAddress, "") })
         |> Task.WhenAll
-    //----------------------------------------------------------------------------------------------------
-
-    //----------------------------------------------------------------------------------------------------
-    static let buildDeviceInfoArray (ipStatusArray : IpStatusArray) =
-
-        ipStatusArray.value
-        |> Array.map (fun (IpStatus (ipAddress, active)) ->
-                          DeviceInfo (ipAddress, active, Mac.create "", ""))
-        |> DeviceInfoArray.OfArray
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
@@ -106,13 +97,10 @@ type Service () =
 
         backgroundTask {
 
-            let! ipStatuses =
-                getAllIpsStatusAsyncTry scanParams.PingTimeOut scanParams.Retries scanParams.Network
+            let! deviceInfos =
+                scanAllIpsAsyncTry scanParams.PingTimeOut scanParams.Retries scanParams.Network
 
-            let deviceInfoArray = IpStatusArray.OfArray ipStatuses
-                                  |> buildDeviceInfoArray
-
-            let! deviceInfoArray = deviceInfoArray
+            let! deviceInfoArray = DeviceInfoArray.OfArray deviceInfos
                                    |> scanMacInfo scanParams.PingTimeOut scanParams.ShowMacs
 
             let! deviceInfoArray = deviceInfoArray

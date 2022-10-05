@@ -58,9 +58,10 @@ type Broker () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member pingIpAsync (timeOut : TimeOut) (retries : Retries) (ipAddress: IpAddress) =
+    static member getDeviceInfoStatus (timeOut : TimeOut) (retries : Retries) (ipAddress: IpAddress) =
 
         backgroundTask {
+
             let ping = new Ping()
             let mutable retryCount : int = retries.value
             let mutable resultStatus = IPStatus.Unknown
@@ -74,7 +75,7 @@ type Broker () =
                 else
                     retryCount <- retryCount - 1
 
-            return IpStatus (ipAddress, (resultStatus = IPStatus.Success))
+            return DeviceInfo (ipAddress, (resultStatus = IPStatus.Success), Mac.create "", "")
         }
     //----------------------------------------------------------------------------------------------------
 
