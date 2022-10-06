@@ -24,6 +24,9 @@ type ArgumentOptions = {
     [<Option ('l', "nombres-timeout", Default = 500)>]
     NameLookUpTimeOut : int
 
+    [<Option ('d', "debug", Default = false)>]
+    Debug : bool
+
     [<Value (0, MetaName="red", Required = true)>]
     Network : string
 }

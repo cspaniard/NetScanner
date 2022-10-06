@@ -51,7 +51,7 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let scanMacInfo pingTimeOut showMacs deviceInfoArray =
+    static let scanMacInfoAsync pingTimeOut showMacs deviceInfoArray =
 
         let mergeInfos (deviceInfoArray : DeviceInfoArray) (macInfoArray : MacInfoArray) =
 
@@ -72,7 +72,7 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let scanNameInfo nameLookUpTimeOut showNames deviceInfoArray =
+    static let scanNameInfoAsync nameLookUpTimeOut showNames deviceInfoArray =
 
         let mergeInfos (deviceInfoArray : DeviceInfoArray) (nameInfoArray : NameInfoArray) =
 
@@ -101,10 +101,10 @@ type Service () =
                 scanAllIpsAsyncTry scanParams.PingTimeOut scanParams.Retries scanParams.Network
 
             let! deviceInfoArray = DeviceInfoArray.OfArray deviceInfos
-                                   |> scanMacInfo scanParams.PingTimeOut scanParams.ShowMacs
+                                   |> scanMacInfoAsync scanParams.PingTimeOut scanParams.ShowMacs
 
             let! deviceInfoArray = deviceInfoArray
-                                   |> scanNameInfo scanParams.NameLookUpTimeOut scanParams.ShowNames
+                                   |> scanNameInfoAsync scanParams.NameLookUpTimeOut scanParams.ShowNames
 
             return deviceInfoArray
         }

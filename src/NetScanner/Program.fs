@@ -1,4 +1,5 @@
 open System
+open System.Diagnostics
 open System.Threading.Tasks
 open CommandLine
 
@@ -9,6 +10,7 @@ open Model.Definitions
 type private IIpService = DI.Services.NetworkDI.IIpService
 type private IHelpService = DI.Services.HelpDI.IHelpService
 type private IExceptionService = DI.Services.ExceptionsDI.IExceptionService
+type private IMetricService = DI.Services.DebugDI.IMetricService
 
 let scanAndOutputNetwork (options : ArgumentOptions) =
 
@@ -16,6 +18,8 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
         task {
 
             try
+                let scanNetworkStopwatch = Stopwatch.StartNew()
+
                 let! deviceInfos =
                     IIpService.scanNetworkAsync
                         { PingTimeOut = TimeOut.create options.PingTimeOut
@@ -25,6 +29,10 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
                           NameLookUpTimeOut = TimeOut.create options.NameLookUpTimeOut
                           Network = IpNetwork.create options.Network }
 
+                scanNetworkStopwatch.Stop()
+
+                if options.Debug then
+                    IMetricService.outputScanNetworkTimeTry scanNetworkStopwatch
 
                 IIpService.outputDeviceInfos
                     { ActivesOnly = options.ActivesOnly
