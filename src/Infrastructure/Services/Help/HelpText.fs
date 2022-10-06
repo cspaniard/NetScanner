@@ -24,6 +24,7 @@ type Service () =
             ArgLineInfo ("-l,  --nombres-timeout",
                          "Tiempo de espera en ms para cada resolución de nombre. (def: 500)")
             ArgLineInfo ("-d,  --debug", "Muestra estadísticas de tiempo. (def: False)")
+            ArgLineInfo ("-b,  --blacklist", "Fichero con las MACs de los dispositivos a ignorar. (def: \"\")")
             ArgLineInfo ("red (requerido)", "La red a escanear.")
 
             ArgLineInfo ($"{leftSpaces}--help", "Muestra esta ayuda y sale.")

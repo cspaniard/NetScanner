@@ -18,6 +18,8 @@
       <Compile Include="Retries\Retries.fs" />
       <Compile Include="IpNetwork\IpNetworkValidation.fs" />
       <Compile Include="IpNetwork\IpNetwork.fs" />
+      <Compile Include="FileName\FileNameValidation.fs" />
+      <Compile Include="FileName\FileName.fs" />
       <Compile Include="Types.fs" />
       <Compile Include="DeviceInfoArray\DeviceInfoArray.fs" />
       <Compile Include="NameInfoArray\NameInfoArray.fs" />

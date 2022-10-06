@@ -6,13 +6,18 @@ open CommandLine
 open Microsoft.FSharp.Core
 open Model
 open Model.Definitions
+open Model.Constants
 
 type private IIpService = DI.Services.NetworkDI.IIpService
 type private IHelpService = DI.Services.HelpDI.IHelpService
 type private IExceptionService = DI.Services.ExceptionsDI.IExceptionService
 type private IMetricService = DI.Services.DebugDI.IMetricService
 
+type private BlackListBroker = DI.Brokers.StorageDI.IBlackListBroker
+
 let scanAndOutputNetwork (options : ArgumentOptions) =
+
+    BlackListBroker.init options
 
     let processTask =
         task {
@@ -27,7 +32,8 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
                           ShowMacs = options.ShowMacs
                           ShowNames = options.ShowNames
                           NameLookUpTimeOut = TimeOut.create options.NameLookUpTimeOut
-                          Network = IpNetwork.create options.Network }
+                          Network = IpNetwork.create options.Network
+                          BlackListFileName = FileName.create options.BlackListFile }
 
                 scanNetworkStopwatch.Stop()
 
@@ -56,4 +62,4 @@ try
     | _ -> Exception("No debiéramos llegar aquí.") |> IExceptionService.outputException
 with
 | :? AggregateException as ae -> IHelpService.showHelp <| ExceptionErrors ae.InnerExceptions |> exit
-| e -> Exception($"Raro que lleguemos aquí, pero: {e.Message}") |> IExceptionService.outputException
+| e -> IExceptionService.outputException e ; exit EXIT_CODE_EXCEPTION

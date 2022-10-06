@@ -15,6 +15,7 @@ type ScanNetworkParams = {
     ShowNames : bool
     NameLookUpTimeOut : TimeOut
     Network : IpNetwork
+    BlackListFileName : FileName
 }
 
 type OutputDeviceInfosParams = {

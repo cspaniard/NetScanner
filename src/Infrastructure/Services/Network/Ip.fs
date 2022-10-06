@@ -11,6 +11,7 @@ open Model.Definitions
 
 type private IIpBroker = DI.Brokers.NetworkDI.IIpBroker
 type private INetworkBroker = DI.Brokers.NetworkDI.INetworkBroker
+type private IBlackListBroker = DI.Brokers.StorageDI.IBlackListBroker
 
 type Service () =
 
@@ -51,21 +52,46 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
+    static let getMacBlacklistTry () =
+
+        IBlackListBroker.getMacBlacklistTry ()
+        |> Array.map (Mac.clean >> Mac.create)
+    //----------------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------------------------
     static let scanMacInfoAsync pingTimeOut showMacs deviceInfoArray =
 
+        //------------------------------------------------------------------------------------------------
+        let filterBlackList (blackList : Mac[]) (deviceInfoArray : DeviceInfoArray) =
+            if blackList.Length = 0 then
+                deviceInfoArray
+            else
+                deviceInfoArray.value
+                |> Array.filter (fun (DeviceInfo (_, _, mac, _)) -> blackList |> (not << Array.contains mac))
+                |> DeviceInfoArray.OfArray
+        //------------------------------------------------------------------------------------------------
+
+        //------------------------------------------------------------------------------------------------
         let mergeInfos (deviceInfoArray : DeviceInfoArray) (macInfoArray : MacInfoArray) =
 
            (deviceInfoArray.value, macInfoArray.value)
            ||> Array.map2 (fun (DeviceInfo (ipAddress, active, _, name)) (MacInfo (_, mac)) ->
                                DeviceInfo (ipAddress, active, mac, name))
            |> DeviceInfoArray.OfArray
-
+        //------------------------------------------------------------------------------------------------
 
         backgroundTask {
-            if showMacs then
+
+            let blackList = getMacBlacklistTry ()
+
+            if showMacs || blackList.Length > 0 then
+
                 let! activeMacInfos = deviceInfoArray |> getMacsForActiveIpsAsyncTry pingTimeOut
 
-                return mergeInfos deviceInfoArray (MacInfoArray.OfArray activeMacInfos)
+                return activeMacInfos
+                       |> MacInfoArray.OfArray
+                       |> mergeInfos deviceInfoArray
+                       |> filterBlackList blackList
             else
                 return deviceInfoArray
         }
@@ -81,9 +107,9 @@ type Service () =
                                DeviceInfo (ipAddress, active, mac, name))
            |> DeviceInfoArray.OfArray
 
-
         backgroundTask {
             if showNames then
+
                 let! activeNameInfos = deviceInfoArray |> getNamesForActiveIpsAsyncTry nameLookUpTimeOut
 
                 return mergeInfos deviceInfoArray (NameInfoArray.OfArray activeNameInfos)
@@ -97,14 +123,17 @@ type Service () =
 
         backgroundTask {
 
-            let! deviceInfos =
-                scanAllIpsAsyncTry scanParams.PingTimeOut scanParams.Retries scanParams.Network
+            let! deviceInfos = scanAllIpsAsyncTry scanParams.PingTimeOut
+                                                  scanParams.Retries
+                                                  scanParams.Network
 
             let! deviceInfoArray = DeviceInfoArray.OfArray deviceInfos
-                                   |> scanMacInfoAsync scanParams.PingTimeOut scanParams.ShowMacs
+                                   |> scanMacInfoAsync scanParams.PingTimeOut
+                                                       scanParams.ShowMacs
 
             let! deviceInfoArray = deviceInfoArray
-                                   |> scanNameInfoAsync scanParams.NameLookUpTimeOut scanParams.ShowNames
+                                   |> scanNameInfoAsync scanParams.NameLookUpTimeOut
+                                                        scanParams.ShowNames
 
             return deviceInfoArray
         }
