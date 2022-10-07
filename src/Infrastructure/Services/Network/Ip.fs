@@ -40,7 +40,7 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let getNamesForActiveIpsAsyncTry (timeOut : TimeOut) (deviceInfoArray : DeviceInfoArray) =
+    static let getNameInfosForActiveIpsAsyncTry (timeOut : TimeOut) (deviceInfoArray : DeviceInfoArray) =
 
         deviceInfoArray.value
         |> Array.map(fun (DeviceInfo (ipAddress, active, _, _)) ->
@@ -110,7 +110,7 @@ type Service () =
         backgroundTask {
             if showNames then
 
-                let! activeNameInfos = deviceInfoArray |> getNamesForActiveIpsAsyncTry nameLookUpTimeOut
+                let! activeNameInfos = deviceInfoArray |> getNameInfosForActiveIpsAsyncTry nameLookUpTimeOut
 
                 return mergeInfos deviceInfoArray (NameInfoArray.OfArray activeNameInfos)
             else

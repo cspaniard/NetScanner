@@ -15,9 +15,14 @@ type private IMetricService = DI.Services.DebugDI.IMetricService
 
 type private BlackListBroker = DI.Brokers.StorageDI.IBlackListBroker
 
-let scanAndOutputNetwork (options : ArgumentOptions) =
+let appInit (options : ArgumentOptions) =
 
     BlackListBroker.init options
+
+    // TODO: Evaluar si pasar options a otros Brokers y evitar tantos parámetros.
+
+
+let scanAndOutputNetwork (options : ArgumentOptions) =
 
     let processTask =
         task {
@@ -57,8 +62,12 @@ try
     let parser = new Parser(fun o -> o.HelpWriter <- null)
 
     match parser.ParseArguments<ArgumentOptions> argv with
-    | :? Parsed as opts -> scanAndOutputNetwork opts.Value
-    | :? NotParsed as notParsed -> IHelpService.showHelp <| ArgErrors notParsed.Errors |> exit
+    | :? Parsed as opts -> appInit opts.Value
+                           scanAndOutputNetwork opts.Value
+    | :? NotParsed as notParsed -> notParsed.Errors
+                                   |> ArgErrors
+                                   |> IHelpService.showHelp
+                                   |> exit
     | _ -> Exception("No debiéramos llegar aquí.") |> IExceptionService.outputException
 with
 | :? AggregateException as ae -> IHelpService.showHelp <| ExceptionErrors ae.InnerExceptions |> exit
