@@ -1,11 +1,12 @@
 namespace Services.Help.HelpText
 
 open System
+open System.ComponentModel.DataAnnotations
 open CommandLine
 open Model
 open Model.Constants
 
-open type Infrastructure.DI.Brokers.HelpDI.IIHelpTextBroker
+type IHelpTextBroker = Infrastructure.DI.Brokers.HelpDI.IIHelpTextBroker
 
 type Service () =
 
@@ -38,12 +39,19 @@ type Service () =
         //------------------------------------------------------------------------------------------------
         let showHelpText (errorMessages : seq<string>) =
 
-            printHeader ()
+            //--------------------------------------------------------------------------------------------
+            let showHelpText (errorMessages : seq<string>) =
+
+                IHelpTextBroker.printHeader ()
+                IHelpTextBroker.printUsage ()
+                IHelpTextBroker.printErrorSection errorMessages
+                IHelpTextBroker.printArgsInfo <| getArgLinesInfo ()
+            //--------------------------------------------------------------------------------------------
 
             match Seq.head errorMessages with
-            | "HELP" -> printUsage () ; getArgLinesInfo () |> printArgsInfo
             | "VERSION" -> ()
-            | _ -> printUsage () ; printErrorList errorMessages ; getArgLinesInfo () |> printArgsInfo
+            | "HELP" -> showHelpText Seq.empty
+            | _ -> showHelpText errorMessages
         //------------------------------------------------------------------------------------------------
 
         //------------------------------------------------------------------------------------------------
@@ -74,8 +82,15 @@ type Service () =
 
             EXIT_CODE_EXCEPTION
         //------------------------------------------------------------------------------------------------
+        let processValidationError (validationError : ValidationException) =
+
+            [ validationError.Message ]
+            |> showHelpText
+
+            EXIT_CODE_ARG_ERROR
 
         match appErrors with
         | ArgErrors argErrors -> processArgErrors argErrors
         | ExceptionErrors exceptionErrors -> processExceptionErrors exceptionErrors
+        | ValidationError validationError -> processValidationError validationError
     //----------------------------------------------------------------------------------------------------

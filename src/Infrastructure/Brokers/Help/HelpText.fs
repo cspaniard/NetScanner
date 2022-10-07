@@ -26,17 +26,18 @@ type Broker () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member printErrorList errorList =
+    static member printErrorSection errorList =
 
-        let leftMargin = String(' ', LEFT_MARGIN)
+        if errorList |> (not << Seq.isEmpty) then
+            let leftMargin = String(' ', LEFT_MARGIN)
 
-        Console.WriteLine "\nERRORES:"
+            Console.WriteLine "\nERRORES:"
 
-        if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then Console.WriteLine ""
+            if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then Console.WriteLine ""
 
-        errorList
-        |> Seq.filter (not << String.IsNullOrWhiteSpace)
-        |> Seq.iter (fun errorLine -> Console.WriteLine $"{leftMargin}{errorLine}")
+            errorList
+            |> Seq.filter (not << String.IsNullOrWhiteSpace)
+            |> Seq.iter (fun errorLine -> Console.WriteLine $"{leftMargin}{errorLine}")
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 namespace Model
 
 open System
+open System.ComponentModel.DataAnnotations
 open CommandLine
 
 type NameInfo = NameInfo of IpAddress * name : string
@@ -19,3 +20,4 @@ type ExceptionErrors = seq<Exception>
 type AppErrors =
     | ArgErrors of ArgErrors
     | ExceptionErrors of ExceptionErrors
+    | ValidationError of ValidationException

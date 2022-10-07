@@ -1,4 +1,5 @@
 open System
+open System.ComponentModel.DataAnnotations
 open System.Diagnostics
 open System.Threading.Tasks
 open CommandLine
@@ -57,14 +58,18 @@ try
     let parser = new Parser(fun o -> o.HelpWriter <- null)
 
     match parser.ParseArguments<ArgumentOptions> argv with
-    | :? Parsed as opts -> appInit opts.Value
-                           scanAndOutputNetwork opts.Value
-    | :? NotParsed as notParsed -> notParsed.Errors
-                                   |> ArgErrors
-                                   |> IHelpService.showHelp
-                                   |> exit
-    | _ -> Exception("No debiéramos llegar aquí.") |> IExceptionService.outputException
+    | :? Parsed as opts ->
+             appInit opts.Value
+             scanAndOutputNetwork opts.Value
+    | :? NotParsed as notParsed ->
+             notParsed.Errors
+             |> ArgErrors
+             |> IHelpService.showHelp
+             |> exit
+    | _ ->
+             Exception("No debiéramos llegar aquí.") |> IExceptionService.outputException
 with
 | :? AggregateException as ae -> IHelpService.showHelp <| ExceptionErrors ae.InnerExceptions |> exit
-| e -> IExceptionService.outputException e ; exit EXIT_CODE_EXCEPTION
-// TODO: ValidationException ?
+| :? ValidationException as ve -> IHelpService.showHelp <| ValidationError ve |> exit
+| e -> IExceptionService.outputException e
+       exit EXIT_CODE_EXCEPTION

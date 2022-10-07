@@ -1,6 +1,6 @@
 namespace Model
 
-open System
+open System.ComponentModel.DataAnnotations
 open Constants
 
 type NameLookupTimeOut =
@@ -11,7 +11,7 @@ type NameLookupTimeOut =
                 value
                 |> TimeOut.create
                 |> NameLookupTimeOut
-            with e -> raise (AggregateException(Exception($"nombres-timeout: {e.Message}")))
+            with e -> raise (ValidationException($"nombres-timeout: {e.Message}"))
 
         static member createDefault () = NameLookupTimeOut.create DEF_NAME_LOOKUP_TIMEOUT
 

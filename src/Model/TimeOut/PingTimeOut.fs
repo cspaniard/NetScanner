@@ -1,6 +1,6 @@
 namespace Model
 
-open System
+open System.ComponentModel.DataAnnotations
 open Constants
 
 type PingTimeOut =
@@ -11,7 +11,7 @@ type PingTimeOut =
                 value
                 |> TimeOut.create
                 |> PingTimeOut
-            with e -> raise (AggregateException(Exception($"ping-timeout: {e.Message}")))
+            with e -> raise (ValidationException($"ping-timeout: {e.Message}"))
 
         static member createDefault () = PingTimeOut.create DEF_PING_TIMEOUT
 
