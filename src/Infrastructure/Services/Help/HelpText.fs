@@ -15,14 +15,14 @@ type Service () =
         let leftSpaces = String(' ', 5)
 
         [|
-            ArgLineInfo ("-w,  --ping-timeout", "Tiempo de espera en ms para cada ping. (def: 500)")
-            ArgLineInfo ("-r,  --reintentos", "Número pings hasta dar la IP por inactiva. (def: 3)")
+            ArgLineInfo ("-w,  --ping-timeout", $"Tiempo de espera en ms para cada ping. (def: {DEF_PING_TIMEOUT})")
+            ArgLineInfo ("-r,  --reintentos", $"Número pings hasta dar la IP por inactiva. (def: {DEF_RETRIES})")
             ArgLineInfo ("-s,  --separador", "Separador entre campos. (def: \\t)")
             ArgLineInfo ("-a,  --activos", "Sólo devuelve las IPs activas. (def: False)")
             ArgLineInfo ("-m,  --mac", "Muestra la MAC de cada IP activa. (def: False)")
             ArgLineInfo ("-n,  --nombres", "Muestra los nombres de los dispositivos (def: False)")
             ArgLineInfo ("-l,  --nombres-timeout",
-                         "Tiempo de espera en ms para cada resolución de nombre. (def: 500)")
+                         $"Tiempo de espera en ms para cada resolución de nombre. (def: {DEF_NAME_LOOKUP_TIMEOUT})")
             ArgLineInfo ("-d,  --debug", "Muestra estadísticas de tiempo. (def: False)")
             ArgLineInfo ("-b,  --blacklist", "Fichero con las MACs de los dispositivos a ignorar. (def: \"\")")
             ArgLineInfo ("red (requerido)", "La red a escanear.")

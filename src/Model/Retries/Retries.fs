@@ -1,5 +1,6 @@
 namespace Model
 
+open Model.Constants
 open Model.RetriesValidation
 
 type Retries =
@@ -20,3 +21,6 @@ type Retries =
             value
             |> Retries.validateTry
             |> Retries
+
+        static member createDefault () =
+            Retries.create DEF_RETRIES

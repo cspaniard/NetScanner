@@ -17,7 +17,7 @@ type FileName =
                 |> Array.iter (fun f -> f value)
 
                 value
-            with e -> failwith $"FileName: {e.Message}"
+            with e -> raise (AggregateException(e))
 
         member this.value = let (FileName value) = this in value
         member this.hasValue = let (FileName value) = this in value |> (not << String.IsNullOrWhiteSpace)

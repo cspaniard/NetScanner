@@ -1,5 +1,6 @@
 namespace Brokers.Network.Ip
 
+open System
 open System.Diagnostics
 open System.Net
 open System.Net.NetworkInformation
@@ -14,8 +15,12 @@ type private IIProcessBroker = DI.Brokers.ProcessesDI.IProcessBroker
 
 type Broker () =
 
+    static let mutable _pingTimeOut = PingTimeOut.createDefault ()
+    static let mutable retries = Retries.createDefault ()
+    static let mutable _nameLookupTimeOut = NameLookupTimeOut.createDefault ()
+
     //----------------------------------------------------------------------------------------------------
-    static let getNameForIpLinuxAsync (timeOut : TimeOut) (ipAddress : IpAddress) =
+    static let getNameForIpLinuxAsync (ipAddress : IpAddress) =
 
         let processProcInfo (proc : Process) =
 
@@ -34,20 +39,25 @@ type Broker () =
 
             let args = $"{ipAddress}"
 
-            match! IIProcessBroker.startProcessWithTimeOutAsync "nslookup" timeOut args with
+            let newProcessTask =
+                IIProcessBroker.startProcessWithTimeOutAsync "nslookup"
+                                                             Broker.NameLookupTimeOut.timeOut
+                                                             args
+
+            match! newProcessTask with
             | Some proc -> return! processProcInfo proc
             | None -> return NameInfo (ipAddress, "")
         }
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let getNameForIpWindowsAsync (timeOut : TimeOut) (ipAddress : IpAddress) =
+    static let getNameForIpWindowsAsync (ipAddress : IpAddress) =
 
         backgroundTask {
 
-            let args = $"-n 1 -a -w {timeOut} {ipAddress}"
+            let args = $"-n 1 -a -w {Broker.PingTimeOut} {ipAddress}"
 
-            match! IIProcessBroker.startProcessWithTimeOutAsync "ping" timeOut args with
+            match! IIProcessBroker.startProcessWithTimeOutAsync "ping" Broker.NameLookupTimeOut.timeOut args with
             | Some proc ->
                 let! result = proc.StandardOutput.ReadToEndAsync()
                 let hostName = result |> split "[" |> Array.item 0 |> split " " |> Array.last
@@ -58,16 +68,36 @@ type Broker () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member getDeviceInfoStatus (timeOut : TimeOut) (retries : Retries) (ipAddress: IpAddress) =
+    static member init pingTimeOut nameLookupTimeOut =
+
+        _pingTimeOut <- pingTimeOut
+        _nameLookupTimeOut <- nameLookupTimeOut
+
+        Arp.LinuxPingTimeout <- TimeSpan.FromMilliseconds(Broker.PingTimeOut.value)
+    //----------------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------------------------
+    static member PingTimeOut
+        with get() : PingTimeOut = _pingTimeOut
+
+    static member Retries
+        with get() : Retries = retries
+
+    static member NameLookupTimeOut
+        with get() : NameLookupTimeOut = _nameLookupTimeOut
+    //----------------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------------------------------------------------
+    static member getDeviceInfoForIpAsync (ipAddress: IpAddress) =
 
         backgroundTask {
 
             let ping = new Ping()
-            let mutable retryCount : int = retries.value
+            let mutable retryCount = Broker.Retries.value
             let mutable resultStatus = IPStatus.Unknown
 
             while retryCount > 0 do
-                let! pingReply = ping.SendPingAsync(ipAddress.value, timeOut.value)
+                let! pingReply = ping.SendPingAsync(ipAddress.value, Broker.PingTimeOut.value)
 
                 if pingReply.Status = IPStatus.Success then
                     resultStatus <- pingReply.Status
@@ -95,10 +125,10 @@ type Broker () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member getNameInfoForIpAsyncTry (timeOut : TimeOut) (ip : IpAddress) =
+    static member getNameInfoForIpAsyncTry (ip : IpAddress) =
 
         match RuntimeInformation.OSArchitecture with
-        | LinuxOs -> getNameForIpLinuxAsync timeOut ip
-        | WindowsOs -> getNameForIpWindowsAsync timeOut ip
+        | LinuxOs -> getNameForIpLinuxAsync ip
+        | WindowsOs -> getNameForIpWindowsAsync ip
         | OtherOs -> backgroundTask { return NameInfo (ip, "") }
     //----------------------------------------------------------------------------------------------------

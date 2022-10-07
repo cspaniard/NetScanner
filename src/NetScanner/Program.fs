@@ -17,9 +17,10 @@ type private BlackListBroker = DI.Brokers.StorageDI.IBlackListBroker
 
 let appInit (options : ArgumentOptions) =
 
-    BlackListBroker.init options
+    DI.Brokers.NetworkDI.IIpBroker.init (PingTimeOut.create options.PingTimeOut)
+                                        (NameLookupTimeOut.create options.NameLookUpTimeOut)
 
-    // TODO: Evaluar si pasar options a otros Brokers y evitar tantos parámetros.
+    DI.Brokers.StorageDI.IBlackListBroker.init (FileName.create options.BlackListFile)
 
 
 let scanAndOutputNetwork (options : ArgumentOptions) =
@@ -32,13 +33,7 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
 
                 let! deviceInfos =
                     IIpService.scanNetworkAsync
-                        { PingTimeOut = TimeOut.create options.PingTimeOut
-                          Retries = Retries.create options.Retries
-                          ShowMacs = options.ShowMacs
-                          ShowNames = options.ShowNames
-                          NameLookUpTimeOut = TimeOut.create options.NameLookUpTimeOut
-                          Network = IpNetwork.create options.Network
-                          BlackListFileName = FileName.create options.BlackListFile }
+                        options.ShowMacs options.ShowNames (IpNetwork.create options.Network)
 
                 scanNetworkStopwatch.Stop()
 
@@ -72,3 +67,4 @@ try
 with
 | :? AggregateException as ae -> IHelpService.showHelp <| ExceptionErrors ae.InnerExceptions |> exit
 | e -> IExceptionService.outputException e ; exit EXIT_CODE_EXCEPTION
+// TODO: ValidationException ?

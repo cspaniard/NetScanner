@@ -1,9 +1,7 @@
 namespace Services.Network.Ip
 
-open System
 open System.Text.RegularExpressions
 open System.Threading.Tasks
-open ArpLookup
 open Motsoft.Util
 
 open Model
@@ -16,19 +14,17 @@ type private IBlackListBroker = DI.Brokers.StorageDI.IBlackListBroker
 type Service () =
 
     //----------------------------------------------------------------------------------------------------
-    static let scanAllIpsAsyncTry pingTimeOut retries (network : IpNetwork) =
+    static let getDeviceInfoStatusInNetworkAsyncTry (network : IpNetwork) =
 
         [|
            for i in 1..254 -> IpAddress.create $"%s{network.value}{i}"
-                              |> IIpBroker.getDeviceInfoStatus pingTimeOut retries
+                              |> IIpBroker.getDeviceInfoForIpAsync
         |]
         |> Task.WhenAll
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let getMacsForActiveIpsAsyncTry (timeOut : TimeOut) (deviceInfoArray : DeviceInfoArray) =
-
-        Arp.LinuxPingTimeout <- TimeSpan.FromMilliseconds(timeOut.value)
+    static let getMacsForActiveIpsAsyncTry (deviceInfoArray : DeviceInfoArray) =
 
         deviceInfoArray.value
         |> Array.map (fun (DeviceInfo (ipAddress, active, _, _)) ->
@@ -40,26 +36,26 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let getNameInfosForActiveIpsAsyncTry (timeOut : TimeOut) (deviceInfoArray : DeviceInfoArray) =
+    static let getNameInfosForActiveIpsAsyncTry (deviceInfoArray : DeviceInfoArray) =
 
         deviceInfoArray.value
         |> Array.map(fun (DeviceInfo (ipAddress, active, _, _)) ->
                          if active then
-                             IIpBroker.getNameInfoForIpAsyncTry timeOut ipAddress
+                             IIpBroker.getNameInfoForIpAsyncTry ipAddress
                          else
                              backgroundTask { return NameInfo (ipAddress, "") })
         |> Task.WhenAll
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let getMacBlacklistTry () =
+    static let getMacBlackListTry () =
 
         IBlackListBroker.getMacBlacklistTry ()
         |> Array.map (Mac.clean >> Mac.create)
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let scanMacInfoAsync pingTimeOut showMacs deviceInfoArray =
+    static let scanMacInfoAsync showMacs deviceInfoArray =
 
         //------------------------------------------------------------------------------------------------
         let filterBlackList (blackList : Mac[]) (deviceInfoArray : DeviceInfoArray) =
@@ -82,11 +78,11 @@ type Service () =
 
         backgroundTask {
 
-            let blackList = getMacBlacklistTry ()
+            let blackList = getMacBlackListTry ()
 
             if showMacs || blackList.Length > 0 then
 
-                let! activeMacInfos = deviceInfoArray |> getMacsForActiveIpsAsyncTry pingTimeOut
+                let! activeMacInfos = deviceInfoArray |> getMacsForActiveIpsAsyncTry
 
                 return activeMacInfos
                        |> MacInfoArray.OfArray
@@ -98,7 +94,7 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static let scanNameInfoAsync nameLookUpTimeOut showNames deviceInfoArray =
+    static let scanNameInfoAsync showNames deviceInfoArray =
 
         let mergeInfos (deviceInfoArray : DeviceInfoArray) (nameInfoArray : NameInfoArray) =
 
@@ -110,7 +106,7 @@ type Service () =
         backgroundTask {
             if showNames then
 
-                let! activeNameInfos = deviceInfoArray |> getNameInfosForActiveIpsAsyncTry nameLookUpTimeOut
+                let! activeNameInfos = deviceInfoArray |> getNameInfosForActiveIpsAsyncTry
 
                 return mergeInfos deviceInfoArray (NameInfoArray.OfArray activeNameInfos)
             else
@@ -119,21 +115,17 @@ type Service () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member scanNetworkAsync (scanParams : ScanNetworkParams) =
+    static member scanNetworkAsync showMacs showNames network =
 
         backgroundTask {
 
-            let! deviceInfos = scanAllIpsAsyncTry scanParams.PingTimeOut
-                                                  scanParams.Retries
-                                                  scanParams.Network
+            let! deviceInfos = getDeviceInfoStatusInNetworkAsyncTry network
 
             let! deviceInfoArray = DeviceInfoArray.OfArray deviceInfos
-                                   |> scanMacInfoAsync scanParams.PingTimeOut
-                                                       scanParams.ShowMacs
+                                   |> scanMacInfoAsync showMacs
 
             let! deviceInfoArray = deviceInfoArray
-                                   |> scanNameInfoAsync scanParams.NameLookUpTimeOut
-                                                        scanParams.ShowNames
+                                   |> scanNameInfoAsync showNames
 
             return deviceInfoArray
         }

@@ -8,16 +8,6 @@ let (|LinuxOs|WindowsOs|OtherOs|) _ =
     else if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then WindowsOs
     else OtherOs
 
-type ScanNetworkParams = {
-    PingTimeOut : TimeOut
-    Retries : Retries
-    ShowMacs : bool
-    ShowNames : bool
-    NameLookUpTimeOut : TimeOut
-    Network : IpNetwork
-    BlackListFileName : FileName
-}
-
 type OutputDeviceInfosParams = {
     ActivesOnly : bool
     Separator : string
