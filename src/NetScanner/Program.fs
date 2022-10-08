@@ -14,16 +14,16 @@ type private IHelpService = DI.Services.HelpDI.IHelpService
 type private IExceptionService = DI.Services.ExceptionsDI.IExceptionService
 type private IMetricService = DI.Services.DebugDI.IMetricService
 
-type private BlackListBroker = DI.Brokers.StorageDI.IBlackListBroker
-
+//----------------------------------------------------------------------------------------------------------------------
 let appInit (options : ArgumentOptions) =
 
     DI.Brokers.NetworkDI.IIpBroker.init (PingTimeOut.create options.PingTimeOut)
                                         (NameLookupTimeOut.create options.NameLookUpTimeOut)
 
-    DI.Brokers.StorageDI.IBlackListBroker.init (FileName.create options.BlackListFile)
+    DI.Brokers.StorageDI.IBlackListBroker.init (FileName.create options.BlackListFileName)
+//----------------------------------------------------------------------------------------------------------------------
 
-
+//----------------------------------------------------------------------------------------------------------------------
 let scanAndOutputNetwork (options : ArgumentOptions) =
 
     let processTask =
@@ -52,7 +52,9 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
         } :> Task
 
     processTask.Wait()
+//----------------------------------------------------------------------------------------------------------------------
 
+//----------------------------------------------------------------------------------------------------------------------
 try
     let argv = Environment.GetCommandLineArgs() |> Array.tail
     let parser = new Parser(fun o -> o.HelpWriter <- null)
@@ -73,3 +75,4 @@ with
 | :? ValidationException as ve -> IHelpService.showHelp <| ValidationError ve |> exit
 | e -> IExceptionService.outputException e
        exit EXIT_CODE_EXCEPTION
+//----------------------------------------------------------------------------------------------------------------------

@@ -29,7 +29,7 @@ type ArgumentOptions = {
     Debug : bool
 
     [<Option ('b', "blacklist", Default = "")>]
-    BlackListFile : string
+    BlackListFileName : string
 
     [<Value (0, MetaName="red", Required = true)>]
     Network : string
