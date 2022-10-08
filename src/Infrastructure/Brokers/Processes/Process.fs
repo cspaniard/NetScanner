@@ -10,43 +10,42 @@ type Broker () =
     //----------------------------------------------------------------------------------------------------
     static member startProcessTry (processName : string) (arguments : string) =
 
-        Process.Start(processName, arguments)
+        Process.Start (processName, arguments)
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
     static member startProcessWithStartInfoTry (startInfo : ProcessStartInfo) =
 
-        Process.Start(startInfo)
+        Process.Start startInfo
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
     static member startProcessWithTimeOutAsync processName (timeOut : TimeOut) arguments =
 
-        let startInfo = ProcessStartInfo(RedirectStandardOutput = true,
-                                         RedirectStandardError = true,
-                                         FileName = processName,
-                                         Arguments = arguments,
-                                         WindowStyle = ProcessWindowStyle.Hidden,
-                                         UseShellExecute = false,
-                                         CreateNoWindow = true)
+        let startInfo = ProcessStartInfo (RedirectStandardOutput = true,
+                                          RedirectStandardError = true,
+                                          FileName = processName,
+                                          Arguments = arguments,
+                                          WindowStyle = ProcessWindowStyle.Hidden,
+                                          UseShellExecute = false,
+                                          CreateNoWindow = true)
 
         backgroundTask {
 
             let proc = Broker.startProcessWithStartInfoTry startInfo
 
-            let processTask = task { do! proc.WaitForExitAsync() } :> Task
-            let timeOutTask = task { do! Task.Delay(timeOut.value)
+            let processTask = task { do! proc.WaitForExitAsync () } :> Task
+            let timeOutTask = task { do! Task.Delay timeOut.value
                                      return Unchecked.defaultof<Process> }
 
             let! winnerTask = Task.WhenAny [ processTask ; timeOutTask ]
 
             if winnerTask = timeOutTask then
-                proc.Kill()
+                proc.Kill ()
                 return None
             else
                 return Some proc
         }
-
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
@@ -54,7 +53,7 @@ type Broker () =
 
         task {
             let proc = Broker.startProcessTry processName arguments
-            do! proc.WaitForExitAsync()
+            do! proc.WaitForExitAsync ()
 
             return proc
         }
@@ -65,39 +64,39 @@ type Broker () =
 
         backgroundTask {
             let proc =
-                ProcessStartInfo(RedirectStandardOutput = true,
-                                 RedirectStandardError = true,
-                                 FileName = processName,
-                                 WindowStyle = ProcessWindowStyle.Hidden,
-                                 CreateNoWindow = true,
-                                 UseShellExecute = false,
-                                 Arguments = arguments)
+                ProcessStartInfo (RedirectStandardOutput = true,
+                                  RedirectStandardError = true,
+                                  FileName = processName,
+                                  WindowStyle = ProcessWindowStyle.Hidden,
+                                  CreateNoWindow = true,
+                                  UseShellExecute = false,
+                                  Arguments = arguments)
                 |> Process.Start
 
             let stdOutLines = ResizeArray<string>()
             let mutable tmpLine = ""
 
             // Lectura del StdOut
-            let! line = proc.StandardOutput.ReadLineAsync()
+            let! line = proc.StandardOutput.ReadLineAsync ()
             tmpLine <- line
 
             while tmpLine <> null do
                 stdOutLines.Add tmpLine
-                let! line = proc.StandardOutput.ReadLineAsync()
+                let! line = proc.StandardOutput.ReadLineAsync ()
                 tmpLine <- line
 
             // Lectura del StdErr
             let stdErrLines = ResizeArray<string>()
-            let! line = proc.StandardError.ReadLineAsync()
+            let! line = proc.StandardError.ReadLineAsync ()
             tmpLine <- line
 
             while tmpLine <> null do
                 stdErrLines.Add tmpLine
-                let! line = proc.StandardError.ReadLineAsync()
+                let! line = proc.StandardError.ReadLineAsync ()
                 tmpLine <- line
 
-            do! proc.WaitForExitAsync()
+            do! proc.WaitForExitAsync ()
 
-            return (stdOutLines.ToArray(), stdErrLines.ToArray(), proc.ExitCode)
+            return (stdOutLines.ToArray (), stdErrLines.ToArray (), proc.ExitCode)
         }
     //----------------------------------------------------------------------------------------------------

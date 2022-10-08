@@ -11,7 +11,7 @@ let checkEvenLength (macString : string) =
 let checkValidChars (macString : string) =
     let validChars = Array.append [| '0'..'9' |] [| 'A'..'F' |]
 
-    macString.ToCharArray()
+    macString.ToCharArray ()
     |> Array.iter (fun c -> validChars |> Array.contains c |> failWithIfFalse "Caracteres inválidos.")
 
 

@@ -39,11 +39,11 @@ type Service () =
     static let getNameInfosForActiveIpsAsyncTry (deviceInfoArray : DeviceInfoArray) =
 
         deviceInfoArray.value
-        |> Array.map(fun (DeviceInfo (ipAddress, active, _, _)) ->
-                         if active then
-                             IIpBroker.getNameInfoForIpAsyncTry ipAddress
-                         else
-                             backgroundTask { return NameInfo (ipAddress, "") })
+        |> Array.map (fun (DeviceInfo (ipAddress, active, _, _)) ->
+                          if active then
+                              IIpBroker.getNameInfoForIpAsyncTry ipAddress
+                          else
+                              backgroundTask { return NameInfo (ipAddress, "") })
         |> Task.WhenAll
     //------------------------------------------------------------------------------------------------------------------
 
@@ -139,7 +139,7 @@ type Service () =
             then Array.filter (fun (DeviceInfo (_, active,_ , _)) -> active)
             else id
 
-        let separator = Regex.Unescape(outputParams.Separator)
+        let separator = Regex.Unescape outputParams.Separator
 
         let buildInfoLinesFun =
             Array.map (fun (DeviceInfo (ipAddress, status, mac, deviceName)) ->

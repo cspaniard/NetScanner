@@ -15,7 +15,7 @@ type Retries =
             with e -> failwith $"retries: {e.Message}"
 
         member this.value = let (Retries value) = this in value
-        override this.ToString() = this.value.ToString()
+        override this.ToString () = this.value.ToString ()
 
         static member create value =
             value

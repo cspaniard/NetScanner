@@ -11,7 +11,7 @@ type PingTimeOut =
                 value
                 |> TimeOut.create
                 |> PingTimeOut
-            with e -> raise (ValidationException($"ping-timeout: {e.Message}"))
+            with e -> raise <| ValidationException $"ping-timeout: {e.Message}"
 
         static member createDefault () = PingTimeOut.create DEF_PING_TIMEOUT
 
@@ -20,4 +20,4 @@ type PingTimeOut =
         member this.value = let timeOut = this.timeOut
                             let (TimeOut value) = timeOut in value
 
-        override this.ToString() = this.value.ToString()
+        override this.ToString () = this.value.ToString ()

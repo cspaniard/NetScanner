@@ -23,7 +23,7 @@ type IpAddress =
 
         member this.value = let (IpAddress value) = this in value
 
-        override this.ToString() = this.value
+        override this.ToString () = this.value
 
         static member create (value : string) =
             value

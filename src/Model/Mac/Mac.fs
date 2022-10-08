@@ -10,9 +10,9 @@ type Mac =
         static member clean (value : string) =
             let validChars = Array.append [| '0'..'9' |] [| 'A'..'F' |]
 
-            value.ToCharArray()
+            value.ToCharArray ()
             |> Array.fold (fun st c -> if validChars |> Array.contains c
-                                       then st + c.ToString()
+                                       then st + c.ToString ()
                                        else st) ""
 
         static member private canonicalize (value : string) =
@@ -34,18 +34,18 @@ type Mac =
 
         member this.value = let (Mac value) = this in value
 
-        override this.ToString() = this.value
+        override this.ToString () = this.value
 
         member this.formatted
-            with get() =
+            with get () =
 
                 let macString = this.value
 
                 if macString |> String.IsNullOrWhiteSpace
                 then ""
                 else
-                    macString.ToCharArray()
-                    |> Array.splitInto(macString.Length / 2)
+                    macString.ToCharArray ()
+                    |> Array.splitInto (macString.Length / 2)
                     |> Array.map String
                     |> join "-"
 

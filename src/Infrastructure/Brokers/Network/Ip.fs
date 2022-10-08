@@ -30,7 +30,7 @@ type Broker () =
                 if proc.ExitCode <> 0 then
                     return NameInfo (ipAddress, "")
                 else
-                    let! result = proc.StandardOutput.ReadToEndAsync()
+                    let! result = proc.StandardOutput.ReadToEndAsync ()
                     let hostFullName = (result |> split "=")[1] |> trim
                     let hostName = (hostFullName |> split ".")[0]
                     return NameInfo (ipAddress, hostName)
@@ -61,7 +61,7 @@ type Broker () =
 
             match! IIProcessBroker.startProcessWithTimeOutAsync "ping" Broker.NameLookupTimeOut.timeOut args with
             | Some proc ->
-                let! result = proc.StandardOutput.ReadToEndAsync()
+                let! result = proc.StandardOutput.ReadToEndAsync ()
                 let hostName = result |> split "[" |> Array.item 0 |> split " " |> Array.last
                 return NameInfo (ipAddress, hostName)
             | None ->
@@ -75,18 +75,18 @@ type Broker () =
         _pingTimeOut <- pingTimeOut
         _nameLookupTimeOut <- nameLookupTimeOut
 
-        Arp.LinuxPingTimeout <- TimeSpan.FromMilliseconds(Broker.PingTimeOut.value)
+        Arp.LinuxPingTimeout <- TimeSpan.FromMilliseconds Broker.PingTimeOut.value
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
     static member PingTimeOut
-        with get() : PingTimeOut = _pingTimeOut
+        with get () : PingTimeOut = _pingTimeOut
 
     static member Retries
-        with get() : Retries = retries
+        with get () : Retries = retries
 
     static member NameLookupTimeOut
-        with get() : NameLookupTimeOut = _nameLookupTimeOut
+        with get () : NameLookupTimeOut = _nameLookupTimeOut
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
@@ -94,12 +94,12 @@ type Broker () =
 
         backgroundTask {
 
-            let ping = new Ping()
+            let ping = new Ping ()
             let mutable retryCount = Broker.Retries.value
             let mutable resultStatus = IPStatus.Unknown
 
             while retryCount > 0 do
-                let! pingReply = ping.SendPingAsync(ipAddress.value, Broker.PingTimeOut.value)
+                let! pingReply = ping.SendPingAsync (ipAddress.value, Broker.PingTimeOut.value)
 
                 if pingReply.Status = IPStatus.Success then
                     resultStatus <- pingReply.Status
@@ -115,12 +115,13 @@ type Broker () =
     static member getMacForIpAsync (ipAddress: IpAddress) =
 
         backgroundTask {
-            let! physicalAddress = Arp.LookupAsync(IPAddress.Parse(ipAddress.value))
+            let! physicalAddress = IPAddress.Parse ipAddress.value
+                                   |> Arp.LookupAsync
 
             if physicalAddress <> null &&
-                physicalAddress.GetAddressBytes() <> Array.zeroCreate (physicalAddress.GetAddressBytes()).Length
+                physicalAddress.GetAddressBytes () <> Array.zeroCreate (physicalAddress.GetAddressBytes ()).Length
             then
-                return MacInfo (ipAddress, Mac.create (physicalAddress.ToString()))
+                return MacInfo (ipAddress, Mac.create (physicalAddress.ToString ()))
             else
                 return MacInfo (ipAddress, Mac.create "")
         }

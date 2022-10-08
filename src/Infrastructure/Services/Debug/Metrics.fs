@@ -9,6 +9,6 @@ type Service () =
 
     static member outputScanNetworkTimeTry (stopwatch : Stopwatch) =
 
-        if stopwatch = null then raise (ArgumentNullException(nameof stopwatch))
+        if stopwatch = null then raise (ArgumentNullException <| nameof stopwatch)
 
         IMetricsBroker.outputMeasurementTry "Escaneado" stopwatch.ElapsedMilliseconds

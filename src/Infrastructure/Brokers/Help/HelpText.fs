@@ -11,12 +11,12 @@ type Broker () =
     //------------------------------------------------------------------------------------------------------------------
     static member printHeader () =
 
-        if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
-            Console.WriteLine()
+        if RuntimeInformation.IsOSPlatform OSPlatform.Windows then
+            Console.WriteLine ()
 
         let version = Assembly.GetEntryAssembly().GetName().Version
 
-        Console.WriteLine($"netscanner - {version.Major}.{version.Minor}.{version.Build}")
+        Console.WriteLine $"netscanner - {version.Major}.{version.Minor}.{version.Build}"
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
@@ -29,11 +29,11 @@ type Broker () =
     static member printErrorSection errorList =
 
         if errorList |> (not << Seq.isEmpty) then
-            let leftMargin = String(' ', LEFT_MARGIN)
+            let leftMargin = String (' ', LEFT_MARGIN)
 
             Console.WriteLine "\nERRORES:"
 
-            if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then Console.WriteLine ""
+            if RuntimeInformation.IsOSPlatform OSPlatform.Windows then Console.WriteLine ""
 
             errorList
             |> Seq.filter (not << String.IsNullOrWhiteSpace)
@@ -44,7 +44,7 @@ type Broker () =
     static member printArgsInfo argLineInfoList =
 
         let maxWidth = argLineInfoList |> Array.map (fun (ArgLineInfo (n, _)) -> n.Length) |> Array.max
-        let leftMargin = String(' ', LEFT_MARGIN)
+        let leftMargin = String (' ', LEFT_MARGIN)
 
         Console.WriteLine ()
 

@@ -30,13 +30,13 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
         task {
 
             try
-                let scanNetworkStopwatch = Stopwatch.StartNew()
+                let scanNetworkStopwatch = Stopwatch.StartNew ()
 
                 let! deviceInfos =
                     IIpService.scanNetworkAsync
                         options.ShowMacs options.ShowNames (IpNetwork.create options.Network)
 
-                scanNetworkStopwatch.Stop()
+                scanNetworkStopwatch.Stop ()
 
                 if options.Debug then
                     IMetricService.outputScanNetworkTimeTry scanNetworkStopwatch
@@ -51,13 +51,13 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
             with e -> IExceptionService.outputException e
         } :> Task
 
-    processTask.Wait()
+    processTask.Wait ()
 //----------------------------------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------------------------------
 try
-    let argv = Environment.GetCommandLineArgs() |> Array.tail
-    let parser = new Parser(fun o -> o.HelpWriter <- null)
+    let argv = Environment.GetCommandLineArgs () |> Array.tail
+    let parser = new Parser (fun o -> o.HelpWriter <- null)
 
     match parser.ParseArguments<ArgumentOptions> argv with
     | :? Parsed as opts ->
@@ -69,7 +69,7 @@ try
              |> IHelpService.showHelp
              |> exit
     | _ ->
-             Exception("No debiéramos llegar aquí.") |> IExceptionService.outputException
+             Exception "No debiéramos llegar aquí." |> IExceptionService.outputException
 with
 | :? AggregateException as ae -> IHelpService.showHelp <| ExceptionErrors ae.InnerExceptions |> exit
 | :? ValidationException as ve -> IHelpService.showHelp <| ValidationError ve |> exit

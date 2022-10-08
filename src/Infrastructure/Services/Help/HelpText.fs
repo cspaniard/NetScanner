@@ -13,7 +13,7 @@ type Service () =
     //------------------------------------------------------------------------------------------------------------------
     static let getArgLinesInfo () =
 
-        let leftSpaces = String(' ', 5)
+        let leftSpaces = String (' ', 5)
 
         [|
             ArgLineInfo ("-w,  --ping-timeout", $"Tiempo de espera en ms para cada ping. (def: {DEF_PING_TIMEOUT})")

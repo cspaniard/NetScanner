@@ -12,7 +12,7 @@ type TimeOut =
             value
 
         member this.value = let (TimeOut value) = this in value
-        override this.ToString() = this.value.ToString()
+        override this.ToString () = this.value.ToString ()
 
         static member create value =
             value

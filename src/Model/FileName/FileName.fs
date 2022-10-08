@@ -17,12 +17,12 @@ type FileName =
                 |> Array.iter (fun f -> f value)
 
                 value
-            with e -> raise (AggregateException(e))
+            with e -> raise <| AggregateException e
 
         member this.value = let (FileName value) = this in value
         member this.hasValue = let (FileName value) = this in value |> (not << String.IsNullOrWhiteSpace)
 
-        override this.ToString() = this.value
+        override this.ToString () = this.value
 
         static member create (value : string) =
             value
