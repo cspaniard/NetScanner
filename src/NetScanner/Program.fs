@@ -33,8 +33,7 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
                 let scanNetworkStopwatch = Stopwatch.StartNew ()
 
                 let! deviceInfos =
-                    IIpService.scanNetworkAsync
-                        options.ShowMacs options.ShowNames (IpNetwork.create options.Network)
+                    IIpService.scanNetworkAsync options.ShowMacs options.ShowNames (IpNetwork.create options.Network)
 
                 scanNetworkStopwatch.Stop ()
 
@@ -56,10 +55,10 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
 
 //----------------------------------------------------------------------------------------------------------------------
 try
-    let argv = Environment.GetCommandLineArgs () |> Array.tail
-    let parser = new Parser (fun o -> o.HelpWriter <- null)
+    let args = Environment.GetCommandLineArgs () |> Array.tail
+    use parser = new Parser (fun o -> o.HelpWriter <- null)
 
-    match parser.ParseArguments<ArgumentOptions> argv with
+    match parser.ParseArguments<ArgumentOptions> args with
     | :? Parsed as opts ->
              appInit opts.Value
              scanAndOutputNetwork opts.Value
