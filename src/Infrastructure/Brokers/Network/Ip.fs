@@ -107,7 +107,10 @@ type Broker () =
                 else
                     retryCount <- retryCount - 1
 
-            return DeviceInfo (ipAddress, (resultStatus = IPStatus.Success), Mac.create "", "")
+            return ({ IpAddress = ipAddress
+                      Active = (resultStatus = IPStatus.Success)
+                      Mac = Mac.create ""
+                      Name = ""} : DeviceInfo)
         }
     //------------------------------------------------------------------------------------------------------------------
 

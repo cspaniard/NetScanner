@@ -36,11 +36,9 @@ type Service () =
         let getMacsForActiveIpsAsyncTry () =
 
             deviceInfoArray.value
-            |> Array.map (fun (DeviceInfo (ipAddress, active, _, _)) ->
-                              if active then
-                                  IIpBroker.getMacForIpAsync ipAddress
-                              else
-                                  backgroundTask { return MacInfo (ipAddress, Mac.create "") })
+            |> Array.map (fun di -> if di.Active
+                                    then IIpBroker.getMacForIpAsync di.IpAddress
+                                    else backgroundTask { return MacInfo (di.IpAddress, Mac.create "") })
             |> Task.WhenAll
 
         backgroundTask {
@@ -55,11 +53,9 @@ type Service () =
     static let getNameInfosForActiveIpsAsyncTry (deviceInfoArray : DeviceInfoArray) =
 
         deviceInfoArray.value
-        |> Array.map (fun (DeviceInfo (ipAddress, active, _, _)) ->
-                          if active then
-                              IIpBroker.getNameInfoForIpAsyncTry ipAddress
-                          else
-                              backgroundTask { return NameInfo (ipAddress, "") })
+        |> Array.map (fun di -> if di.Active
+                                then IIpBroker.getNameInfoForIpAsyncTry di.IpAddress
+                                else backgroundTask { return NameInfo (di.IpAddress, "") })
         |> Task.WhenAll
     //------------------------------------------------------------------------------------------------------------------
 
@@ -80,7 +76,7 @@ type Service () =
                 deviceInfoArray
             else
                 deviceInfoArray.value
-                |> Array.filter (fun (DeviceInfo (_, _, mac, _)) -> blackList |> (not << Array.contains mac))
+                |> Array.filter (fun di -> blackList |> (not << Array.contains di.Mac))
                 |> DeviceInfoArray.OfArray
         //--------------------------------------------------------------------------------------------------------------
 
@@ -88,8 +84,7 @@ type Service () =
         let mergeInfos (deviceInfoArray : DeviceInfoArray) (macInfoArray : MacInfoArray) =
 
            (deviceInfoArray.value, macInfoArray.value)
-           ||> Array.map2 (fun (DeviceInfo (ipAddress, active, _, name)) (MacInfo (_, mac)) ->
-                               DeviceInfo (ipAddress, active, mac, name))
+           ||> Array.map2 (fun di (MacInfo (_, mac)) -> { di with Mac = mac })
            |> DeviceInfoArray.OfArray
         //--------------------------------------------------------------------------------------------------------------
 
@@ -116,8 +111,7 @@ type Service () =
         let mergeInfos (deviceInfoArray : DeviceInfoArray) (nameInfoArray : NameInfoArray) =
 
            (deviceInfoArray.value, nameInfoArray.value)
-           ||> Array.map2 (fun (DeviceInfo (ipAddress, active, mac, _)) (NameInfo (_, name)) ->
-                               DeviceInfo (ipAddress, active, mac, name))
+           ||> Array.map2 (fun di (NameInfo (_, name)) -> { di with Name = name })
            |> DeviceInfoArray.OfArray
         //--------------------------------------------------------------------------------------------------------------
 
@@ -154,16 +148,15 @@ type Service () =
 
         let filterFun =
             if outputParams.ActivesOnly
-            then Array.filter (fun (DeviceInfo (_, active,_ , _)) -> active)
+            then Array.filter (fun di -> di.Active)
             else id
 
         let separator = Regex.Unescape outputParams.Separator
 
         let buildInfoLinesFun =
-            Array.map (fun (DeviceInfo (ipAddress, status, mac, deviceName)) ->
-                           $"%s{ipAddress.value}%s{separator}%b{status}" +
-                           (if outputParams.ShowMacs then $"%s{separator}%s{mac.formatted}" else "") +
-                           (if outputParams.ShowNames then $"%s{separator}%s{deviceName}" else ""))
+            Array.map (fun di -> $"%s{di.IpAddress.value}%s{separator}%b{di.Active}" +
+                                 (if outputParams.ShowMacs then $"%s{separator}%s{di.Mac.formatted}" else "") +
+                                 (if outputParams.ShowNames then $"%s{separator}%s{di.Name}" else ""))
 
         outputParams.DeviceInfos.value
         |> filterFun
