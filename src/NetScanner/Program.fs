@@ -6,7 +6,6 @@ open CommandLine
 
 open Microsoft.FSharp.Core
 open Model
-open Model.Definitions
 open Model.Constants
 
 type private IIpService = DI.Services.NetworkDI.IIpService

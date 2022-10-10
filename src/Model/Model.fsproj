@@ -27,7 +27,7 @@
       <Compile Include="DeviceInfoArray\DeviceInfoArray.fs" />
       <Compile Include="NameInfoArray\NameInfoArray.fs" />
       <Compile Include="MacInfoArray\MacInfoArray.fs" />
-      <Compile Include="Definitions.fs" />
+      <Compile Include="Types.OfArray.fs" />
     </ItemGroup>
 
     <ItemGroup>

@@ -5,7 +5,6 @@ open System.Threading.Tasks
 open Motsoft.Util
 
 open Model
-open Model.Definitions
 
 type private IIpBroker = DI.Brokers.NetworkDI.IIpBroker
 type private INetworkBroker = DI.Brokers.NetworkDI.INetworkBroker

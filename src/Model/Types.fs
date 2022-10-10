@@ -2,6 +2,7 @@ namespace Model
 
 open System
 open System.ComponentModel.DataAnnotations
+open System.Runtime.InteropServices
 open CommandLine
 
 type NameInfo = NameInfo of IpAddress * name : string
@@ -26,3 +27,9 @@ type AppErrors =
     | ArgErrors of ArgErrors
     | ExceptionErrors of ExceptionErrors
     | ValidationError of ValidationException
+
+module Definitions =
+    let (|LinuxOs|WindowsOs|OtherOs|) _ =
+        if RuntimeInformation.IsOSPlatform OSPlatform.Linux then LinuxOs
+        else if RuntimeInformation.IsOSPlatform OSPlatform.Windows then WindowsOs
+        else OtherOs
