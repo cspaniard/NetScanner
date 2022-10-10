@@ -74,7 +74,7 @@ type Service () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static let scanMacInfoAsync blackList deviceInfoArray =
+    static let scanMacInfoAsyncTry blackList deviceInfoArray =
 
         //--------------------------------------------------------------------------------------------------------------
         let filterBlackList (blackList : Mac[]) (deviceInfoArray : DeviceInfoArray) =
@@ -106,7 +106,7 @@ type Service () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static let scanNameInfoAsync deviceInfoArray =
+    static let scanNameInfoAsyncTry deviceInfoArray =
 
         //--------------------------------------------------------------------------------------------------------------
         let mergeInfos (deviceInfoArray : DeviceInfoArray) (nameInfoArray : NameInfoArray) =
@@ -135,11 +135,11 @@ type Service () =
             let blackList = getMacBlackListTry()
 
             let! deviceInfoArray = if showMacs || blackList.Length > 0
-                                   then scanMacInfoAsync blackList deviceInfoArray
+                                   then scanMacInfoAsyncTry blackList deviceInfoArray
                                    else deviceInfoArray |> Task.FromResult
 
             let! deviceInfoArray = if showNames
-                                   then scanNameInfoAsync deviceInfoArray
+                                   then scanNameInfoAsyncTry deviceInfoArray
                                    else deviceInfoArray |> Task.FromResult
 
             return deviceInfoArray
