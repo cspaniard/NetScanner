@@ -30,14 +30,14 @@ type Service () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static let getMacsForActiveIpsAsyncTry (deviceInfoArray : DeviceInfoArray) =
+    static let getMacInfosForActiveIpsAsyncTry (deviceInfoArray : DeviceInfoArray) =
 
         let getMacsForActiveIpsAsyncTry () =
 
             deviceInfoArray.value
             |> Array.map (fun di -> if di.Active
                                     then IIpBroker.getMacForIpAsync di.IpAddress
-                                    else backgroundTask { return MacInfo (di.IpAddress, Mac.create "") })
+                                    else MacInfo (di.IpAddress, Mac.create "") |> Task.FromResult)
             |> Task.WhenAll
 
         backgroundTask {
@@ -51,11 +51,19 @@ type Service () =
     //------------------------------------------------------------------------------------------------------------------
     static let getNameInfosForActiveIpsAsyncTry (deviceInfoArray : DeviceInfoArray) =
 
-        deviceInfoArray.value
-        |> Array.map (fun di -> if di.Active
-                                then IIpBroker.getNameInfoForIpAsyncTry di.IpAddress
-                                else backgroundTask { return NameInfo (di.IpAddress, "") })
-        |> Task.WhenAll
+        let getNameInfosForActiveIpsAsyncTry () =
+
+            deviceInfoArray.value
+            |> Array.map (fun di -> if di.Active
+                                    then IIpBroker.getNameInfoForIpAsyncTry di.IpAddress
+                                    else NameInfo (di.IpAddress, "") |> Task.FromResult)
+            |> Task.WhenAll
+
+        backgroundTask {
+            let! namesForActiveIps = getNameInfosForActiveIpsAsyncTry ()
+
+            return (NameInfoArray.OfArray namesForActiveIps)
+        }
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
@@ -66,7 +74,7 @@ type Service () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static let scanMacInfoAsync showMacs deviceInfoArray =
+    static let scanMacInfoAsync blackList deviceInfoArray =
 
         //--------------------------------------------------------------------------------------------------------------
         let filterBlackList (blackList : Mac[]) (deviceInfoArray : DeviceInfoArray) =
@@ -89,22 +97,16 @@ type Service () =
 
         backgroundTask {
 
-            let blackList = getMacBlackListTry ()
+            let! activeMacInfos = deviceInfoArray |> getMacInfosForActiveIpsAsyncTry
 
-            if showMacs || blackList.Length > 0 then
-
-                let! activeMacInfos = deviceInfoArray |> getMacsForActiveIpsAsyncTry
-
-                return activeMacInfos
-                       |> mergeInfos deviceInfoArray
-                       |> filterBlackList blackList
-            else
-                return deviceInfoArray
+            return activeMacInfos
+                   |> mergeInfos deviceInfoArray
+                   |> filterBlackList blackList
         }
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static let scanNameInfoAsync showNames deviceInfoArray =
+    static let scanNameInfoAsync deviceInfoArray =
 
         //--------------------------------------------------------------------------------------------------------------
         let mergeInfos (deviceInfoArray : DeviceInfoArray) (nameInfoArray : NameInfoArray) =
@@ -116,12 +118,10 @@ type Service () =
 
         backgroundTask {
 
-            if showNames then
-                let! activeNameInfos = deviceInfoArray |> getNameInfosForActiveIpsAsyncTry
+            let! activeNameInfos = deviceInfoArray |> getNameInfosForActiveIpsAsyncTry
 
-                return mergeInfos deviceInfoArray (NameInfoArray.OfArray activeNameInfos)
-            else
-                return deviceInfoArray
+            return activeNameInfos
+                   |> mergeInfos deviceInfoArray
         }
     //------------------------------------------------------------------------------------------------------------------
 
@@ -132,11 +132,15 @@ type Service () =
 
             let! deviceInfoArray = scanStatusAsyncTry network
 
-            let! deviceInfoArray = deviceInfoArray
-                                   |> scanMacInfoAsync showMacs
+            let blackList = getMacBlackListTry()
 
-            let! deviceInfoArray = deviceInfoArray
-                                   |> scanNameInfoAsync showNames
+            let! deviceInfoArray = if showMacs || blackList.Length > 0
+                                   then scanMacInfoAsync blackList deviceInfoArray
+                                   else deviceInfoArray |> Task.FromResult
+
+            let! deviceInfoArray = if showNames
+                                   then scanNameInfoAsync deviceInfoArray
+                                   else deviceInfoArray |> Task.FromResult
 
             return deviceInfoArray
         }
