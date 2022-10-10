@@ -90,7 +90,7 @@ type Broker () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static member getDeviceInfoForIpAsync (ipAddress: IpAddress) =
+    static member getDeviceInfoStatusForIpAsync (ipAddress: IpAddress) =
 
         backgroundTask {
 

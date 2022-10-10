@@ -18,7 +18,7 @@ type Service () =
         let scanStatusesAsyncTry () =
             [|
                for i in 1..254 -> IpAddress.create $"%s{network.value}{i}"
-                                  |> IIpBroker.getDeviceInfoForIpAsync
+                                  |> IIpBroker.getDeviceInfoStatusForIpAsync
             |]
             |> Task.WhenAll
 
@@ -126,7 +126,7 @@ type Service () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static member scanNetworkAsync showMacs showNames network =
+    static member scanNetworkAsync scanMacs scanNames network =
 
         backgroundTask {
 
@@ -134,11 +134,11 @@ type Service () =
 
             let blackList = getMacBlackListTry()
 
-            let! deviceInfoArray = if showMacs || blackList.Length > 0
+            let! deviceInfoArray = if scanMacs || blackList.Length > 0
                                    then scanMacInfoAsyncTry blackList deviceInfoArray
                                    else deviceInfoArray |> Task.FromResult
 
-            let! deviceInfoArray = if showNames
+            let! deviceInfoArray = if scanNames
                                    then scanNameInfoAsyncTry deviceInfoArray
                                    else deviceInfoArray |> Task.FromResult
 
