@@ -28,6 +28,14 @@ type AppErrors =
     | ExceptionErrors of ExceptionErrors
     | ValidationError of ValidationException
 
+type OutputDeviceInfosParams = {
+    DeviceInfos : DeviceInfo[]
+    ActivesOnly : bool
+    Separator : string
+    ShowMacs : bool
+    ShowNames : bool
+}
+
 module Definitions =
     let (|LinuxOs|WindowsOs|OtherOs|) _ =
         if RuntimeInformation.IsOSPlatform OSPlatform.Linux then LinuxOs

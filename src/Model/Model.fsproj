@@ -24,10 +24,6 @@
       <Compile Include="FileName\FileNameValidation.fs" />
       <Compile Include="FileName\FileName.fs" />
       <Compile Include="Types.fs" />
-      <Compile Include="DeviceInfoArray\DeviceInfoArray.fs" />
-      <Compile Include="NameInfoArray\NameInfoArray.fs" />
-      <Compile Include="MacInfoArray\MacInfoArray.fs" />
-      <Compile Include="Types.OfArray.fs" />
     </ItemGroup>
 
     <ItemGroup>
