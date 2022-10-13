@@ -71,7 +71,7 @@ type Service () =
 
         backgroundTask {
 
-            let! activeMacInfos = deviceInfos |> getMacInfosForActiveIpsAsyncTry
+            let! activeMacInfos = getMacInfosForActiveIpsAsyncTry deviceInfos
 
             return activeMacInfos
                    |> mergeInfos deviceInfos
@@ -91,7 +91,7 @@ type Service () =
 
         backgroundTask {
 
-            let! activeNameInfos = deviceInfos |> getNameInfosForActiveIpsAsyncTry
+            let! activeNameInfos = getNameInfosForActiveIpsAsyncTry deviceInfos
 
             return activeNameInfos
                    |> mergeInfos deviceInfos

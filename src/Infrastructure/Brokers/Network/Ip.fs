@@ -5,6 +5,7 @@ open System.Diagnostics
 open System.Net
 open System.Net.NetworkInformation
 open System.Runtime.InteropServices
+open System.Threading.Tasks
 open ArpLookup
 open Motsoft.Util
 
@@ -16,7 +17,7 @@ type private IIProcessBroker = DI.Brokers.ProcessesDI.IProcessBroker
 type Broker () =
 
     static let mutable _pingTimeOut = PingTimeOut.createDefault ()
-    static let mutable retries = Retries.createDefault ()
+    static let mutable _retries = Retries.createDefault ()
     static let mutable _nameLookupTimeOut = NameLookupTimeOut.createDefault ()
 
     //------------------------------------------------------------------------------------------------------------------
@@ -39,12 +40,10 @@ type Broker () =
 
         backgroundTask {
 
-            let args = $"{ipAddress}"
-
             let newProcessTask =
                 IIProcessBroker.startProcessWithTimeOutAsync "nslookup"
                                                              Broker.NameLookupTimeOut.timeOut
-                                                             args
+                                                             ipAddress.value
 
             match! newProcessTask with
             | Some proc -> return! processProcInfo proc
@@ -70,23 +69,19 @@ type Broker () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static member init pingTimeOut nameLookupTimeOut =
+    static member init pingTimeOut retries nameLookupTimeOut =
 
         _pingTimeOut <- pingTimeOut
+        _retries <- retries
         _nameLookupTimeOut <- nameLookupTimeOut
 
         Arp.LinuxPingTimeout <- TimeSpan.FromMilliseconds Broker.PingTimeOut.value
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static member PingTimeOut
-        with get () : PingTimeOut = _pingTimeOut
-
-    static member Retries
-        with get () : Retries = retries
-
-    static member NameLookupTimeOut
-        with get () : NameLookupTimeOut = _nameLookupTimeOut
+    static member PingTimeOut with get () : PingTimeOut = _pingTimeOut
+    static member Retries with get () : Retries = _retries
+    static member NameLookupTimeOut with get () : NameLookupTimeOut = _nameLookupTimeOut
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
@@ -115,7 +110,7 @@ type Broker () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static member getMacForIpAsync (ipAddress: IpAddress) =
+    static member getMacForIpAsync (ipAddress : IpAddress) =
 
         backgroundTask {
             let! physicalAddress = IPAddress.Parse ipAddress.value
@@ -133,8 +128,8 @@ type Broker () =
     //------------------------------------------------------------------------------------------------------------------
     static member getNameInfoForIpAsyncTry (ip : IpAddress) =
 
-        match RuntimeInformation.OSArchitecture with
+        match RuntimeInformation.OSDescription with
         | LinuxOs -> getNameForIpLinuxAsync ip
         | WindowsOs -> getNameForIpWindowsAsync ip
-        | OtherOs -> backgroundTask { return NameInfo (ip, "") }
+        | OtherOs ->  NameInfo (ip, "") |> Task.FromResult
     //------------------------------------------------------------------------------------------------------------------

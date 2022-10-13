@@ -17,6 +17,7 @@ type private IMetricService = DI.Services.DebugDI.IMetricService
 let appInit (options : ArgumentOptions) =
 
     DI.Brokers.NetworkDI.IIpBroker.init (PingTimeOut.create options.PingTimeOut)
+                                        (Retries.create options.Retries)
                                         (NameLookupTimeOut.create options.NameLookUpTimeOut)
 
     DI.Brokers.StorageDI.IBlackListBroker.init (FileName.create options.BlackListFileName)
