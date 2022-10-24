@@ -3,5 +3,4 @@ namespace Brokers.Network.Ip
 module private Exceptions =
     ()
 
-    // [<Literal>]
-    // let DUMMY_NAME = ""
+    let [<Literal>] OS_UNSUPPORTED = "Sistema Operativo no soportado."

@@ -5,67 +5,34 @@ open System.Diagnostics
 open System.Net
 open System.Net.NetworkInformation
 open System.Runtime.InteropServices
-open System.Threading.Tasks
 open ArpLookup
 open Motsoft.Util
 
 open Model
 open Model.Definitions
 
+open Brokers.Network.Ip.Exceptions
+
 type private IIProcessBroker = DI.Brokers.ProcessesDI.IProcessBroker
 
 type Broker () =
 
+    //------------------------------------------------------------------------------------------------------------------
     static let mutable _pingTimeOut = PingTimeOut.createDefault ()
     static let mutable _retries = Retries.createDefault ()
     static let mutable _nameLookupTimeOut = NameLookupTimeOut.createDefault ()
 
-    //------------------------------------------------------------------------------------------------------------------
-    static let getNameForIpLinuxAsync (ipAddress : IpAddress) =
-
-        //--------------------------------------------------------------------------------------------------------------
-        let processProcInfo (proc : Process) =
-
-            backgroundTask {
-
-                if proc.ExitCode <> 0 then
-                    return NameInfo (ipAddress, "")
-                else
-                    let! result = proc.StandardOutput.ReadToEndAsync ()
-                    let hostFullName = (result |> split "=")[1] |> trim
-                    let hostName = (hostFullName |> split ".")[0]
-                    return NameInfo (ipAddress, hostName)
-            }
-        //--------------------------------------------------------------------------------------------------------------
-
-        backgroundTask {
-
-            let newProcessTask =
-                IIProcessBroker.startProcessWithTimeOutAsync "nslookup"
-                                                             Broker.NameLookupTimeOut.timeOut
-                                                             ipAddress.value
-
-            match! newProcessTask with
-            | Some proc -> return! processProcInfo proc
-            | None -> return NameInfo (ipAddress, "")
-        }
+    static let lookUpApp =
+        match RuntimeInformation.OSDescription with
+        | LinuxOs -> "nslookup"
+        | WindowsOs -> "ping"
+        | OtherOs -> failwith OS_UNSUPPORTED
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static let getNameForIpWindowsAsync (ipAddress : IpAddress) =
+    static let startProcessGetNameForIpAsyncTry args =
 
-        backgroundTask {
-
-            let args = $"-n 1 -a -w {Broker.PingTimeOut} {ipAddress}"
-
-            match! IIProcessBroker.startProcessWithTimeOutAsync "ping" Broker.NameLookupTimeOut.timeOut args with
-            | Some proc ->
-                let! result = proc.StandardOutput.ReadToEndAsync ()
-                let hostName = result |> split "[" |> Array.item 0 |> split " " |> Array.last
-                return NameInfo (ipAddress, hostName)
-            | None ->
-                return NameInfo (ipAddress, "")
-        }
+        IIProcessBroker.startProcessWithTimeOutAsync lookUpApp Broker.NameLookupTimeOut.timeOut args
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
@@ -113,7 +80,9 @@ type Broker () =
     static member getMacForIpAsync (ipAddress : IpAddress) =
 
         backgroundTask {
-            let! physicalAddress = IPAddress.Parse ipAddress.value
+
+            let! physicalAddress = ipAddress.value
+                                   |> IPAddress.Parse
                                    |> Arp.LookupAsync
 
             if physicalAddress <> null &&
@@ -126,10 +95,47 @@ type Broker () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static member getNameInfoForIpAsyncTry (ip : IpAddress) =
+    static member getNameInfoForIpAsyncTry (ipAddress : IpAddress) =
 
-        match RuntimeInformation.OSDescription with
-        | LinuxOs -> getNameForIpLinuxAsync ip
-        | WindowsOs -> getNameForIpWindowsAsync ip
-        | OtherOs ->  NameInfo (ip, "") |> Task.FromResult
+        let emptyNameInfo = NameInfo (ipAddress, "")
+
+        //--------------------------------------------------------------------------------------------------------------
+        let processLinuxProcInfoAsyncTry (proc : Process) =
+
+            backgroundTask {
+
+                if proc.ExitCode <> 0 then
+                    return emptyNameInfo
+                else
+                    let! result = proc.StandardOutput.ReadToEndAsync ()
+                    let hostName = ((result |> split "=")[1] |> trim |> split ".")[0]
+
+                    return NameInfo (ipAddress, hostName)
+            }
+        //--------------------------------------------------------------------------------------------------------------
+
+        //--------------------------------------------------------------------------------------------------------------
+        let processWindowsProcInfoAsyncTry (proc : Process) =
+
+            backgroundTask {
+
+                let! result = proc.StandardOutput.ReadToEndAsync ()
+                let hostName = (result |> split "[")[0] |> split " " |> Array.last
+
+                return NameInfo (ipAddress, hostName)
+            }
+        //--------------------------------------------------------------------------------------------------------------
+
+        let args, processProcInfoFun =
+            match RuntimeInformation.OSDescription with
+            | LinuxOs -> ipAddress.value, processLinuxProcInfoAsyncTry
+            | WindowsOs -> $"-n 1 -a -w {Broker.PingTimeOut} %s{ipAddress.value}", processWindowsProcInfoAsyncTry
+            | OtherOs ->  failwith OS_UNSUPPORTED
+
+        backgroundTask {
+
+            match! startProcessGetNameForIpAsyncTry args with
+            | Some proc -> return! processProcInfoFun proc
+            | None -> return emptyNameInfo
+        }
     //------------------------------------------------------------------------------------------------------------------
