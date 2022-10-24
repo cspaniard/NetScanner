@@ -37,8 +37,14 @@ type OutputDeviceInfosParams = {
 }
 
 module Definitions =
+
     let (|LinuxOs|WindowsOs|MacOs|OtherOs|) _ =
-        if RuntimeInformation.IsOSPlatform OSPlatform.Linux then LinuxOs
-        else if RuntimeInformation.IsOSPlatform OSPlatform.Windows then WindowsOs
-        else if RuntimeInformation.IsOSPlatform OSPlatform.OSX then MacOs
-        else OtherOs
+
+        let knownOsList =
+            [ (OSPlatform.Linux, LinuxOs)
+              (OSPlatform.Windows, WindowsOs)
+              (OSPlatform.OSX, MacOs) ]
+
+        match knownOsList |> List.tryFind (fst >> RuntimeInformation.IsOSPlatform) with
+        | Some (_, os) -> os
+        | None -> OtherOs

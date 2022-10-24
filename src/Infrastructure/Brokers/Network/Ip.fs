@@ -26,7 +26,8 @@ type Broker () =
         match RuntimeInformation.OSDescription with
         | LinuxOs -> "nslookup"
         | WindowsOs -> "ping"
-        | MacOs | OtherOs -> failwith OS_UNSUPPORTED
+        | MacOs -> "nslookup"
+        | OtherOs -> failwith OS_UNSUPPORTED
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
