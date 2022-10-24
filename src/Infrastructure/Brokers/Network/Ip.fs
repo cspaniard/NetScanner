@@ -26,7 +26,7 @@ type Broker () =
         match RuntimeInformation.OSDescription with
         | LinuxOs -> "nslookup"
         | WindowsOs -> "ping"
-        | OtherOs -> failwith OS_UNSUPPORTED
+        | MacOs | OtherOs -> failwith OS_UNSUPPORTED
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
@@ -130,7 +130,7 @@ type Broker () =
             match RuntimeInformation.OSDescription with
             | LinuxOs -> ipAddress.value, processLinuxProcInfoAsyncTry
             | WindowsOs -> $"-n 1 -a -w {Broker.PingTimeOut} %s{ipAddress.value}", processWindowsProcInfoAsyncTry
-            | OtherOs ->  failwith OS_UNSUPPORTED
+            | MacOs | OtherOs -> failwith OS_UNSUPPORTED
 
         backgroundTask {
 

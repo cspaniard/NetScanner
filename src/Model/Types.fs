@@ -37,7 +37,8 @@ type OutputDeviceInfosParams = {
 }
 
 module Definitions =
-    let (|LinuxOs|WindowsOs|OtherOs|) _ =
+    let (|LinuxOs|WindowsOs|MacOs|OtherOs|) _ =
         if RuntimeInformation.IsOSPlatform OSPlatform.Linux then LinuxOs
         else if RuntimeInformation.IsOSPlatform OSPlatform.Windows then WindowsOs
+        else if RuntimeInformation.IsOSPlatform OSPlatform.OSX then MacOs
         else OtherOs
