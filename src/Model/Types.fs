@@ -38,6 +38,14 @@ type OutputDeviceInfosParams = {
 
 module Definitions =
 
+    let (|Parsed|NotParsed|) (parserResult : ParserResult<_>) =
+
+        match parserResult with
+        | :? Parsed -> Parsed
+        | :? NotParsed -> NotParsed
+        | _ -> failwith "No debiéramos llegar aquí."
+
+
     let (|LinuxOs|WindowsOs|MacOs|OtherOs|) _ =
 
         let knownOsList =

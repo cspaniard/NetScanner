@@ -7,6 +7,7 @@ open CommandLine
 open Microsoft.FSharp.Core
 open Model
 open Model.Constants
+open Model.Definitions
 
 type private IIpService = DI.Services.NetworkDI.IIpService
 type private IHelpService = DI.Services.HelpDI.IHelpService
@@ -59,16 +60,15 @@ try
     use parser = new Parser (fun o -> o.HelpWriter <- null)
 
     match parser.ParseArguments<ArgumentOptions> args with
-    | :? Parsed as opts ->
+    | Parsed as opts ->
              appInit opts.Value
              scanAndOutputNetwork opts.Value
-    | :? NotParsed as notParsed ->
+    | NotParsed as notParsed ->
              notParsed.Errors
              |> ArgErrors
              |> IHelpService.showHelp
              |> exit
-    | _ ->
-             Exception "No debiéramos llegar aquí." |> IExceptionService.outputException
+
 with
 | :? AggregateException as ae -> IHelpService.showHelp <| ExceptionErrors ae.InnerExceptions |> exit
 | :? ValidationException as ve -> IHelpService.showHelp <| ValidationError ve |> exit

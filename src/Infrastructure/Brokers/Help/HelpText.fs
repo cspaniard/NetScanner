@@ -11,8 +11,7 @@ type Broker () =
     //------------------------------------------------------------------------------------------------------------------
     static member printHeader () =
 
-        if RuntimeInformation.IsOSPlatform OSPlatform.Windows then
-            Console.WriteLine ()
+        if RuntimeInformation.IsOSPlatform OSPlatform.Windows then Console.WriteLine ()
 
         let version = Assembly.GetEntryAssembly().GetName().Version
 
@@ -33,7 +32,7 @@ type Broker () =
 
             Console.WriteLine "\nERRORES:"
 
-            if RuntimeInformation.IsOSPlatform OSPlatform.Windows then Console.WriteLine ""
+            if RuntimeInformation.IsOSPlatform OSPlatform.Windows then Console.WriteLine ()
 
             errorList
             |> Seq.filter (not << String.IsNullOrWhiteSpace)
