@@ -23,7 +23,7 @@ let appInit (options : ArgumentOptions) =
                                         (Retries.create options.Retries)
                                         (NameLookupTimeOut.create options.NameLookUpTimeOut)
 
-    DI.Brokers.StorageDI.IMacBlackListBroker.init (FileName.create options.BlackListFileName)
+    DI.Brokers.StorageDI.IMacBlackListBroker.init (FileName.create options.MacBlackListFileName)
     DI.Brokers.StorageDI.IIpBlackListBroker.init (FileName.create options.IpBlackListFileName)
 //----------------------------------------------------------------------------------------------------------------------
 

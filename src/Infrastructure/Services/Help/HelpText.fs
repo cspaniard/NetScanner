@@ -26,7 +26,7 @@ type Service () =
                          $"Tiempo de espera en ms para cada resolución de nombre. (def: {DEF_NAME_LOOKUP_TIMEOUT})")
             ArgLineInfo ("-d,  --debug", "Muestra estadísticas de tiempo. (def: False)")
             ArgLineInfo ("-b,  --blacklist", "Fichero con las MACs de los dispositivos a ignorar. (def: \"\")")
-            ArgLineInfo ("     --ip-blacklist", "Fichero con las IPs de los dispositivos a ignorar. (def: \"\")")
+            ArgLineInfo ("-B   --ip-blacklist", "Fichero con las IPs de los dispositivos a ignorar. (def: \"\")")
             ArgLineInfo ("red (requerido)", "La red a escanear.")
 
             ArgLineInfo ($"{leftSpaces}--help", "Muestra esta ayuda y sale.")

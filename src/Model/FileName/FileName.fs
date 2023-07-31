@@ -1,6 +1,7 @@
 namespace Model
 
 open System
+open System.ComponentModel.DataAnnotations
 open Motsoft.Util
 open Model.FileNameValidation
 
@@ -17,7 +18,7 @@ type FileName =
                 |> Array.iter (fun f -> f value)
 
                 value
-            with e -> raise <| AggregateException e
+            with e -> raise <| ValidationException e.Message
 
         member this.value = let (FileName value) = this in value
         member this.hasValue = let (FileName value) = this in value |> (not << String.IsNullOrWhiteSpace)

@@ -29,9 +29,9 @@ type ArgumentOptions = {
     Debug : bool
 
     [<Option ('b', "blacklist", Default = "")>]
-    BlackListFileName : string
+    MacBlackListFileName : string
 
-    [<Option ("ip-blacklist", Default = "")>]
+    [<Option ('B',"ip-blacklist", Default = "")>]
     IpBlackListFileName : string
 
     [<Value (0, MetaName="red", Required = true)>]
