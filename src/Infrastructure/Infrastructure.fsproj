@@ -18,7 +18,8 @@
       <Compile Include="Brokers\Exceptions\ExceptionsDI.fs" />
       <Compile Include="Brokers\Debug\Metrics.fs" />
       <Compile Include="Brokers\Debug\DebugDI.fs" />
-      <Compile Include="Brokers\Storage\BlackList.fs" />
+      <Compile Include="Brokers\Storage\MacBlackList.fs" />
+      <Compile Include="Brokers\Storage\IpBlackList.fs" />
       <Compile Include="Brokers\Storage\StorageDI.fs" />
       <Compile Include="Services\Network\Ip.Exceptions.fs" />
       <Compile Include="Services\Network\Ip.fs" />

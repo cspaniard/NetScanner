@@ -2,4 +2,5 @@ namespace DI.Brokers
 
 module StorageDI =
 
-    type IBlackListBroker = Brokers.Storage.Blacklist.Broker
+    type IMacBlackListBroker = Brokers.Storage.MacBlacklist.Broker
+    type IIpBlackListBroker = Brokers.Storage.IpBlacklist.Broker

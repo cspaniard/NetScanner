@@ -21,7 +21,8 @@ let appInit (options : ArgumentOptions) =
                                         (Retries.create options.Retries)
                                         (NameLookupTimeOut.create options.NameLookUpTimeOut)
 
-    DI.Brokers.StorageDI.IBlackListBroker.init (FileName.create options.BlackListFileName)
+    DI.Brokers.StorageDI.IMacBlackListBroker.init (FileName.create options.BlackListFileName)
+    DI.Brokers.StorageDI.IIpBlackListBroker.init (FileName.create options.IpBlackListFileName)
 //----------------------------------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -73,5 +74,6 @@ with
 | :? AggregateException as ae -> IHelpService.showHelp <| ExceptionErrors ae.InnerExceptions |> exit
 | :? ValidationException as ve -> IHelpService.showHelp <| ValidationError ve |> exit
 | e -> IExceptionService.outputException e
+       Console.WriteLine e.StackTrace
        exit EXIT_CODE_EXCEPTION
 //----------------------------------------------------------------------------------------------------------------------

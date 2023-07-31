@@ -8,19 +8,20 @@ open Model
 
 type private IIpBroker = DI.Brokers.NetworkDI.IIpBroker
 type private INetworkBroker = DI.Brokers.NetworkDI.INetworkBroker
-type private IBlackListBroker = DI.Brokers.StorageDI.IBlackListBroker
+type private IMacBlackListBroker = DI.Brokers.StorageDI.IMacBlackListBroker
+type private IIpBlackListBroker = DI.Brokers.StorageDI.IIpBlackListBroker
 
 type Service () =
 
     //------------------------------------------------------------------------------------------------------------------
-    static let scanStatusAsyncTry (network : IpNetwork) =
+    static let scanStatusAsyncTry (ipBlackList : IpAddress array) (network : IpNetwork) =
 
-        [|
-           for i in 1..254 -> IpAddress.create $"%s{network.value}{i}"
-                              |> IIpBroker.getDeviceInfoStatusForIpAsync
-        |]
+        let blakListValues = ipBlackList |> Array.map (fun ip -> ip.value)
+
+        [| for i in 1..254 -> IpAddress.create $"%s{network.value}{i}" |]
+        |> Array.filter (fun ip -> blakListValues |> Array.contains ip.value = false)
+        |> Array.map IIpBroker.getDeviceInfoStatusForIpAsync
         |> Task.WhenAll
-
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
@@ -45,8 +46,15 @@ type Service () =
     //------------------------------------------------------------------------------------------------------------------
     static let getMacBlackListTry () =
 
-        IBlackListBroker.getMacBlacklistTry ()
+        IMacBlackListBroker.getMacBlacklistTry ()
         |> Array.map (Mac.clean >> Mac.create)
+    //------------------------------------------------------------------------------------------------------------------
+
+    //------------------------------------------------------------------------------------------------------------------
+    static let getIpBlackListTry () =
+
+        IIpBlackListBroker.getIpBlacklistTry ()
+        |> Array.map IpAddress.create
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
@@ -103,12 +111,14 @@ type Service () =
 
         backgroundTask {
 
-            let! deviceInfos = scanStatusAsyncTry network
 
-            let blackList = getMacBlackListTry()
+            let macBlackList = getMacBlackListTry()
+            let ipBlackList = getIpBlackListTry()
 
-            let! deviceInfos = if scanMacs || blackList.Length > 0
-                               then scanMacInfoAsyncTry blackList deviceInfos
+            let! deviceInfos = scanStatusAsyncTry ipBlackList network
+
+            let! deviceInfos = if scanMacs || macBlackList.Length > 0
+                               then scanMacInfoAsyncTry macBlackList deviceInfos
                                else deviceInfos |> Task.FromResult
 
             let! deviceInfos = if scanNames

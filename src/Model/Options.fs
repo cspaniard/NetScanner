@@ -31,6 +31,9 @@ type ArgumentOptions = {
     [<Option ('b', "blacklist", Default = "")>]
     BlackListFileName : string
 
+    [<Option ("ip-blacklist", Default = "")>]
+    IpBlackListFileName : string
+
     [<Value (0, MetaName="red", Required = true)>]
     Network : string
 }

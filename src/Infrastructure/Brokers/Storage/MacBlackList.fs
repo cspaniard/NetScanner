@@ -1,5 +1,6 @@
-namespace Brokers.Storage.Blacklist
+namespace Brokers.Storage.MacBlacklist
 
+open System
 open System.IO
 open Model
 open Motsoft.Util
@@ -21,6 +22,9 @@ type Broker () =
     static member getMacBlacklistTry () =
 
         match Broker.FileName.hasValue with
-        | true -> File.ReadAllText Broker.FileName.value |> split "\t"
+        | true -> File.ReadAllLines Broker.FileName.value
+                  |> Array.map (fun l -> l |> split "\t")
+                  |> Array.collect id
+                  |> Array.filter (not << String.IsNullOrEmpty)
         | false -> Array.empty<string>
     //------------------------------------------------------------------------------------------------------------------
