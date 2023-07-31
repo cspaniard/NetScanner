@@ -1,6 +1,7 @@
 open System
 open System.ComponentModel.DataAnnotations
 open System.Diagnostics
+open System.Diagnostics.CodeAnalysis
 open System.Threading.Tasks
 open CommandLine
 
@@ -15,6 +16,7 @@ type private IExceptionService = DI.Services.ExceptionsDI.IExceptionService
 type private IMetricService = DI.Services.DebugDI.IMetricService
 
 //----------------------------------------------------------------------------------------------------------------------
+[<DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof<ArgumentOptions>)>]
 let appInit (options : ArgumentOptions) =
 
     DI.Brokers.NetworkDI.IIpBroker.init (PingTimeOut.create options.PingTimeOut)
@@ -74,6 +76,5 @@ with
 | :? AggregateException as ae -> IHelpService.showHelp <| ExceptionErrors ae.InnerExceptions |> exit
 | :? ValidationException as ve -> IHelpService.showHelp <| ValidationError ve |> exit
 | e -> IExceptionService.outputException e
-       Console.WriteLine e.StackTrace
        exit EXIT_CODE_EXCEPTION
 //----------------------------------------------------------------------------------------------------------------------
