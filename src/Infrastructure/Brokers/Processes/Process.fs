@@ -1,9 +1,9 @@
 namespace Brokers.Processes.Process
 
+open System
 open System.Diagnostics
 open System.Threading.Tasks
 open Model
-open Motsoft.Util
 
 type Broker () =
 
@@ -34,15 +34,19 @@ type Broker () =
 
             let proc = Broker.startProcessWithStartInfoTry startInfo
 
-            let processTask = task { do! proc.WaitForExitAsync () } :> Task
-            let timeOutTask = task { do! Task.Delay timeOut.value
-                                     return Unchecked.defaultof<Process> }
+            if Environment.OSVersion.Version.Major >= 10 then
 
-            let! winnerTask = Task.WhenAny [ processTask ; timeOutTask ]
+                let processTask = task { do! proc.WaitForExitAsync () } :> Task
+                let timeOutTask = task { do! Task.Delay timeOut.value
+                                         return Unchecked.defaultof<Process> }
 
-            if winnerTask = timeOutTask then
-                proc.Kill ()
-                return None
+                let! winnerTask = Task.WhenAny [ processTask ; timeOutTask ]
+
+                if winnerTask = timeOutTask then
+                    proc.Kill ()
+                    return None
+                else
+                    return Some proc
             else
                 return Some proc
         }
