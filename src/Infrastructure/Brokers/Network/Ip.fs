@@ -33,7 +33,9 @@ type Broker () =
     //------------------------------------------------------------------------------------------------------------------
     static let startProcessGetNameForIpAsyncTry args =
 
-        IIProcessBroker.startProcessWithTimeOutAsync lookUpApp Broker.NameLookupTimeOut.timeOut args
+        backgroundTask {
+            return! IIProcessBroker.startProcessWithTimeOutAsync lookUpApp Broker.NameLookupTimeOut.timeOut args
+        }
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
@@ -121,7 +123,12 @@ type Broker () =
             backgroundTask {
 
                 let! result = proc.StandardOutput.ReadToEndAsync ()
-                let hostName = (result |> split "[")[0] |> split " " |> Array.last
+
+                let hostName =
+                    if result.Contains "[" then
+                        (result |> split "[")[0] |> split " " |> Array.last
+                    else
+                        ""
 
                 return NameInfo (ipAddress, hostName)
             }
@@ -130,7 +137,7 @@ type Broker () =
         let args, processProcInfoFun =
             match RuntimeInformation.OSDescription with
             | LinuxOs -> ipAddress.value, processLinuxProcInfoAsyncTry
-            | WindowsOs -> $"-n 1 -a -w {Broker.PingTimeOut} %s{ipAddress.value}", processWindowsProcInfoAsyncTry
+            | WindowsOs -> $"-n 1 -a -w {Broker.PingTimeOut} {ipAddress}", processWindowsProcInfoAsyncTry
             | MacOs | OtherOs -> failwith OS_UNSUPPORTED
 
         backgroundTask {

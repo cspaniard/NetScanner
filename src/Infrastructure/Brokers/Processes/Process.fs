@@ -20,7 +20,7 @@ type Broker () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member startProcessWithTimeOutAsync processName (timeOut : TimeOut) arguments =
+    static member startProcessWithTimeOutAsync processName (nameLookUpTimeOut : TimeOut) arguments =
 
         let startInfo = ProcessStartInfo (RedirectStandardOutput = true,
                                           RedirectStandardError = true,
@@ -37,7 +37,7 @@ type Broker () =
             if Environment.OSVersion.Version.Major >= 10 then
 
                 let processTask = task { do! proc.WaitForExitAsync () } :> Task
-                let timeOutTask = task { do! Task.Delay timeOut.value
+                let timeOutTask = task { do! Task.Delay nameLookUpTimeOut.value
                                          return Unchecked.defaultof<Process> }
 
                 let! winnerTask = Task.WhenAny [ processTask ; timeOutTask ]
