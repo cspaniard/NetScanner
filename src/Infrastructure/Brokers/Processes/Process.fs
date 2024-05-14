@@ -36,9 +36,8 @@ type Broker () =
 
             if Environment.OSVersion.Version.Major >= 10 then
 
-                let processTask = task { do! proc.WaitForExitAsync () } :> Task
-                let timeOutTask = task { do! Task.Delay nameLookUpTimeOut.value
-                                         return Unchecked.defaultof<Process> }
+                let processTask = backgroundTask { do! proc.WaitForExitAsync () }
+                let timeOutTask = backgroundTask { do! Task.Delay nameLookUpTimeOut.value }
 
                 let! winnerTask = Task.WhenAny [ processTask ; timeOutTask ]
 
