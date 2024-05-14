@@ -16,8 +16,6 @@ type Broker () =
         let version = Assembly.GetEntryAssembly().GetName().Version
 
         Console.WriteLine $"netscanner - {version.Major}.{version.Minor}.{version.Build}"
-
-        if RuntimeInformation.IsOSPlatform OSPlatform.Windows then Console.WriteLine ()
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
