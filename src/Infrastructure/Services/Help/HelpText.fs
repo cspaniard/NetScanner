@@ -50,7 +50,7 @@ type Service () =
             //----------------------------------------------------------------------------------------------------------
 
             match Seq.head errorMessages with
-            | "VERSION" -> ()
+            | "VERSION" -> IHelpTextBroker.printHeader ()
             | "HELP" -> showHelpText Seq.empty
             | _ -> showHelpText errorMessages
         //--------------------------------------------------------------------------------------------------------------

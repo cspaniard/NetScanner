@@ -16,12 +16,16 @@ type Broker () =
         let version = Assembly.GetEntryAssembly().GetName().Version
 
         Console.WriteLine $"netscanner - {version.Major}.{version.Minor}.{version.Build}"
+
+        if RuntimeInformation.IsOSPlatform OSPlatform.Windows then Console.WriteLine ()
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
     static member printUsage () =
 
-        Console.WriteLine "\nUSO: netscanner [opciones] red"
+        if RuntimeInformation.IsOSPlatform OSPlatform.Windows = false then Console.WriteLine ()
+
+        Console.WriteLine "USO: netscanner [opciones] red"
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
