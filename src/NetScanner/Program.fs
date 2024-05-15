@@ -54,7 +54,7 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
             with e -> IExceptionService.outputException e
         } :> Task
 
-    processTask.Wait ()
+    processTask.GetAwaiter().GetResult()
 //----------------------------------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------------------------------
