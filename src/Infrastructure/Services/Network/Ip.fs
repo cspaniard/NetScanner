@@ -61,13 +61,13 @@ type Service () =
     static let scanMacInfoAsyncTry blackList deviceInfos =
 
         //--------------------------------------------------------------------------------------------------------------
-        let filterBlackList (blackList : Mac[]) (deviceInfos : DeviceInfo[]) =
+        let filterMacBlackList (macBlackList : Mac[]) (deviceInfos : DeviceInfo[]) =
 
-            if blackList.Length = 0 then
+            if macBlackList.Length = 0 then
                 deviceInfos
             else
                 deviceInfos
-                |> Array.filter (fun di -> blackList |> (not << Array.contains di.Mac))
+                |> Array.filter (fun di -> macBlackList |> (not << Array.contains di.Mac))
         //--------------------------------------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ type Service () =
 
             return activeMacInfos
                    |> mergeInfos deviceInfos
-                   |> filterBlackList blackList
+                   |> filterMacBlackList blackList
         }
     //------------------------------------------------------------------------------------------------------------------
 
