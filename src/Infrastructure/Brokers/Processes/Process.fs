@@ -1,8 +1,6 @@
 namespace Brokers.Processes.Process
 
-open System
 open System.Diagnostics
-open System.Runtime.InteropServices
 open System.Threading.Tasks
 open Model
 
@@ -35,8 +33,7 @@ type Broker () =
 
             let proc = Broker.startProcessWithStartInfoTry startInfo
 
-            if RuntimeInformation.IsOSPlatform OSPlatform.Windows &&
-               Environment.OSVersion.Version.Major < 10
+            if nameLookUpTimeOut.value = 0
             then
                 do! proc.WaitForExitAsync()
                 return Some proc
