@@ -2,6 +2,7 @@ namespace Services.Network.Ip
 
 open System.Text.RegularExpressions
 open System.Threading.Tasks
+open Motsoft.Util
 
 open Model
 
@@ -20,6 +21,7 @@ type Service () =
         set [ for i in 1..254 -> IpAddress.create $"%s{network.value}{i}" ]
         |> removeSetFromSet (ipBlackList |> Set.ofArray)
         |> Set.toArray
+        |> Array.sortBy (fun ip -> ip.value |> split "." |> Array.last |> int)
         |> Array.map IIpBroker.getDeviceInfoStatusForIpAsync
         |> Task.WhenAll
     //------------------------------------------------------------------------------------------------------------------
