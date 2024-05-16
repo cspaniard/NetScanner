@@ -15,10 +15,10 @@ type Service () =
     //------------------------------------------------------------------------------------------------------------------
     static let scanStatusAsyncTry (ipBlackList : IpAddress array) (network : IpNetwork) =
 
-        let blakListValues = ipBlackList |> Array.map _.value
+        let ipBlakListValues = ipBlackList |> Array.map _.value
 
         [| for i in 1..254 -> IpAddress.create $"%s{network.value}{i}" |]
-        |> Array.filter (fun ip -> blakListValues |> Array.contains ip.value = false)
+        |> Array.filter (fun ip -> ipBlakListValues |> (not << Array.contains ip.value))
         |> Array.map IIpBroker.getDeviceInfoStatusForIpAsync
         |> Task.WhenAll
     //------------------------------------------------------------------------------------------------------------------
