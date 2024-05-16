@@ -21,9 +21,7 @@ type Broker () =
     //------------------------------------------------------------------------------------------------------------------
     static member printUsage () =
 
-        if RuntimeInformation.IsOSPlatform OSPlatform.Windows = false then Console.WriteLine ()
-
-        Console.WriteLine "USO: netscanner [opciones] red"
+        Console.WriteLine "\nUSO: netscanner [opciones] red"
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
