@@ -29,7 +29,6 @@ type AppErrors =
     | ValidationError of ValidationException
 
 type OutputDeviceInfosParams = {
-    DeviceInfos : DeviceInfo[]
     ActivesOnly : bool
     Separator : string
     ShowMacs : bool

@@ -2,7 +2,6 @@ namespace Services.Network.Ip
 
 open System.Text.RegularExpressions
 open System.Threading.Tasks
-open Motsoft.Util
 
 open Model
 
@@ -16,7 +15,7 @@ type Service () =
     //------------------------------------------------------------------------------------------------------------------
     static let scanStatusAsyncTry (ipBlackList : IpAddress array) (network : IpNetwork) =
 
-        let blakListValues = ipBlackList |> Array.map (fun ip -> ip.value)
+        let blakListValues = ipBlackList |> Array.map _.value
 
         [| for i in 1..254 -> IpAddress.create $"%s{network.value}{i}" |]
         |> Array.filter (fun ip -> blakListValues |> Array.contains ip.value = false)
@@ -42,6 +41,7 @@ type Service () =
                                 then IIpBroker.getNameInfoForIpAsyncTry di.IpAddress
                                 else NameInfo (di.IpAddress, "") |> Task.FromResult)
         |> Task.WhenAll
+    //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
     static let getMacBlackListTry () =
@@ -130,11 +130,11 @@ type Service () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static member outputDeviceInfos (outputParams : OutputDeviceInfosParams) =
+    static member outputDeviceInfos (outputParams : OutputDeviceInfosParams) (deviceInfos : DeviceInfo[]) =
 
         let filterFun =
             if outputParams.ActivesOnly
-            then Array.filter (fun di -> di.Active)
+            then Array.filter _.Active
             else id
 
         let separator = Regex.Unescape outputParams.Separator
@@ -144,7 +144,7 @@ type Service () =
                                  (if outputParams.ShowMacs then $"%s{separator}%s{di.Mac.formatted}" else "") +
                                  (if outputParams.ShowNames then $"%s{separator}%s{di.Name}" else ""))
 
-        outputParams.DeviceInfos
+        deviceInfos
         |> filterFun
         |> buildInfoLinesFun
         |> INetworkBroker.outputDeviceInfoLines

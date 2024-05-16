@@ -44,12 +44,12 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
                 if options.Debug then
                     IMetricService.outputScanNetworkTimeTry scanNetworkStopwatch
 
-                IIpService.outputDeviceInfos
-                    { ActivesOnly = options.ActivesOnly
-                      Separator = options.Separator
-                      ShowMacs = options.ShowMacs
-                      ShowNames = options.ShowNames
-                      DeviceInfos = deviceInfos }
+                deviceInfos
+                |> IIpService.outputDeviceInfos
+                      { ActivesOnly = options.ActivesOnly
+                        Separator = options.Separator
+                        ShowMacs = options.ShowMacs
+                        ShowNames = options.ShowNames }
 
             with e -> IExceptionService.outputException e
         } :> Task
