@@ -33,8 +33,7 @@ type Broker () =
 
             let proc = Broker.startProcessWithStartInfoTry startInfo
 
-            if nameLookUpTimeOut.value = 0
-            then
+            if nameLookUpTimeOut.value = 0 then
                 do! proc.WaitForExitAsync()
                 return Some proc
             else
