@@ -32,26 +32,22 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
 
     let processTask =
         task {
+            let scanNetworkStopwatch = Stopwatch.StartNew ()
 
-            try
-                let scanNetworkStopwatch = Stopwatch.StartNew ()
+            let! deviceInfos =
+                IIpService.scanNetworkAsync options.ShowMacs options.ShowNames (IpNetwork.create options.Network)
 
-                let! deviceInfos =
-                    IIpService.scanNetworkAsync options.ShowMacs options.ShowNames (IpNetwork.create options.Network)
+            scanNetworkStopwatch.Stop ()
 
-                scanNetworkStopwatch.Stop ()
+            if options.Debug then
+                IMetricService.outputScanNetworkTimeTry scanNetworkStopwatch
 
-                if options.Debug then
-                    IMetricService.outputScanNetworkTimeTry scanNetworkStopwatch
-
-                deviceInfos
-                |> IIpService.outputDeviceInfos
-                      { ActivesOnly = options.ActivesOnly
-                        Separator = options.Separator
-                        ShowMacs = options.ShowMacs
-                        ShowNames = options.ShowNames }
-
-            with e -> IExceptionService.outputException e
+            deviceInfos
+            |> IIpService.outputDeviceInfos
+                  { ActivesOnly = options.ActivesOnly
+                    Separator = options.Separator
+                    ShowMacs = options.ShowMacs
+                    ShowNames = options.ShowNames }
         } :> Task
 
     processTask.GetAwaiter().GetResult()

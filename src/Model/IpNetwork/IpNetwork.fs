@@ -1,6 +1,7 @@
 namespace Model
 
 open System
+open System.ComponentModel.DataAnnotations
 open Motsoft.Util
 open Model.IpNetworkValidation
 
@@ -22,7 +23,7 @@ type IpNetwork =
                 |> Array.iter (fun f -> f value)
 
                 value
-            with e -> failwith $"red: {e.Message}"
+            with e -> raise <| ValidationException $"red: {e.Message}"
         //--------------------------------------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------------------------------------
