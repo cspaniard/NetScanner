@@ -5,6 +5,7 @@ open System.Diagnostics
 open System.Net
 open System.Net.NetworkInformation
 open System.Runtime.InteropServices
+open System.Threading
 open ArpLookup
 open Motsoft.Util
 
@@ -31,7 +32,7 @@ type Broker () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static let startProcessGetNameForIpAsyncTry args =
+    static let startProcessGetNameInfoForIpAsyncTry args =
 
         backgroundTask {
             return! IIProcessBroker.startProcessWithTimeOutAsync lookUpApp Broker.NameLookupTimeOut.timeOut args
@@ -98,7 +99,7 @@ type Broker () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static member getNameInfoForIpAsyncTry (ipAddress : IpAddress) =
+    static member getNameInfoForIpAsyncTry useDns (ipAddress : IpAddress) =
 
         let emptyNameInfo = NameInfo (ipAddress, "")
 
@@ -134,16 +135,35 @@ type Broker () =
             }
         //--------------------------------------------------------------------------------------------------------------
 
+        // -------------------------------------------------------------------------------------------------------------
+        let getNameInfoFromDnsAsync (ipAdress : IpAddress) =
+
+            backgroundTask {
+                let cts = new CancellationTokenSource ()
+
+                if Broker.NameLookupTimeOut.value > 0 then
+                    cts.CancelAfter Broker.NameLookupTimeOut.value
+
+                try
+                    let! ipHostEntry = Dns.GetHostEntryAsync (ipAdress.value, cts.Token)
+                    return NameInfo (ipAddress, ipHostEntry.HostName)
+                with _ -> return emptyNameInfo
+            }
+        // -------------------------------------------------------------------------------------------------------------
+
         let args, processProcInfoFun =
             match RuntimeInformation.OSDescription with
             | LinuxOs -> ipAddress.value, processLinuxProcInfoAsyncTry
             | WindowsOs -> $"-n 1 -a -w {Broker.PingTimeOut} {ipAddress}", processWindowsProcInfoAsyncTry
             | MacOs | OtherOs -> failwith OS_UNSUPPORTED
 
-        backgroundTask {
 
-            match! startProcessGetNameForIpAsyncTry args with
-            | Some proc -> return! processProcInfoFun proc
-            | None -> return emptyNameInfo
+        backgroundTask {
+            if useDns then
+                return! getNameInfoFromDnsAsync ipAddress
+            else
+                match! startProcessGetNameInfoForIpAsyncTry args with
+                | Some proc -> return! processProcInfoFun proc
+                | None -> return emptyNameInfo
         }
     //------------------------------------------------------------------------------------------------------------------

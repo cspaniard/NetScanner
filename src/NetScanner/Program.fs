@@ -35,7 +35,8 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
             let scanNetworkStopwatch = Stopwatch.StartNew ()
 
             let! deviceInfos =
-                IIpService.scanNetworkAsync options.ShowMacs options.ShowNames (IpNetwork.create options.Network)
+                IIpService.scanNetworkAsync options.ShowMacs options.ShowNames options.UseDns
+                                            (IpNetwork.create options.Network)
 
             scanNetworkStopwatch.Stop ()
 

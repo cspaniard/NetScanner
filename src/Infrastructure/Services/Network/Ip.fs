@@ -35,11 +35,11 @@ type Service () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static let getNameInfosForActiveIpsAsyncTry (deviceInfos : DeviceInfo[]) =
+    static let getNameInfosForActiveIpsAsyncTry useDns (deviceInfos : DeviceInfo[]) =
 
         deviceInfos
         |> Array.map (fun di -> if di.Active
-                                then IIpBroker.getNameInfoForIpAsyncTry di.IpAddress
+                                then IIpBroker.getNameInfoForIpAsyncTry useDns di.IpAddress
                                 else NameInfo (di.IpAddress, "") |> Task.FromResult)
         |> Task.WhenAll
     //------------------------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ type Service () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static let scanNameInfoAsyncTry deviceInfos =
+    static let scanNameInfoAsyncTry useDns deviceInfos =
 
         //--------------------------------------------------------------------------------------------------------------
         let mergeInfos (deviceInfos : DeviceInfo[]) (nameInfos : NameInfo[]) =
@@ -100,7 +100,7 @@ type Service () =
 
         backgroundTask {
 
-            let! activeNameInfos = getNameInfosForActiveIpsAsyncTry deviceInfos
+            let! activeNameInfos = getNameInfosForActiveIpsAsyncTry useDns deviceInfos
 
             return activeNameInfos
                    |> mergeInfos deviceInfos
@@ -108,7 +108,7 @@ type Service () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static member scanNetworkAsync scanMacs scanNames network =
+    static member scanNetworkAsync scanMacs scanNames useDns network =
 
         backgroundTask {
 
@@ -124,7 +124,7 @@ type Service () =
                                else deviceInfos |> Task.FromResult
 
             let! deviceInfos = if scanNames
-                               then scanNameInfoAsyncTry deviceInfos
+                               then scanNameInfoAsyncTry useDns deviceInfos
                                else deviceInfos |> Task.FromResult
 
             return deviceInfos

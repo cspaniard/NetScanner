@@ -24,6 +24,7 @@ type Service () =
             ArgLineInfo ("-n,  --nombres", "Muestra los nombres de los dispositivos (def: False)")
             ArgLineInfo ("-l,  --nombres-timeout",
                          $"Tiempo de espera en ms para cada resolución de nombre. (def: {DEF_NAME_LOOKUP_TIMEOUT})")
+            ArgLineInfo ("-D,  --dns", "Resuelve los nombres usando DNS. (def: False)")
             ArgLineInfo ("-d,  --debug", "Muestra estadísticas de tiempo. (def: False)")
             ArgLineInfo ("-b,  --blacklist", "Fichero con las MACs de los dispositivos a ignorar. (def: \"\")")
             ArgLineInfo ("-B   --ip-blacklist", "Fichero con las IPs de los dispositivos a ignorar. (def: \"\")")

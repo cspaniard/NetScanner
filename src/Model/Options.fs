@@ -25,6 +25,9 @@ type ArgumentOptions = {
     [<Option ('l', "nombres-timeout", Default = DEF_NAME_LOOKUP_TIMEOUT)>]
     NameLookUpTimeOut : int
 
+    [<Option ('D', "dns", Default = false)>]
+    UseDns : bool
+
     [<Option ('d', "debug", Default = false)>]
     Debug : bool
 
