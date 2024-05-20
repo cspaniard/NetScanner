@@ -1,7 +1,8 @@
 namespace Brokers.Processes.Process
 
+open System
 open System.Diagnostics
-open System.Threading.Tasks
+open System.Threading
 open Model
 
 type Broker () =
@@ -19,7 +20,7 @@ type Broker () =
     //----------------------------------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------------------------------
-    static member startProcessWithTimeOutAsync processName (nameLookUpTimeOut : TimeOut) arguments =
+    static member startProcessWithTimeOutAsync processName (timeOut : TimeOut) arguments =
 
         let startInfo = ProcessStartInfo (RedirectStandardOutput = true,
                                           RedirectStandardError = true,
@@ -33,24 +34,18 @@ type Broker () =
 
             let proc = Broker.startProcessWithStartInfoTry startInfo
 
-            if nameLookUpTimeOut.value = 0 then
-                do! proc.WaitForExitAsync()
+            let cts = new CancellationTokenSource ()
+
+            if timeOut.value > 0 then
+                cts.CancelAfter timeOut.value
+
+            try
+                do! proc.WaitForExitAsync cts.Token
                 return Some proc
-            else
-                let processTask = backgroundTask { do! proc.WaitForExitAsync () }
-                let timeOutTask = backgroundTask { do! Task.Delay nameLookUpTimeOut.value }
-
-                let! winnerTask = Task.WhenAny [ processTask ; timeOutTask ]
-
-                if winnerTask = timeOutTask then
-                    proc.Kill ()
-
-                    if timeOutTask.IsFaulted then
-                        raise timeOutTask.Exception.InnerException
-
-                    return None
-                else
-                    return Some proc
+            with
+            | :? OperationCanceledException ->
+                proc.Kill ()
+                return None
         }
     //----------------------------------------------------------------------------------------------------
 
