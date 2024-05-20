@@ -45,7 +45,7 @@ type Broker () =
         let maxWidth = argLineInfoList |> Array.map (fun (ArgLineInfo (n, _)) -> n.Length) |> Array.max
         let leftMargin = String (' ', LEFT_MARGIN)
 
-        Console.WriteLine ()
+        Console.WriteLine "\nOPCIONES:\n"
 
         argLineInfoList
         |> Array.iter (fun (ArgLineInfo (names, helpText)) ->

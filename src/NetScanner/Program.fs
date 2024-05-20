@@ -69,7 +69,6 @@ try
              |> exit
 
 with
-| :? AggregateException as ae -> IHelpService.showHelp <| ExceptionErrors ae.InnerExceptions |> exit
 | :? ValidationException as ve -> IHelpService.showHelp <| ValidationError ve |> exit
 | e -> IExceptionService.outputException e
        exit EXIT_CODE_EXCEPTION

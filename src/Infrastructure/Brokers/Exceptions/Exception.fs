@@ -7,7 +7,7 @@ type Broker () =
     //------------------------------------------------------------------------------------------------------------------
     static member printSingle (exn : Exception) =
 
-        Console.Error.WriteLine exn.Message
+        Console.Error.WriteLine exn
         if exn.InnerException <> null then Broker.printSingle exn.InnerException
     //------------------------------------------------------------------------------------------------------------------
 

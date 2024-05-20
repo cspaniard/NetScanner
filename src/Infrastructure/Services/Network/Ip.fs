@@ -112,6 +112,7 @@ type Service () =
 
         backgroundTask {
 
+            // TODO: Pass in useDNS flag
 
             let macBlackList = getMacBlackListTry()
             let ipBlackList = getIpBlackListTry()

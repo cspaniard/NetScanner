@@ -44,6 +44,10 @@ type Broker () =
 
                 if winnerTask = timeOutTask then
                     proc.Kill ()
+
+                    if timeOutTask.IsFaulted then
+                        raise timeOutTask.Exception.InnerException
+
                     return None
                 else
                     return Some proc
