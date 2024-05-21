@@ -21,8 +21,6 @@ type Broker () =
     //------------------------------------------------------------------------------------------------------------------
     static member getMacBlacklistTry () =
 
-        // TODO: change to checkInit() pattern.
-
         match Broker.FileName.hasValue with
         | true -> File.ReadAllLines Broker.FileName.value
                   |> Array.map (fun l -> l |> split "\t")
