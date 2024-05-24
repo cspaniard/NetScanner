@@ -1,5 +1,6 @@
 namespace Services.Network.Ip
 
+open System.Runtime.InteropServices
 open System.Text.RegularExpressions
 open System.Threading.Tasks
 
@@ -78,13 +79,59 @@ type Service () =
            ||> Array.map2 (fun di (MacInfo (_, mac)) -> { di with Mac = mac })
         //--------------------------------------------------------------------------------------------------------------
 
+        //--------------------------------------------------------------------------------------------------------------
+        let getlocalMacInfoForIpAsync (ipAddress : IpAddress) =
+            backgroundTask {
+                try
+                    return! IIpBroker.getLocalMacInfoForIpAsyncTry ipAddress
+                with _ ->
+                    return MacInfo (ipAddress, Mac.create "")
+            }
+        //--------------------------------------------------------------------------------------------------------------
+
+        //--------------------------------------------------------------------------------------------------------------
+        let getLocalMacInfosAsync (macInfos : DeviceInfo[]) =
+            backgroundTask {
+                if RuntimeInformation.IsOSPlatform OSPlatform.Windows then
+                    return! Task.FromResult [||]
+                else
+                    return!
+                        macInfos
+                        |> Array.filter (fun di -> di.Active && not di.Mac.hasValue)
+                        |> Array.map (fun di -> backgroundTask { return! getlocalMacInfoForIpAsync di.IpAddress })
+                        |> Task.WhenAll
+            }
+        //--------------------------------------------------------------------------------------------------------------
+
+        //--------------------------------------------------------------------------------------------------------------
+        let mergeLocalMacInfos (deviceInfos : DeviceInfo[]) (localMacInfos : MacInfo[]) =
+            [|
+                for deviceInfo in deviceInfos do
+
+                    let macInfoOption =
+                        localMacInfos
+                        |> Array.tryFind (fun (MacInfo (ipAddress, _)) -> deviceInfo.IpAddress = ipAddress)
+
+                    match macInfoOption with
+                    | Some (MacInfo (_, mac)) -> yield { deviceInfo with Mac = mac }
+                    | None -> yield deviceInfo
+            |]
+        //--------------------------------------------------------------------------------------------------------------
+
         backgroundTask {
 
-            let! activeMacInfos = getMacInfosForActiveIpsAsyncTry deviceInfos
+            let! allMacInfos = getMacInfosForActiveIpsAsyncTry deviceInfos
 
-            return activeMacInfos
-                   |> mergeInfos deviceInfos
-                   |> filterMacBlackList blackList
+            let cleanDeviceInfos =
+                allMacInfos
+                |> mergeInfos deviceInfos
+                |> filterMacBlackList blackList
+
+            let! localMacInfos = getLocalMacInfosAsync cleanDeviceInfos
+
+            return
+                localMacInfos
+                |> mergeLocalMacInfos cleanDeviceInfos
         }
     //------------------------------------------------------------------------------------------------------------------
 

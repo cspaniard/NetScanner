@@ -14,7 +14,7 @@ open Model.Definitions
 
 open Brokers.Network.Ip.Exceptions
 
-type private IIProcessBroker = DI.Brokers.ProcessesDI.IProcessBroker
+type private IProcessBroker = DI.Brokers.ProcessesDI.IProcessBroker
 
 type Broker () =
 
@@ -35,7 +35,7 @@ type Broker () =
     static let startProcessGetNameInfoForIpAsyncTry args =
 
         backgroundTask {
-            return! IIProcessBroker.startProcessWithTimeOutAsync lookUpApp Broker.NameLookupTimeOut.timeOut args
+            return! IProcessBroker.startProcessWithTimeOutAsync lookUpApp Broker.NameLookupTimeOut.timeOut args
         }
     //------------------------------------------------------------------------------------------------------------------
 
@@ -95,6 +95,30 @@ type Broker () =
                 return MacInfo (ipAddress, Mac.create (physicalAddress.ToString ()))
             else
                 return MacInfo (ipAddress, Mac.create "")
+        }
+    //------------------------------------------------------------------------------------------------------------------
+
+    //------------------------------------------------------------------------------------------------------------------
+    static member getLocalMacInfoForIpAsyncTry (ipAddress : IpAddress) =
+
+        //--------------------------------------------------------------------------------------------------------------
+        let getMacInfoOptionForIp (ipAddress : IpAddress) (stdOutLines : string []) =
+            [|
+                for i, line in stdOutLines |> Array.mapi (fun i v -> i, v) do
+                    if line.Contains $"inet {ipAddress.value}" then
+                        let macCleanValue = (stdOutLines[i - 1] |> split " ")[1] |> Mac.clean
+                        yield MacInfo(ipAddress, Mac.create macCleanValue)
+            |]
+            |> Array.tryFind (fun (MacInfo (ipAddress, _)) -> ipAddress = ipAddress)
+        //--------------------------------------------------------------------------------------------------------------
+
+        backgroundTask {
+            let! stdOutLines, _, _ = IProcessBroker.startProcessAndReadAllLinesAsyncTry "ip" "a"
+
+            return
+                match stdOutLines |> getMacInfoOptionForIp ipAddress with
+                | Some macInfo -> macInfo
+                | None -> MacInfo (ipAddress, Mac.create "")
         }
     //------------------------------------------------------------------------------------------------------------------
 

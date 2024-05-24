@@ -10,7 +10,9 @@ type Mac =
         static member clean (value : string) =
             let validChars = Array.append [| '0'..'9' |] [| 'A'..'F' |]
 
-            value.ToCharArray ()
+            value
+                .ToUpper()
+                .ToCharArray ()
             |> Array.fold (fun st c -> if validChars |> Array.contains c
                                        then st + c.ToString ()
                                        else st) ""
@@ -33,6 +35,7 @@ type Mac =
             with e -> failwith $"Mac: {e.Message}"
 
         member this.value = let (Mac value) = this in value
+        member this.hasValue = let (Mac value) = this in value |> (not << String.IsNullOrWhiteSpace)
 
         override this.ToString () = this.value
 
