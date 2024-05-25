@@ -98,7 +98,7 @@ type Service () =
                     return!
                         macInfos
                         |> Array.filter (fun di -> di.Active && not di.Mac.hasValue)
-                        |> Array.map (fun di -> backgroundTask { return! getlocalMacInfoForIpAsync di.IpAddress })
+                        |> Array.map (fun di -> getlocalMacInfoForIpAsync di.IpAddress)
                         |> Task.WhenAll
             }
         //--------------------------------------------------------------------------------------------------------------
