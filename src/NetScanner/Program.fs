@@ -5,46 +5,36 @@ open System.Diagnostics.CodeAnalysis
 open System.Threading.Tasks
 open CommandLine
 
+open Microsoft.Extensions.DependencyInjection
 open Microsoft.FSharp.Core
 open Model
 open Model.Constants
 open Model.Definitions
+open DI.Interfaces
+open DI.Providers
 
-type private IIpService = DI.Services.NetworkDI.IIpService
-type private IHelpService = DI.Services.HelpDI.IHelpService
-type private IExceptionService = DI.Services.ExceptionsDI.IExceptionService
-type private IMetricService = DI.Services.DebugDI.IMetricService
 
 //----------------------------------------------------------------------------------------------------------------------
 [<DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof<ArgumentOptions>)>]
-let appInit (options : ArgumentOptions) =
-
-    DI.Brokers.NetworkDI.IIpBroker.init (PingTimeOut.create options.PingTimeOut)
-                                        (Retries.create options.Retries)
-                                        (NameLookupTimeOut.create options.NameLookUpTimeOut)
-
-    DI.Brokers.StorageDI.IMacBlackListBroker.init (FileName.create options.MacBlackListFileName)
-    DI.Brokers.StorageDI.IIpBlackListBroker.init (FileName.create options.IpBlackListFileName)
-//----------------------------------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------------------------------
-let scanAndOutputNetwork (options : ArgumentOptions) =
+let scanAndOutputNetwork (ipService : IIpService)
+                         (metricsService : IMetricsService)
+                         (options : ArgumentOptions) =
 
     let processTask =
         task {
             let scanNetworkStopwatch = Stopwatch.StartNew ()
 
             let! deviceInfos =
-                IIpService.scanNetworkAsync options.ShowMacs options.ShowNames options.UseDns
+                ipService.scanNetworkAsync options.ShowMacs options.ShowNames options.UseDns
                                             (IpNetwork.create options.Network)
 
             scanNetworkStopwatch.Stop ()
 
             if options.Debug then
-                IMetricService.outputScanNetworkTimeTry scanNetworkStopwatch
+                metricsService.outputScanNetworkTimeTry scanNetworkStopwatch
 
             deviceInfos
-            |> IIpService.outputDeviceInfos
+            |> ipService.outputDeviceInfos
                   { ActivesOnly = options.ActivesOnly
                     Separator = options.Separator
                     ShowMacs = options.ShowMacs
@@ -55,22 +45,34 @@ let scanAndOutputNetwork (options : ArgumentOptions) =
 //----------------------------------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------------------------------
-try
-    let args = Environment.GetCommandLineArgs () |> Array.tail
-    use parser = new Parser (fun o -> o.HelpWriter <- null)
+let parser = new Parser (fun o -> o.HelpWriter <- null)
 
-    match parser.ParseArguments<ArgumentOptions> args with
+let parserResult =
+    Environment.GetCommandLineArgs () |> Array.tail
+    |> parser.ParseArguments<ArgumentOptions>
+
+let ServiceProvider = ServiceProviderBuild parserResult.Value
+
+let helpTextService = ServiceProvider.GetRequiredService<IHelpTextService>()
+let exceptionService = ServiceProvider.GetRequiredService<IExceptionService>()
+//----------------------------------------------------------------------------------------------------------------------
+
+//----------------------------------------------------------------------------------------------------------------------
+try
+    match parserResult with
     | Parsed as opts ->
-             appInit opts.Value
-             scanAndOutputNetwork opts.Value
+             let ipService = ServiceProvider.GetRequiredService<IIpService>()
+             let metricsService = ServiceProvider.GetRequiredService<IMetricsService>()
+
+             scanAndOutputNetwork ipService metricsService opts.Value
     | NotParsed as notParsed ->
              notParsed.Errors
              |> ArgErrors
-             |> IHelpService.showHelp
+             |> helpTextService.showHelp
              |> exit
 
 with
-| :? ValidationException as ve -> IHelpService.showHelp <| ValidationError ve |> exit
-| e -> IExceptionService.outputException e
+| :? ValidationException as ve -> helpTextService.showHelp <| ValidationError ve |> exit
+| e -> exceptionService.outputException e
        exit EXIT_CODE_EXCEPTION
 //----------------------------------------------------------------------------------------------------------------------

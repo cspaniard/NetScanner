@@ -1,30 +1,21 @@
-namespace Brokers.Storage.MacBlacklist
+namespace Brokers
 
 open System
 open System.IO
+open DI.Interfaces
 open Model
 open Motsoft.Util
 
-type Broker () =
+type MacBlacklistBroker (fileName : FileName) =
 
-    static let mutable _fileName = FileName.create ""
+    interface IMacBlacklistBroker with
+        //--------------------------------------------------------------------------------------------------------------
+        member _.getMacBlacklistTry () =
 
-    //------------------------------------------------------------------------------------------------------------------
-    static member init fileName =
-        _fileName <- fileName
-    //------------------------------------------------------------------------------------------------------------------
-
-    //------------------------------------------------------------------------------------------------------------------
-    static member FileName with get () = _fileName
-    //------------------------------------------------------------------------------------------------------------------
-
-    //------------------------------------------------------------------------------------------------------------------
-    static member getMacBlacklistTry () =
-
-        match Broker.FileName.hasValue with
-        | true -> File.ReadAllLines Broker.FileName.value
-                  |> Array.map (fun l -> l |> split "\t")
-                  |> Array.collect id
-                  |> Array.filter (not << String.IsNullOrEmpty)
-        | false -> Array.empty<string>
-    //------------------------------------------------------------------------------------------------------------------
+            match fileName.hasValue with
+            | true -> File.ReadAllLines fileName.value
+                      |> Array.map (fun l -> l |> split "\t")
+                      |> Array.collect id
+                      |> Array.filter (not << String.IsNullOrEmpty)
+            | false -> Array.empty<string>
+        //--------------------------------------------------------------------------------------------------------------

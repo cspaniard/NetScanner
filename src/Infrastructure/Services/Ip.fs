@@ -1,66 +1,63 @@
-namespace Services.Network.Ip
+namespace Services
 
 open System.Runtime.InteropServices
 open System.Text.RegularExpressions
 open System.Threading.Tasks
 
 open Model
+open DI.Interfaces
 
-type private IIpBroker = DI.Brokers.NetworkDI.IIpBroker
-type private INetworkBroker = DI.Brokers.NetworkDI.INetworkBroker
-type private IMacBlackListBroker = DI.Brokers.StorageDI.IMacBlackListBroker
-type private IIpBlackListBroker = DI.Brokers.StorageDI.IIpBlackListBroker
-
-type Service () =
+type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
+                macBlackListBroker : IMacBlacklistBroker, ipBlacklistBroker : IIpBlacklistBroker) =
 
     //------------------------------------------------------------------------------------------------------------------
-    static let scanStatusAsyncTry (ipBlackList : IpAddress array) (network : IpNetwork) =
+    let scanStatusAsyncTry (ipBlackList : IpAddress array) (network : IpNetwork) =
 
         let removeSetFromSet s1 s2 = Set.difference s2 s1
 
         set [ for i in 1..254 -> IpAddress.create $"%s{network.value}{i}" ]
         |> removeSetFromSet (ipBlackList |> Set.ofArray)
         |> Set.toArray
-        |> Array.map IIpBroker.getDeviceInfoStatusForIpAsync
+        |> Array.map ipBroker.getDeviceInfoStatusForIpAsync
         |> Task.WhenAll
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static let getMacInfosForActiveIpsAsyncTry (deviceInfos : DeviceInfo[]) =
+    let getMacInfosForActiveIpsAsyncTry (deviceInfos : DeviceInfo[]) =
 
         deviceInfos
         |> Array.map (fun di -> if di.Active
-                                then IIpBroker.getMacForIpAsync di.IpAddress
+                                then ipBroker.getMacForIpAsync di.IpAddress
                                 else MacInfo (di.IpAddress, Mac.create "") |> Task.FromResult)
         |> Task.WhenAll
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static let getNameInfosForActiveIpsAsyncTry useDns (deviceInfos : DeviceInfo[]) =
+    let getNameInfosForActiveIpsAsyncTry useDns (deviceInfos : DeviceInfo[]) =
 
         deviceInfos
         |> Array.map (fun di -> if di.Active
-                                then IIpBroker.getNameInfoForIpAsyncTry useDns di.IpAddress
+                                then ipBroker.getNameInfoForIpAsyncTry useDns di.IpAddress
                                 else NameInfo (di.IpAddress, "") |> Task.FromResult)
         |> Task.WhenAll
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static let getMacBlackListTry () =
+    let getMacBlackListTry () =
 
-        IMacBlackListBroker.getMacBlacklistTry ()
+        macBlackListBroker.getMacBlacklistTry ()
         |> Array.map (Mac.clean >> Mac.create)
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static let getIpBlackListTry () =
+    let getIpBlackListTry () =
 
-        IIpBlackListBroker.getIpBlacklistTry ()
+        ipBlacklistBroker.getIpBlacklistTry ()
         |> Array.map IpAddress.create
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static let scanMacInfoAsyncTry blackList deviceInfos =
+    let scanMacInfoAsyncTry blackList deviceInfos =
 
         //--------------------------------------------------------------------------------------------------------------
         let filterMacBlackList (macBlackList : Mac[]) (deviceInfos : DeviceInfo[]) =
@@ -83,7 +80,7 @@ type Service () =
         let getlocalMacInfoForIpAsync (ipAddress : IpAddress) =
             backgroundTask {
                 try
-                    return! IIpBroker.getLocalMacInfoForIpAsyncTry ipAddress
+                    return! ipBroker.getLocalMacInfoForIpAsyncTry ipAddress
                 with _ ->
                     return MacInfo (ipAddress, Mac.create "")
             }
@@ -136,7 +133,7 @@ type Service () =
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    static let scanNameInfoAsyncTry useDns deviceInfos =
+    let scanNameInfoAsyncTry useDns deviceInfos =
 
         //--------------------------------------------------------------------------------------------------------------
         let mergeInfos (deviceInfos : DeviceInfo[]) (nameInfos : NameInfo[]) =
@@ -154,45 +151,47 @@ type Service () =
         }
     //------------------------------------------------------------------------------------------------------------------
 
-    //------------------------------------------------------------------------------------------------------------------
-    static member scanNetworkAsync scanMacs scanNames useDns network =
 
-        backgroundTask {
+    interface IIpService with
+        //--------------------------------------------------------------------------------------------------------------
+        member _.scanNetworkAsync scanMacs scanNames useDns network =
 
-            let macBlackList = getMacBlackListTry()
-            let ipBlackList = getIpBlackListTry()
+            backgroundTask {
 
-            let! deviceInfos = scanStatusAsyncTry ipBlackList network
+                let macBlackList = getMacBlackListTry()
+                let ipBlackList = getIpBlackListTry()
 
-            let! deviceInfos = if scanMacs || macBlackList.Length > 0
-                               then scanMacInfoAsyncTry macBlackList deviceInfos
-                               else deviceInfos |> Task.FromResult
+                let! deviceInfos = scanStatusAsyncTry ipBlackList network
 
-            let! deviceInfos = if scanNames
-                               then scanNameInfoAsyncTry useDns deviceInfos
-                               else deviceInfos |> Task.FromResult
+                let! deviceInfos = if scanMacs || macBlackList.Length > 0
+                                   then scanMacInfoAsyncTry macBlackList deviceInfos
+                                   else deviceInfos |> Task.FromResult
 
-            return deviceInfos
-        }
-    //------------------------------------------------------------------------------------------------------------------
+                let! deviceInfos = if scanNames
+                                   then scanNameInfoAsyncTry useDns deviceInfos
+                                   else deviceInfos |> Task.FromResult
 
-    //------------------------------------------------------------------------------------------------------------------
-    static member outputDeviceInfos (outputParams : OutputDeviceInfosParams) (deviceInfos : DeviceInfo[]) =
+                return deviceInfos
+            }
+        //--------------------------------------------------------------------------------------------------------------
 
-        let filterFun =
-            if outputParams.ActivesOnly
-            then Array.filter _.Active
-            else id
+        //--------------------------------------------------------------------------------------------------------------
+        member _.outputDeviceInfos (outputParams : OutputDeviceInfosParams) (deviceInfos : DeviceInfo[]) =
 
-        let separator = Regex.Unescape outputParams.Separator
+            let filterFun =
+                if outputParams.ActivesOnly
+                then Array.filter _.Active
+                else id
 
-        let buildInfoLinesFun =
-            Array.map (fun di -> $"%s{di.IpAddress.value}%s{separator}%b{di.Active}" +
-                                 (if outputParams.ShowMacs then $"%s{separator}%s{di.Mac.formatted}" else "") +
-                                 (if outputParams.ShowNames then $"%s{separator}%s{di.Name}" else ""))
+            let separator = Regex.Unescape outputParams.Separator
 
-        deviceInfos
-        |> filterFun
-        |> buildInfoLinesFun
-        |> INetworkBroker.outputDeviceInfoLines
-    //------------------------------------------------------------------------------------------------------------------
+            let buildInfoLinesFun =
+                Array.map (fun di -> $"%s{di.IpAddress.value}%s{separator}%b{di.Active}" +
+                                     (if outputParams.ShowMacs then $"%s{separator}%s{di.Mac.formatted}" else "") +
+                                     (if outputParams.ShowNames then $"%s{separator}%s{di.Name}" else ""))
+
+            deviceInfos
+            |> filterFun
+            |> buildInfoLinesFun
+            |> networkBroker.outputDeviceInfoLines
+        //--------------------------------------------------------------------------------------------------------------

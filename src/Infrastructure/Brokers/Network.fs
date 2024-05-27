@@ -1,11 +1,14 @@
-namespace Brokers.Debug.Metrics
+namespace Brokers
 
 open System
+open DI.Interfaces
 
-type Broker () =
+type NetworkBroker () =
 
     //------------------------------------------------------------------------------------------------------------------
-    static member outputMeasurementTry elementName (ms : int64) =
+    interface INetworkBroker with
+        member _.outputDeviceInfoLines (deviceInfoLines : string[]) =
 
-        Console.Error.WriteLine $"%s{elementName}: %i{ms}ms."
+            deviceInfoLines
+            |> Array.iter Console.WriteLine
     //------------------------------------------------------------------------------------------------------------------
