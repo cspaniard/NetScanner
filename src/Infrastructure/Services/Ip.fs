@@ -11,7 +11,7 @@ type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
                 macBlackListBroker : IMacBlacklistBroker, ipBlacklistBroker : IIpBlacklistBroker) =
 
     //------------------------------------------------------------------------------------------------------------------
-    let scanStatusAsyncTry (ipBlackList : IpAddress array) (network : IpNetwork) =
+    let scanStatusAsyncTry (network : IpNetwork) (ipBlackList : IpAddress array) =
 
         let removeSetFromSet s1 s2 = Set.difference s2 s1
 
@@ -152,7 +152,9 @@ type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
     //------------------------------------------------------------------------------------------------------------------
 
 
+    //------------------------------------------------------------------------------------------------------------------
     interface IIpService with
+
         //--------------------------------------------------------------------------------------------------------------
         member _.scanNetworkAsync scanMacs scanNames useDns network =
 
@@ -161,7 +163,7 @@ type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
                 let macBlackList = getMacBlackListTry()
                 let ipBlackList = getIpBlackListTry()
 
-                let! deviceInfos = scanStatusAsyncTry ipBlackList network
+                let! deviceInfos = scanStatusAsyncTry network ipBlackList
 
                 let! deviceInfos = if scanMacs || macBlackList.Length > 0
                                    then scanMacInfoAsyncTry macBlackList deviceInfos
@@ -195,3 +197,4 @@ type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
             |> buildInfoLinesFun
             |> networkBroker.outputDeviceInfoLines
         //--------------------------------------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------------------------------
