@@ -15,7 +15,7 @@
       <Compile Include="Brokers\HelpText.fs" />
       <Compile Include="Brokers\Exception.fs" />
       <Compile Include="Brokers\Metrics.fs" />
-      <Compile Include="Brokers\BacklistBrokes.fs" />
+      <Compile Include="Brokers\BacklistBrokers.fs" />
       <Compile Include="Services\Ip.fs" />
       <Compile Include="Services\HelpText.fs" />
       <Compile Include="Services\Exception.fs" />
