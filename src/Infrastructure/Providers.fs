@@ -8,6 +8,7 @@ open Brokers
 open Services
 
 let ServiceProviderBuild (options : ArgumentOptions) =
+
     ServiceCollection()
         .AddSingleton<IProcessBroker, ProcessBroker>()
         .AddSingleton<IIpBroker, IpBroker>(
@@ -21,9 +22,9 @@ let ServiceProviderBuild (options : ArgumentOptions) =
         .AddSingleton<IExceptionBroker, ExceptionBroker>()
         .AddSingleton<IMetricsBroker, MetricsBroker>()
         .AddSingleton<IMacBlacklistBroker, MacBlacklistBroker>(
-            fun services -> MacBlacklistBroker(FileName.create options.MacBlackListFileName))
+            fun _ -> MacBlacklistBroker(FileName.create options.MacBlackListFileName))
         .AddSingleton<IIpBlacklistBroker, IpBlacklistBroker>(
-            fun services -> IpBlacklistBroker(FileName.create options.IpBlackListFileName))
+            fun _ -> IpBlacklistBroker(FileName.create options.IpBlackListFileName))
 
         .AddSingleton<IIpService, IpService>()
         .AddSingleton<IHelpTextService, HelpTextService>()

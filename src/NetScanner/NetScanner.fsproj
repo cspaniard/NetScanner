@@ -4,9 +4,13 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net7.0</TargetFramework>
         <AssemblyName>netscanner</AssemblyName>
-        <AssemblyVersion>5.0.2</AssemblyVersion>
+        <AssemblyVersion>5.0.3</AssemblyVersion>
         <LangVersion>latest</LangVersion>
         <SelfContained>true</SelfContained>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <OtherFlags>$(OtherFlags) --warnon:1182</OtherFlags>
     </PropertyGroup>
 
     <ItemGroup>

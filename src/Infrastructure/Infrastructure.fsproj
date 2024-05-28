@@ -7,6 +7,10 @@
         <SelfContained>true</SelfContained>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <OtherFlags>$(OtherFlags) --warnon:1182</OtherFlags>
+    </PropertyGroup>
+    
     <ItemGroup>
       <Compile Include="Interfaces.fs" />
       <Compile Include="Brokers\Process.fs" />
