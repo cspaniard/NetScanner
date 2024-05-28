@@ -2,7 +2,6 @@ open System
 open System.ComponentModel.DataAnnotations
 open System.Diagnostics
 open System.Diagnostics.CodeAnalysis
-open System.Threading.Tasks
 open CommandLine
 
 open Microsoft.Extensions.DependencyInjection
@@ -21,7 +20,7 @@ let scanAndOutputNetwork (ipService : IIpService)
                          (options : ArgumentOptions) =
 
     let processTask =
-        task {
+        backgroundTask {
             let scanNetworkStopwatch = Stopwatch.StartNew ()
 
             let! deviceInfos =
@@ -39,7 +38,7 @@ let scanAndOutputNetwork (ipService : IIpService)
                     Separator = options.Separator
                     ShowMacs = options.ShowMacs
                     ShowNames = options.ShowNames }
-        } :> Task
+        }
 
     processTask.GetAwaiter().GetResult()
 //----------------------------------------------------------------------------------------------------------------------

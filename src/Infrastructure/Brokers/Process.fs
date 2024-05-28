@@ -74,7 +74,7 @@ type ProcessBroker () as this =
             let readAllLinesAsyncTry (reader : StreamReader) =
 
                 let rec readAllLinesAsync (reader : StreamReader) (stdOutLines: ResizeArray<string>) =
-                    task {
+                    backgroundTask {
                         match! reader.ReadLineAsync () with
                         | null -> return stdOutLines
                         | line ->
