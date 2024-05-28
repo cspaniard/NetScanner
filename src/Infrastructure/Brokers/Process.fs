@@ -103,8 +103,7 @@ type ProcessBroker () as this =
                     Task.WhenAll [| readAllLinesAsyncTry proc.StandardOutput
                                     readAllLinesAsyncTry proc.StandardError |]
 
-                let stdOutLines = results[0]
-                let stdErrLines = results[1]
+                let stdOutLines, stdErrLines = results[0], results[1]
 
                 do! proc.WaitForExitAsync ()
 
