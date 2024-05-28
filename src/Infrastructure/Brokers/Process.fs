@@ -4,6 +4,7 @@ open System
 open System.Diagnostics
 open System.IO
 open System.Threading
+open System.Threading.Tasks
 open Model
 open DI.Interfaces
 
@@ -96,8 +97,12 @@ type ProcessBroker () as this =
                                       Arguments = arguments)
                     |> Process.Start
 
-                let! stdOutLines = readAllLinesAsyncTry proc.StandardOutput
-                let! stdErrLines = readAllLinesAsyncTry proc.StandardError
+                let! results =
+                    Task.WhenAll [| readAllLinesAsyncTry proc.StandardOutput
+                                    readAllLinesAsyncTry proc.StandardError |]
+
+                let stdOutLines = results[0]
+                let stdErrLines = results[1]
 
                 do! proc.WaitForExitAsync ()
 
