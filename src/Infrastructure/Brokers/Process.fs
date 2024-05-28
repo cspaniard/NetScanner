@@ -74,16 +74,18 @@ type ProcessBroker () as this =
             //----------------------------------------------------------------------------------------------------------
             let readAllLinesAsyncTry (reader : StreamReader) =
 
-                let rec readAllLinesAsync (reader : StreamReader) (stdOutLines: ResizeArray<string>) =
-                    backgroundTask {
-                        match! reader.ReadLineAsync () with
-                        | null -> return stdOutLines
-                        | line ->
-                            stdOutLines.Add line
-                            return! readAllLinesAsync reader stdOutLines
-                    }
+                backgroundTask {
+                    let lines = ResizeArray<string> ()
 
-                readAllLinesAsync reader (ResizeArray<string>())
+                    let mutable shouldContinue = true
+
+                    while shouldContinue do
+                        match! reader.ReadLineAsync () with
+                        | null -> shouldContinue <- false
+                        | line -> lines.Add line
+
+                    return lines.ToArray()
+                }
             //----------------------------------------------------------------------------------------------------------
 
             backgroundTask {
@@ -106,6 +108,6 @@ type ProcessBroker () as this =
 
                 do! proc.WaitForExitAsync ()
 
-                return (stdOutLines.ToArray (), stdErrLines.ToArray (), proc.ExitCode)
+                return (stdOutLines, stdErrLines, proc.ExitCode)
             }
         //--------------------------------------------------------------------------------------------------------------
