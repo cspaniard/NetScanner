@@ -44,23 +44,29 @@ type IpBroker (processBroker : IProcessBroker, pingTimeOut : PingTimeOut,
 
             backgroundTask {
 
-                let ping = new Ping ()
-                let mutable retryCount = retries.value
-                let mutable resultStatus = IPStatus.Unknown
+                try
+                    let ping = new Ping ()
+                    let mutable retryCount = retries.value
+                    let mutable resultStatus = IPStatus.Unknown
 
-                while retryCount > 0 do
-                    let! pingReply = ping.SendPingAsync (ipAddress.value, pingTimeOut.value)
+                    while retryCount > 0 do
+                        let! pingReply = ping.SendPingAsync (ipAddress.value, pingTimeOut.value)
 
-                    if pingReply.Status = IPStatus.Success then
-                        resultStatus <- pingReply.Status
-                        retryCount <- 0
-                    else
-                        retryCount <- retryCount - 1
+                        if pingReply.Status = IPStatus.Success then
+                            resultStatus <- pingReply.Status
+                            retryCount <- 0
+                        else
+                            retryCount <- retryCount - 1
 
-                return ({ IpAddress = ipAddress
-                          Active = (resultStatus = IPStatus.Success)
-                          Mac = Mac.create ""
-                          Name = ""} : DeviceInfo)
+                    return ({ IpAddress = ipAddress
+                              Active = (resultStatus = IPStatus.Success)
+                              Mac = Mac.create ""
+                              Name = ""} : DeviceInfo)
+                with _ ->
+                    return ({ IpAddress = ipAddress
+                              Active = false
+                              Mac = Mac.create ""
+                              Name = ""} : DeviceInfo)
             }
         //--------------------------------------------------------------------------------------------------------------
 
