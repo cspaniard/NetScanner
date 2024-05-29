@@ -43,17 +43,27 @@ type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    let getMacBlackListTry () =
+    let getMacBlackListAsyncTry () =
 
-        macBlackListBroker.getMacBlacklistTry ()
-        |> Array.map (Mac.clean >> Mac.create)
+        backgroundTask {
+            let! macBlackList = macBlackListBroker.getMacBlacklistAsyncTry ()
+
+            return
+                macBlackList
+                |> Array.map (Mac.clean >> Mac.create)
+        }
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    let getIpBlackListTry () =
+    let getIpBlackListAsyncTry () =
 
-        ipBlacklistBroker.getIpBlacklistTry ()
-        |> Array.map IpAddress.create
+        backgroundTask {
+            let! ipBlackList = ipBlacklistBroker.getIpBlacklistAsyncTry ()
+
+            return
+                ipBlackList
+                |> Array.map IpAddress.create
+        }
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
@@ -160,8 +170,8 @@ type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
 
             backgroundTask {
 
-                let macBlackList = getMacBlackListTry()
-                let ipBlackList = getIpBlackListTry()
+                let! macBlackList = getMacBlackListAsyncTry()
+                let! ipBlackList = getIpBlackListAsyncTry()
 
                 let! deviceInfos = scanStatusAsyncTry network ipBlackList
 

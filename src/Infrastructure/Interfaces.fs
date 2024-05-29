@@ -38,10 +38,10 @@ type IMetricsBroker =
     abstract member outputMeasurementTry: elementName : string -> ms : int64 -> unit
 
 type IMacBlacklistBroker =
-    abstract member getMacBlacklistTry : unit -> string array
+    abstract member getMacBlacklistAsyncTry : unit -> Task<string array>
 
 type IIpBlacklistBroker =
-    abstract member getIpBlacklistTry : unit -> string array
+    abstract member getIpBlacklistAsyncTry : unit -> Task<string array>
 //----------------------------------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------------------------------

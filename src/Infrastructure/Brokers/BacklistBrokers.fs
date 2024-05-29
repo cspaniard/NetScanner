@@ -10,14 +10,20 @@ open Motsoft.Util
 [<AbstractClass>]
 type BlacklistBrokerBase (fileName : FileName) =
 
-    member _.getBlacklistTry () =
+    member _.getBlacklistAsyncTry () =
 
-        match fileName.hasValue with
-        | true -> File.ReadAllLines fileName.value
-                  |> Array.map (fun l -> l |> split "\t")
-                  |> Array.collect id
-                  |> Array.filter (not << String.IsNullOrEmpty)
-        | false -> Array.empty<string>
+        backgroundTask {
+            match fileName.hasValue with
+            | true ->
+                let! lines = File.ReadAllLinesAsync fileName.value
+                return
+                    lines
+                    |> Array.map (fun l -> l |> split "\t")
+                    |> Array.collect id
+                    |> Array.filter (not << String.IsNullOrEmpty)
+            | false ->
+                return Array.empty<string>
+        }
 //----------------------------------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -26,8 +32,8 @@ type IpBlacklistBroker (fileName : FileName) =
 
     interface IIpBlacklistBroker with
 
-        member _.getIpBlacklistTry () =
-            base.getBlacklistTry ()
+        member _.getIpBlacklistAsyncTry () =
+            base.getBlacklistAsyncTry ()
 //----------------------------------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -36,6 +42,6 @@ type MacBlacklistBroker (fileName : FileName) =
 
     interface IMacBlacklistBroker with
 
-        member _.getMacBlacklistTry () =
-            base.getBlacklistTry ()
+        member _.getMacBlacklistAsyncTry () =
+            base.getBlacklistAsyncTry ()
 //----------------------------------------------------------------------------------------------------------------------
