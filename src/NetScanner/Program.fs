@@ -14,6 +14,7 @@ open DI.Providers
 
 
 //----------------------------------------------------------------------------------------------------------------------
+// TODO: Evaluar si se puede cambiar a una clase para usar DI.
 [<DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof<ArgumentOptions>)>]
 let scanAndOutputNetwork (ipService : IIpService)
                          (metricsService : IMetricsService)
@@ -33,7 +34,7 @@ let scanAndOutputNetwork (ipService : IIpService)
                 metricsService.outputScanNetworkTimeTry scanNetworkStopwatch
 
             deviceInfos
-            |> ipService.outputDeviceInfos
+            |> ipService.outputDeviceInfos              // TODO: cambiar a parámetros independientes
                   { ActivesOnly = options.ActivesOnly
                     Separator = options.Separator
                     ShowMacs = options.ShowMacs

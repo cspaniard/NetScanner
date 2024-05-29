@@ -50,7 +50,7 @@ type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
 
             return
                 macBlackList
-                |> Array.map (Mac.clean >> Mac.create)
+                |> Array.map Mac.create
         }
     //------------------------------------------------------------------------------------------------------------------
 

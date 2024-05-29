@@ -96,8 +96,8 @@ type IpBroker (processBroker : IProcessBroker, pingTimeOut : PingTimeOut,
                 [|
                     for i, line in stdOutLines |> Array.mapi (fun i v -> i, v) do
                         if line.Contains $"inet {ipAddress.value}" then
-                            let macCleanValue = (stdOutLines[i - 1] |> split " ")[1] |> Mac.clean
-                            yield MacInfo(ipAddress, Mac.create macCleanValue)
+                            let macValue = (stdOutLines[i - 1] |> split " ")[1]
+                            yield MacInfo(ipAddress, Mac.create macValue)
                 |]
                 |> Array.tryFind (fun (MacInfo (ipAddress, _)) -> ipAddress = ipAddress)
             //----------------------------------------------------------------------------------------------------------

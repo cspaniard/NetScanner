@@ -54,6 +54,7 @@ type Mac =
 
         static member create (value : string) =
             value
+            |> Mac.clean
             |> Mac.canonicalize
             |> Mac.validateTry
             |> Mac
