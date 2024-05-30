@@ -13,7 +13,7 @@ type Retries =
                 |> Array.iter (fun f -> f value)
 
                 value
-            with e -> raise <| ValidationException $"retries: {e.Message}"
+            with e -> raise <| ValidationException $"reintentos: {e.Message}"
 
         member this.value = let (Retries value) = this in value
         override this.ToString () = this.value.ToString ()
