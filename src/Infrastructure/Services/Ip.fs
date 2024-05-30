@@ -188,19 +188,19 @@ type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
         //--------------------------------------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------------------------------------
-        member _.outputDeviceInfos (outputParams : OutputDeviceInfosParams) (deviceInfos : DeviceInfo[]) =
+        member _.outputDeviceInfos activesOnly separator showMacs showNames (deviceInfos : DeviceInfo[]) =
 
             let filterFun =
-                if outputParams.ActivesOnly
+                if activesOnly
                 then Array.filter _.Active
                 else id
 
-            let separator = Regex.Unescape outputParams.Separator
+            let separator = Regex.Unescape separator
 
             let buildInfoLinesFun =
                 Array.map (fun di -> $"%s{di.IpAddress.value}%s{separator}%b{di.Active}" +
-                                     (if outputParams.ShowMacs then $"%s{separator}%s{di.Mac.formatted}" else "") +
-                                     (if outputParams.ShowNames then $"%s{separator}%s{di.Name}" else ""))
+                                     (if showMacs then $"%s{separator}%s{di.Mac.formatted}" else "") +
+                                     (if showNames then $"%s{separator}%s{di.Name}" else ""))
 
             deviceInfos
             |> filterFun

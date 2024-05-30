@@ -28,12 +28,6 @@ type AppErrors =
     | ExceptionErrors of ExceptionErrors
     | ValidationError of ValidationException
 
-type OutputDeviceInfosParams = {
-    ActivesOnly : bool
-    Separator : string
-    ShowMacs : bool
-    ShowNames : bool
-}
 
 module Definitions =
 

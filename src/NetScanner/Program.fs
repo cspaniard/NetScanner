@@ -34,11 +34,7 @@ let scanAndOutputNetwork (ipService : IIpService)
                 metricsService.outputScanNetworkTimeTry scanNetworkStopwatch
 
             deviceInfos
-            |> ipService.outputDeviceInfos              // TODO: cambiar a parámetros independientes
-                  { ActivesOnly = options.ActivesOnly
-                    Separator = options.Separator
-                    ShowMacs = options.ShowMacs
-                    ShowNames = options.ShowNames }
+            |> ipService.outputDeviceInfos options.ActivesOnly options.Separator options.ShowMacs options.ShowNames
         }
 
     processTask.GetAwaiter().GetResult()
