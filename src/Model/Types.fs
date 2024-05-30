@@ -22,11 +22,13 @@ type NotParsed = NotParsed<ArgumentOptions>
 
 type ArgErrors = seq<Error>
 type ExceptionErrors = seq<Exception>
+type ValidationErrors = seq<ValidationException>
 
 type AppErrors =
     | ArgErrors of ArgErrors
     | ExceptionErrors of ExceptionErrors
     | ValidationError of ValidationException
+    | ValidationErrors of ValidationErrors
 
 
 module Definitions =

@@ -7,9 +7,9 @@ open Microsoft.Extensions.DependencyInjection
 open Microsoft.FSharp.Core
 open Model
 open Model.Constants
-open Model.Definitions
 open DI.Interfaces
 open DI.Providers
+open NetScanner.ArgumentOptionsValidation
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -24,20 +24,14 @@ let ServiceProvider = ServiceProviderBuild parserResult.Value
 
 let helpTextService = ServiceProvider.GetRequiredService<IHelpTextService>()
 let exceptionService = ServiceProvider.GetRequiredService<IExceptionService>()
+let ifOptionErrorsShowAndExit = ifOptionErrorsShowAndExit helpTextService
 //----------------------------------------------------------------------------------------------------------------------
 
-//----------------------------------------------------------------------------------------------------------------------
 try
-    match parserResult with
-    | Parsed ->
-             let mainApp = ServiceProvider.GetRequiredService<IMainApp>()
-             mainApp.run ()
+    ifOptionErrorsShowAndExit parserResult
 
-    | NotParsed as notParsed ->
-             notParsed.Errors
-             |> ArgErrors
-             |> helpTextService.showHelp
-             |> exit
+    let mainApp = ServiceProvider.GetRequiredService<IMainApp>()
+    mainApp.run ()
 
 with
 | :? ValidationException as ve -> helpTextService.showHelp <| ValidationError ve |> exit

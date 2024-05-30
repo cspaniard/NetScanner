@@ -4,7 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net7.0</TargetFramework>
         <AssemblyName>netscanner</AssemblyName>
-        <AssemblyVersion>5.1.5</AssemblyVersion>
+        <AssemblyVersion>5.1.6</AssemblyVersion>
         <LangVersion>latest</LangVersion>
         <SelfContained>true</SelfContained>
     </PropertyGroup>
@@ -17,6 +17,7 @@
         <Compile Include="Interfaces.fs" />
         <Compile Include="MainApp.fs" />
         <Compile Include="Providers.fs" />
+        <Compile Include="ValueValidation.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 

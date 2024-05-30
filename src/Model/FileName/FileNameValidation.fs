@@ -1,6 +1,7 @@
 module Model.FileNameValidation
 
 open System
+open System.ComponentModel.DataAnnotations
 open System.IO
 open Motsoft.Util
 

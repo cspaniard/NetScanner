@@ -79,16 +79,17 @@ type HelpTextService (helpTextBroker : IHelpTextBroker) =
             let processExceptionErrors (exceptionErrors : ExceptionErrors) =
 
                 exceptionErrors
-                |> Seq.map (fun e -> e.Message)
+                |> Seq.map _.Message
                 |> showHelpText
 
                 EXIT_CODE_EXCEPTION
             //----------------------------------------------------------------------------------------------------------
 
             //----------------------------------------------------------------------------------------------------------
-            let processValidationError (validationError : ValidationException) =
+            let processValidationErrors (validationErrors : ValidationException seq) =
 
-                [ validationError.Message ]
+                validationErrors
+                |> Seq.map _.Message
                 |> showHelpText
 
                 EXIT_CODE_ARG_ERROR
@@ -97,5 +98,6 @@ type HelpTextService (helpTextBroker : IHelpTextBroker) =
             match appErrors with
             | ArgErrors argErrors -> processArgErrors argErrors
             | ExceptionErrors exceptionErrors -> processExceptionErrors exceptionErrors
-            | ValidationError validationError -> processValidationError validationError
+            | ValidationError validationError -> processValidationErrors [ validationError ]
+            | ValidationErrors validationErrors -> processValidationErrors validationErrors
         //--------------------------------------------------------------------------------------------------------------
