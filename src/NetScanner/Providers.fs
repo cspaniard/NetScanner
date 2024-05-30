@@ -6,6 +6,7 @@ open Model
 open DI.Interfaces
 open Brokers
 open Services
+open NetScanner.App
 
 let ServiceProviderBuild (options : ArgumentOptions) =
 
@@ -30,4 +31,9 @@ let ServiceProviderBuild (options : ArgumentOptions) =
         .AddSingleton<IHelpTextService, HelpTextService>()
         .AddSingleton<IExceptionService, ExceptionService>()
         .AddSingleton<IMetricsService, MetricsService>()
+        .AddSingleton<IMainApp, MainApp>(
+            fun services ->
+                MainApp(services.GetRequiredService<IIpService>(),
+                        services.GetRequiredService<IMetricsService>(),
+                        options))
         .BuildServiceProvider()

@@ -47,7 +47,7 @@ type IIpBlacklistBroker =
 //----------------------------------------------------------------------------------------------------------------------
 type IIpService =
     abstract member scanNetworkAsync : scanMacs : bool -> scanNames : bool -> useDns : bool -> network : IpNetwork ->
-                                Task<DeviceInfo[]>
+                                       Task<DeviceInfo[]>
     abstract member outputDeviceInfos : activesOnly : bool -> separator : string -> showMacs : bool ->
                                         showNames : bool -> deviceInfos : DeviceInfo array -> unit
 
