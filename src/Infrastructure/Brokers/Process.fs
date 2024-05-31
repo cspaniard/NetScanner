@@ -8,24 +8,9 @@ open System.Threading.Tasks
 open Model
 open DI.Interfaces
 
-type ProcessBroker () as this =
-
-    // -----------------------------------------------------------------------------------------------------------------
-    let self = this :> IProcessBroker
-    // -----------------------------------------------------------------------------------------------------------------
+type ProcessBroker () =
 
     interface IProcessBroker with
-        //--------------------------------------------------------------------------------------------------------------
-        member _.startProcessTry (processName : string) (arguments : string) =
-
-            Process.Start (processName, arguments)
-        //--------------------------------------------------------------------------------------------------------------
-
-        //--------------------------------------------------------------------------------------------------------------
-        member _.startProcessWithStartInfoTry (startInfo : ProcessStartInfo) =
-
-            Process.Start startInfo
-        //--------------------------------------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------------------------------------
         member _.startProcessWithTimeOutAsync (processName : string) (timeOut : TimeOut) (arguments : string) =
@@ -35,12 +20,12 @@ type ProcessBroker () as this =
                                               FileName = processName,
                                               Arguments = arguments,
                                               WindowStyle = ProcessWindowStyle.Hidden,
-                                              UseShellExecute = false,
-                                              CreateNoWindow = true)
+                                              CreateNoWindow = true,
+                                              UseShellExecute = false)
 
             backgroundTask {
 
-                let proc = self.startProcessWithStartInfoTry startInfo
+                let proc = Process.Start startInfo
 
                 let cts = new CancellationTokenSource ()
 
@@ -54,17 +39,6 @@ type ProcessBroker () as this =
                 | :? OperationCanceledException ->
                     proc.Kill ()
                     return None
-            }
-        //--------------------------------------------------------------------------------------------------------------
-
-        //--------------------------------------------------------------------------------------------------------------
-        member _.startAndWaitForProcessAsyncTry (processName : string) (arguments : string) =
-
-            backgroundTask {
-                let proc = self.startProcessTry processName arguments
-                do! proc.WaitForExitAsync ()
-
-                return proc
             }
         //--------------------------------------------------------------------------------------------------------------
 
@@ -93,10 +67,10 @@ type ProcessBroker () as this =
                     ProcessStartInfo (RedirectStandardOutput = true,
                                       RedirectStandardError = true,
                                       FileName = processName,
+                                      Arguments = arguments,
                                       WindowStyle = ProcessWindowStyle.Hidden,
                                       CreateNoWindow = true,
-                                      UseShellExecute = false,
-                                      Arguments = arguments)
+                                      UseShellExecute = false)
                     |> Process.Start
 
                 let! results =

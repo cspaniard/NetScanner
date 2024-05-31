@@ -8,11 +8,8 @@ open Model
 
 //----------------------------------------------------------------------------------------------------------------------
 type IProcessBroker =
-    abstract member startProcessTry: processName: string -> arguments : string -> Process
-    abstract member startProcessWithStartInfoTry: startInfo : ProcessStartInfo -> Process
     abstract member startProcessWithTimeOutAsync: processName: string -> timeOut : TimeOut -> arguments: string ->
                                                   Task<Process option>
-    abstract member startAndWaitForProcessAsyncTry: processName: string -> arguments: string -> Task<Process>
     abstract member startProcessAndReadAllLinesAsyncTry: processName: string -> arguments: string ->
                                                          Task<string array * string array * int>
 
