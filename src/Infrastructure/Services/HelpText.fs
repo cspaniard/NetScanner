@@ -7,7 +7,7 @@ open Model
 open Model.Constants
 open DI.Interfaces
 
-type HelpTextService (helpTextBroker : IHelpTextBroker) =
+type HelpTextService (HelpTextBroker : IHelpTextBroker) =
 
     //------------------------------------------------------------------------------------------------------------------
     let getArgLinesInfo () =
@@ -44,14 +44,14 @@ type HelpTextService (helpTextBroker : IHelpTextBroker) =
                 //------------------------------------------------------------------------------------------------------
                 let showHelpText (errorMessages : seq<string>) =
 
-                    helpTextBroker.printHeader ()
-                    helpTextBroker.printUsage ()
-                    helpTextBroker.printErrorSection errorMessages
-                    helpTextBroker.printArgsInfo <| getArgLinesInfo ()
+                    HelpTextBroker.printHeader ()
+                    HelpTextBroker.printUsage ()
+                    HelpTextBroker.printErrorSection errorMessages
+                    HelpTextBroker.printArgsInfo <| getArgLinesInfo ()
                 //------------------------------------------------------------------------------------------------------
 
                 match Seq.head errorMessages with
-                | "VERSION" -> helpTextBroker.printHeader ()
+                | "VERSION" -> HelpTextBroker.printHeader ()
                 | "HELP" -> showHelpText Seq.empty
                 | _ -> showHelpText errorMessages
             //----------------------------------------------------------------------------------------------------------

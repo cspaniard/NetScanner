@@ -6,7 +6,7 @@ open DI.Interfaces
 open Model
 open Model.Definitions
 
-type OptionValidationService (helpTextService : IHelpTextService) =
+type OptionValidationService (HelpTextService : IHelpTextService) =
 
     //------------------------------------------------------------------------------------------------------------------
     let getOptionValidationErrors (options : ArgumentOptions) =
@@ -38,7 +38,7 @@ type OptionValidationService (helpTextService : IHelpTextService) =
             //----------------------------------------------------------------------------------------------------------
             let showErrorsAndExit (errors: AppErrors) =
                     errors
-                    |> helpTextService.showHelp
+                    |> HelpTextService.showHelp
                     |> exit
             //----------------------------------------------------------------------------------------------------------
 

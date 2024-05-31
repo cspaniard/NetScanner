@@ -7,8 +7,8 @@ open System.Threading.Tasks
 open Model
 open DI.Interfaces
 
-type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
-                macBlackListBroker : IMacBlacklistBroker, ipBlacklistBroker : IIpBlacklistBroker) =
+type IpService (IpBroker : IIpBroker, NetworkBroker : INetworkBroker,
+                MacBlackListBroker : IMacBlacklistBroker, IpBlacklistBroker : IIpBlacklistBroker) =
 
     //------------------------------------------------------------------------------------------------------------------
     let scanStatusAsyncTry (network : IpNetwork) (ipBlackList : IpAddress array) =
@@ -18,7 +18,7 @@ type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
         set [ for i in 1..254 -> IpAddress.create $"%s{network.value}{i}" ]
         |> removeSetFromSet (ipBlackList |> Set.ofArray)
         |> Set.toArray
-        |> Array.map ipBroker.getDeviceInfoStatusForIpAsync
+        |> Array.map IpBroker.getDeviceInfoStatusForIpAsync
         |> Task.WhenAll
     //------------------------------------------------------------------------------------------------------------------
 
@@ -27,7 +27,7 @@ type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
 
         deviceInfos
         |> Array.map (fun di -> if di.Active
-                                then ipBroker.getMacForIpAsync di.IpAddress
+                                then IpBroker.getMacForIpAsync di.IpAddress
                                 else MacInfo (di.IpAddress, Mac.create "") |> Task.FromResult)
         |> Task.WhenAll
     //------------------------------------------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
 
         deviceInfos
         |> Array.map (fun di -> if di.Active
-                                then ipBroker.getNameInfoForIpAsyncTry useDns di.IpAddress
+                                then IpBroker.getNameInfoForIpAsyncTry useDns di.IpAddress
                                 else NameInfo (di.IpAddress, "") |> Task.FromResult)
         |> Task.WhenAll
     //------------------------------------------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
     let getMacBlackListAsyncTry () =
 
         backgroundTask {
-            let! macBlackList = macBlackListBroker.getMacBlacklistAsyncTry ()
+            let! macBlackList = MacBlackListBroker.getMacBlacklistAsyncTry ()
 
             return
                 macBlackList
@@ -58,7 +58,7 @@ type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
     let getIpBlackListAsyncTry () =
 
         backgroundTask {
-            let! ipBlackList = ipBlacklistBroker.getIpBlacklistAsyncTry ()
+            let! ipBlackList = IpBlacklistBroker.getIpBlacklistAsyncTry ()
 
             return
                 ipBlackList
@@ -90,7 +90,7 @@ type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
         let getlocalMacInfoForIpAsync (ipAddress : IpAddress) =
             backgroundTask {
                 try
-                    return! ipBroker.getLocalMacInfoForIpAsyncTry ipAddress
+                    return! IpBroker.getLocalMacInfoForIpAsyncTry ipAddress
                 with _ ->
                     return MacInfo (ipAddress, Mac.create "")
             }
@@ -205,6 +205,6 @@ type IpService (ipBroker : IIpBroker, networkBroker : INetworkBroker,
             deviceInfos
             |> filterFun
             |> buildInfoLinesFun
-            |> networkBroker.outputDeviceInfoLines
+            |> NetworkBroker.outputDeviceInfoLines
         //--------------------------------------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------------------------

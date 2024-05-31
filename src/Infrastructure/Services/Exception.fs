@@ -3,13 +3,13 @@ namespace Services
 open System
 open DI.Interfaces
 
-type ExceptionService (exceptionBroker : IExceptionBroker) =
+type ExceptionService (ExceptionBroker : IExceptionBroker) =
 
     interface IExceptionService with
         //--------------------------------------------------------------------------------------------------------------
         member _.outputException (exn : Exception) =
 
             match exn with
-            | :? AggregateException as ae -> exceptionBroker.printAggregate ae
-            | e -> exceptionBroker.printSingle e
+            | :? AggregateException as ae -> ExceptionBroker.printAggregate ae
+            | e -> ExceptionBroker.printSingle e
         //--------------------------------------------------------------------------------------------------------------

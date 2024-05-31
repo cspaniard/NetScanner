@@ -21,19 +21,19 @@ let parserResult =
 
 let serviceProvider = ServiceProviderBuild parserResult.Value
 
-let helpTextService = serviceProvider.GetRequiredService<IHelpTextService>()
-let exceptionService = serviceProvider.GetRequiredService<IExceptionService>()
-let optionValidationService = serviceProvider.GetRequiredService<IOptionValidationService>()
+let HelpTextService = serviceProvider.GetRequiredService<IHelpTextService>()
+let ExceptionService = serviceProvider.GetRequiredService<IExceptionService>()
+let OptionValidationService = serviceProvider.GetRequiredService<IOptionValidationService>()
 //----------------------------------------------------------------------------------------------------------------------
 
 try
-    optionValidationService.ifErrorsShowAndExit parserResult
+    OptionValidationService.ifErrorsShowAndExit parserResult
 
     let mainApp = serviceProvider.GetRequiredService<IMainApp>()
     mainApp.run ()
 
 with
-| :? ValidationException as ve -> helpTextService.showHelp <| ValidationError ve |> exit
-| e -> exceptionService.outputException e
+| :? ValidationException as ve -> HelpTextService.showHelp <| ValidationError ve |> exit
+| e -> ExceptionService.outputException e
        exit EXIT_CODE_EXCEPTION
 //----------------------------------------------------------------------------------------------------------------------

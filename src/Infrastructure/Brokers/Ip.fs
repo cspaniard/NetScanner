@@ -18,7 +18,7 @@ module private IpBrokerExceptions =
 
 open IpBrokerExceptions
 
-type IpBroker (processBroker : IProcessBroker, pingTimeOut : PingTimeOut,
+type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
                retries : Retries, nameLookupTimeOut : NameLookupTimeOut) =
 
     //------------------------------------------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ type IpBroker (processBroker : IProcessBroker, pingTimeOut : PingTimeOut,
     let startProcessGetNameInfoForIpAsyncTry args =
 
         backgroundTask {
-            return! processBroker.startProcessWithTimeOutAsync lookUpApp nameLookupTimeOut.timeOut args
+            return! ProcessBroker.startProcessWithTimeOutAsync lookUpApp nameLookupTimeOut.timeOut args
         }
     //------------------------------------------------------------------------------------------------------------------
 
@@ -103,7 +103,7 @@ type IpBroker (processBroker : IProcessBroker, pingTimeOut : PingTimeOut,
             //----------------------------------------------------------------------------------------------------------
 
             backgroundTask {
-                let! stdOutLines, _, _ = processBroker.startProcessAndReadAllLinesAsyncTry "ip" "a"
+                let! stdOutLines, _, _ = ProcessBroker.startProcessAndReadAllLinesAsyncTry "ip" "a"
 
                 return
                     match stdOutLines |> getMacInfoOptionForIp ipAddress with

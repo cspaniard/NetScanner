@@ -5,7 +5,7 @@ open System.Diagnostics
 open DI.Interfaces
 
 
-type MetricsService (metricsBroker : IMetricsBroker) =
+type MetricsService (MetricsBroker : IMetricsBroker) =
 
     interface IMetricsService with
         //--------------------------------------------------------------------------------------------------------------
@@ -13,5 +13,5 @@ type MetricsService (metricsBroker : IMetricsBroker) =
 
             if stopwatch = null then raise (ArgumentNullException <| nameof stopwatch)
 
-            metricsBroker.outputMeasurementTry "Escaneado" stopwatch.ElapsedMilliseconds
+            MetricsBroker.outputMeasurementTry "Escaneado" stopwatch.ElapsedMilliseconds
         //--------------------------------------------------------------------------------------------------------------
