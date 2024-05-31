@@ -38,7 +38,7 @@ type HelpTextBroker () =
 
                 errorList
                 |> Seq.filter (not << String.IsNullOrWhiteSpace)
-                |> Seq.iter (fun errorLine -> Console.WriteLine $"{leftMargin}{errorLine}")
+                |> Seq.iter (fun errorLine -> Console.Error.WriteLine $"{leftMargin}{errorLine}")
         //--------------------------------------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------------------------------------
