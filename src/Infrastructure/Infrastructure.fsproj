@@ -24,6 +24,7 @@
       <Compile Include="Services\HelpText.fs" />
       <Compile Include="Services\Exception.fs" />
       <Compile Include="Services\Metrics.fs" />
+      <Compile Include="Services\OptionValidation.fs" />
     </ItemGroup>
 
     <ItemGroup>

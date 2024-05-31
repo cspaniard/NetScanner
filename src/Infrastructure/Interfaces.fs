@@ -3,6 +3,7 @@ module DI.Interfaces
 open System
 open System.Diagnostics
 open System.Threading.Tasks
+open CommandLine
 open Model
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -59,4 +60,7 @@ type IExceptionService =
 
 type IMetricsService =
     abstract member outputScanNetworkTimeTry : stopwatch : Stopwatch -> unit
+
+type IOptionValidationService =
+    abstract member ifErrorsShowAndExit: parserResult : ParserResult<ArgumentOptions> -> unit
 //----------------------------------------------------------------------------------------------------------------------

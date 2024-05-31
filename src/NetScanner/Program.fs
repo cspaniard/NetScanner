@@ -9,7 +9,6 @@ open Model
 open Model.Constants
 open DI.Interfaces
 open DI.Providers
-open NetScanner.ArgumentOptionsValidation
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -20,17 +19,17 @@ let parserResult =
     Environment.GetCommandLineArgs () |> Array.tail
     |> parser.ParseArguments<ArgumentOptions>
 
-let ServiceProvider = ServiceProviderBuild parserResult.Value
+let serviceProvider = ServiceProviderBuild parserResult.Value
 
-let helpTextService = ServiceProvider.GetRequiredService<IHelpTextService>()
-let exceptionService = ServiceProvider.GetRequiredService<IExceptionService>()
-let ifOptionErrorsShowAndExit = ifOptionErrorsShowAndExit helpTextService
+let helpTextService = serviceProvider.GetRequiredService<IHelpTextService>()
+let exceptionService = serviceProvider.GetRequiredService<IExceptionService>()
+let optionValidationService = serviceProvider.GetRequiredService<IOptionValidationService>()
 //----------------------------------------------------------------------------------------------------------------------
 
 try
-    ifOptionErrorsShowAndExit parserResult
+    optionValidationService.ifErrorsShowAndExit parserResult
 
-    let mainApp = ServiceProvider.GetRequiredService<IMainApp>()
+    let mainApp = serviceProvider.GetRequiredService<IMainApp>()
     mainApp.run ()
 
 with

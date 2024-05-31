@@ -36,4 +36,5 @@ let ServiceProviderBuild (options : ArgumentOptions) =
                 MainApp(services.GetRequiredService<IIpService>(),
                         services.GetRequiredService<IMetricsService>(),
                         options))
+        .AddSingleton<IOptionValidationService, OptionValidationService>()
         .BuildServiceProvider()
