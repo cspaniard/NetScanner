@@ -8,10 +8,10 @@ open Model
 
 //----------------------------------------------------------------------------------------------------------------------
 type IProcessBroker =
-    abstract member startProcessWithTimeOutAsync: processName: string -> timeOut : TimeOut -> arguments: string ->
-                                                  Task<Process option>
-    abstract member startProcessAndReadAllLinesAsyncTry: processName: string -> arguments: string ->
-                                                         Task<string array * string array * int>
+    abstract member startProcessAsyncTry: timeOut : TimeOut -> processName: string -> arguments: string ->
+                                          Task<Process option>
+    abstract member startProcessReadLinesAsyncTry: timeOut : TimeOut -> processName: string -> arguments: string ->
+                                                   Task<string array * string array * int>
 
 type IIpBroker =
     abstract member getDeviceInfoStatusForIpAsync: ipAddress: IpAddress -> Task<DeviceInfo>

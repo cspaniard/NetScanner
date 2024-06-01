@@ -22,6 +22,9 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
                retries : Retries, nameLookupTimeOut : NameLookupTimeOut) =
 
     //------------------------------------------------------------------------------------------------------------------
+    let startProcessAsyncTry = ProcessBroker.startProcessAsyncTry nameLookupTimeOut.timeOut
+    let startProcessReadLinesNoTimeOutAsyncTry = ProcessBroker.startProcessReadLinesAsyncTry (TimeOut.create 0)
+
     let lookUpApp =
         match RuntimeInformation.OSDescription with
         | LinuxOs -> "nslookup"
@@ -34,7 +37,7 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
     let startProcessGetNameInfoForIpAsyncTry args =
 
         backgroundTask {
-            return! ProcessBroker.startProcessWithTimeOutAsync lookUpApp nameLookupTimeOut.timeOut args
+            return! startProcessAsyncTry lookUpApp args
         }
     //------------------------------------------------------------------------------------------------------------------
 
@@ -103,7 +106,7 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
             //----------------------------------------------------------------------------------------------------------
 
             backgroundTask {
-                let! stdOutLines, _, _ = ProcessBroker.startProcessAndReadAllLinesAsyncTry "ip" "a"
+                let! stdOutLines, _, _ = startProcessReadLinesNoTimeOutAsyncTry "ip" "a"
 
                 return
                     match stdOutLines |> getMacInfoOptionForIp ipAddress with

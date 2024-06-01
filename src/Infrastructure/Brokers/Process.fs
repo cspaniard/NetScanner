@@ -13,7 +13,7 @@ type ProcessBroker () =
     interface IProcessBroker with
 
         //--------------------------------------------------------------------------------------------------------------
-        member _.startProcessWithTimeOutAsync (processName : string) (timeOut : TimeOut) (arguments : string) =
+        member _.startProcessAsyncTry (timeOut : TimeOut) (processName : string) (arguments : string) =
 
             let startInfo = ProcessStartInfo (RedirectStandardOutput = true,
                                               RedirectStandardError = true,
@@ -43,10 +43,10 @@ type ProcessBroker () =
         //--------------------------------------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------------------------------------
-        member _.startProcessAndReadAllLinesAsyncTry (processName : string) (arguments : string) =
+        member _.startProcessReadLinesAsyncTry (timeOut : TimeOut) (processName : string) (arguments : string) =
 
             //----------------------------------------------------------------------------------------------------------
-            let readAllLinesAsyncTry (reader : StreamReader) =
+            let readAllLinesAsyncTry (reader : StreamReader) (ct : CancellationToken) =
 
                 backgroundTask {
                     let lines = ResizeArray<string> ()
@@ -54,7 +54,7 @@ type ProcessBroker () =
                     let mutable shouldContinue = true
 
                     while shouldContinue do
-                        match! reader.ReadLineAsync () with
+                        match! reader.ReadLineAsync ct with
                         | null -> shouldContinue <- false
                         | line -> lines.Add line
 
@@ -73,14 +73,24 @@ type ProcessBroker () =
                                       UseShellExecute = false)
                     |> Process.Start
 
-                let! results =
-                    Task.WhenAll [| readAllLinesAsyncTry proc.StandardOutput
-                                    readAllLinesAsyncTry proc.StandardError |]
+                let cts = new CancellationTokenSource ()
 
-                let stdOutLines, stdErrLines = results[0], results[1]
+                try
+                    if timeOut.value > 0 then
+                        cts.CancelAfter timeOut.value
 
-                do! proc.WaitForExitAsync ()
+                    let! results =
+                        Task.WhenAll [| readAllLinesAsyncTry proc.StandardOutput cts.Token
+                                        readAllLinesAsyncTry proc.StandardError cts.Token |]
 
-                return (stdOutLines, stdErrLines, proc.ExitCode)
+                    let stdOutLines, stdErrLines = results[0], results[1]
+
+                    do! proc.WaitForExitAsync cts.Token
+
+                    return (stdOutLines, stdErrLines, proc.ExitCode)
+                with
+                | :? OperationCanceledException ->
+                    proc.Kill ()
+                    return ([||], [||], -1)
             }
         //--------------------------------------------------------------------------------------------------------------
