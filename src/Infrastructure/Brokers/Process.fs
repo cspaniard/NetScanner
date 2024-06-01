@@ -13,36 +13,6 @@ type ProcessBroker () =
     interface IProcessBroker with
 
         //--------------------------------------------------------------------------------------------------------------
-        member _.startProcessAsyncTry (timeOut : TimeOut) (processName : string) (arguments : string) =
-
-            let startInfo = ProcessStartInfo (RedirectStandardOutput = true,
-                                              RedirectStandardError = true,
-                                              FileName = processName,
-                                              Arguments = arguments,
-                                              WindowStyle = ProcessWindowStyle.Hidden,
-                                              CreateNoWindow = true,
-                                              UseShellExecute = false)
-
-            backgroundTask {
-
-                let proc = Process.Start startInfo
-
-                let cts = new CancellationTokenSource ()
-
-                if timeOut.value > 0 then
-                    cts.CancelAfter timeOut.value
-
-                try
-                    do! proc.WaitForExitAsync cts.Token
-                    return Some proc
-                with
-                | :? OperationCanceledException ->
-                    proc.Kill ()
-                    return None
-            }
-        //--------------------------------------------------------------------------------------------------------------
-
-        //--------------------------------------------------------------------------------------------------------------
         member _.startProcessReadLinesAsyncTry (timeOut : TimeOut) (processName : string) (arguments : string) =
 
             //----------------------------------------------------------------------------------------------------------

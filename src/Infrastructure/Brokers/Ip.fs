@@ -1,6 +1,5 @@
 namespace Brokers
 
-open System.Diagnostics
 open System.Net
 open System.Net.NetworkInformation
 open System.Runtime.InteropServices
@@ -22,7 +21,7 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
                retries : Retries, nameLookupTimeOut : NameLookupTimeOut) =
 
     //------------------------------------------------------------------------------------------------------------------
-    let startProcessAsyncTry = ProcessBroker.startProcessAsyncTry nameLookupTimeOut.timeOut
+    let startNameLookupProcessAsyncTry = ProcessBroker.startProcessReadLinesAsyncTry nameLookupTimeOut.timeOut
     let startProcessReadLinesNoTimeOutAsyncTry = ProcessBroker.startProcessReadLinesAsyncTry (TimeOut.create 0)
 
     let lookUpApp =
@@ -37,7 +36,7 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
     let startProcessGetNameInfoForIpAsyncTry args =
 
         backgroundTask {
-            return! startProcessAsyncTry lookUpApp args
+            return! startNameLookupProcessAsyncTry lookUpApp args
         }
     //------------------------------------------------------------------------------------------------------------------
 
@@ -121,35 +120,33 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
             let emptyNameInfo = NameInfo (ipAddress, "")
 
             //----------------------------------------------------------------------------------------------------------
-            let processLinuxProcInfoAsyncTry (proc : Process) =
+            let processLinuxProcInfoAsyncTry (stdOutLines : string []) =
 
-                backgroundTask {
+                let result =
+                    stdOutLines
+                    |> Array.skipWhile System.String.IsNullOrWhiteSpace
+                    |> Array.head
 
-                    if proc.ExitCode <> 0 then
-                        return emptyNameInfo
+                let hostName = ((result |> split "=")[1] |> trim |> split ".")[0]
+
+                NameInfo (ipAddress, hostName)
+            //----------------------------------------------------------------------------------------------------------
+
+            //----------------------------------------------------------------------------------------------------------
+            let processWindowsProcInfoAsyncTry (stdOutLines : string []) =
+
+                let result =
+                    stdOutLines
+                    |> Array.skipWhile System.String.IsNullOrWhiteSpace
+                    |> Array.head
+
+                let hostName =
+                    if result.Contains "[" then
+                        (result |> split "[")[0] |> split " " |> Array.last
                     else
-                        let! result = proc.StandardOutput.ReadToEndAsync ()
-                        let hostName = ((result |> split "=")[1] |> trim |> split ".")[0]
+                        ""
 
-                        return NameInfo (ipAddress, hostName)
-                }
-            //----------------------------------------------------------------------------------------------------------
-
-            //----------------------------------------------------------------------------------------------------------
-            let processWindowsProcInfoAsyncTry (proc : Process) =
-
-                backgroundTask {
-
-                    let! result = proc.StandardOutput.ReadToEndAsync ()
-
-                    let hostName =
-                        if result.Contains "[" then
-                            (result |> split "[")[0] |> split " " |> Array.last
-                        else
-                            ""
-
-                    return NameInfo (ipAddress, hostName)
-                }
+                NameInfo (ipAddress, hostName)
             //----------------------------------------------------------------------------------------------------------
 
             // ---------------------------------------------------------------------------------------------------------
@@ -180,7 +177,7 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
                     return! getNameInfoFromDnsAsync ipAddress
                 else
                     match! startProcessGetNameInfoForIpAsyncTry args with
-                    | Some proc -> return! processProcInfoFun proc
-                    | None -> return emptyNameInfo
+                    | stdOutLines, _, exitCode when exitCode = 0 -> return processProcInfoFun stdOutLines
+                    | _ -> return emptyNameInfo
             }
         //--------------------------------------------------------------------------------------------------------------
