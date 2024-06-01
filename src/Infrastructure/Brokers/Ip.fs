@@ -127,7 +127,7 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
                     |> Array.skipWhile System.String.IsNullOrWhiteSpace
                     |> Array.head
 
-                let hostName = ((result |> split "=")[1] |> trim |> split ".")[0]
+                let hostName = (result |> split "=")[1] |> trim |> split "." |> Array.head
 
                 NameInfo (ipAddress, hostName)
             //----------------------------------------------------------------------------------------------------------
