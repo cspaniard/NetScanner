@@ -33,7 +33,7 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    let startProcessGetNameInfoForIpAsyncTry args =
+    let getNameInfoFromProcessAsyncTry args =
 
         backgroundTask {
             return! startNameLookupProcessAsyncTry lookUpApp args
@@ -120,7 +120,7 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
             let emptyNameInfo = NameInfo (ipAddress, "")
 
             //----------------------------------------------------------------------------------------------------------
-            let processLinuxProcInfoAsyncTry (stdOutLines : string []) =
+            let processLinuxRawDataAsyncTry (stdOutLines : string []) =
 
                 let result =
                     stdOutLines
@@ -133,7 +133,7 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
             //----------------------------------------------------------------------------------------------------------
 
             //----------------------------------------------------------------------------------------------------------
-            let processWindowsProcInfoAsyncTry (stdOutLines : string []) =
+            let processWindowsRawDataAsyncTry (stdOutLines : string []) =
 
                 let result =
                     stdOutLines
@@ -165,10 +165,10 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
                 }
             // ---------------------------------------------------------------------------------------------------------
 
-            let args, processProcInfoFun =
+            let args, processRawDataFun =
                 match RuntimeInformation.OSDescription with
-                | LinuxOs -> ipAddress.value, processLinuxProcInfoAsyncTry
-                | WindowsOs -> $"-n 1 -a -w {pingTimeOut} {ipAddress}", processWindowsProcInfoAsyncTry
+                | LinuxOs -> ipAddress.value, processLinuxRawDataAsyncTry
+                | WindowsOs -> $"-n 1 -a -w {pingTimeOut} {ipAddress}", processWindowsRawDataAsyncTry
                 | MacOs | OtherOs -> failwith OS_UNSUPPORTED
 
 
@@ -176,8 +176,8 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
                 if useDns then
                     return! getNameInfoFromDnsAsync ipAddress
                 else
-                    match! startProcessGetNameInfoForIpAsyncTry args with
-                    | stdOutLines, _, exitCode when exitCode = 0 -> return processProcInfoFun stdOutLines
+                    match! getNameInfoFromProcessAsyncTry args with
+                    | stdOutLines, _, exitCode when exitCode = 0 -> return processRawDataFun stdOutLines
                     | _ -> return emptyNameInfo
             }
         //--------------------------------------------------------------------------------------------------------------
