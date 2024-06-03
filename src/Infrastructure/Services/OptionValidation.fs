@@ -11,7 +11,7 @@ type OptionValidationService (HelpTextService : IHelpTextService) =
     //------------------------------------------------------------------------------------------------------------------
     let getOptionValidationErrors (options : ArgumentOptions) =
 
-        let getValidationException f v =
+        let getValidationExceptionOrNone f v =
             try
                 f v |> ignore
                 None
@@ -20,12 +20,12 @@ type OptionValidationService (HelpTextService : IHelpTextService) =
             | _ -> failwith "Alguna de Las validaciones no devuelve un error de tipo ValidationException."
 
         seq {
-            getValidationException PingTimeOut.create options.PingTimeOut
-            getValidationException Retries.create options.Retries
-            getValidationException NameLookupTimeOut.create options.NameLookUpTimeOut
-            getValidationException FileName.create options.MacBlackListFileName
-            getValidationException FileName.create options.IpBlackListFileName
-            getValidationException IpNetwork.create options.Network
+            getValidationExceptionOrNone PingTimeOut.create options.PingTimeOut
+            getValidationExceptionOrNone Retries.create options.Retries
+            getValidationExceptionOrNone NameLookupTimeOut.create options.NameLookUpTimeOut
+            getValidationExceptionOrNone FileName.create options.MacBlackListFileName
+            getValidationExceptionOrNone FileName.create options.IpBlackListFileName
+            getValidationExceptionOrNone IpNetwork.create options.Network
         }
         |> Seq.choose id
         |> ValidationErrors
