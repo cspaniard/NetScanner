@@ -120,33 +120,39 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
             let emptyNameInfo = NameInfo (ipAddress, "")
 
             //----------------------------------------------------------------------------------------------------------
-            let processLinuxRawDataAsyncTry (stdOutLines : string []) =
+            let processLinuxRawDataAsync (stdOutLines : string []) =
 
-                let result =
-                    stdOutLines
-                    |> Array.skipWhile System.String.IsNullOrWhiteSpace
-                    |> Array.head
+                try
+                    let result =
+                        stdOutLines
+                        |> Array.skipWhile System.String.IsNullOrWhiteSpace
+                        |> Array.head
 
-                let hostName = (result |> split "=")[1] |> trim |> split "." |> Array.head
+                    let hostName = (result |> split "=")[1] |> trim |> split "." |> Array.head
 
-                NameInfo (ipAddress, hostName)
+                    NameInfo (ipAddress, hostName)
+                with _ ->
+                    emptyNameInfo
             //----------------------------------------------------------------------------------------------------------
 
             //----------------------------------------------------------------------------------------------------------
-            let processWindowsRawDataAsyncTry (stdOutLines : string []) =
+            let processWindowsRawDataAsync (stdOutLines : string []) =
 
-                let result =
-                    stdOutLines
-                    |> Array.skipWhile System.String.IsNullOrWhiteSpace
-                    |> Array.head
+                try
+                    let result =
+                        stdOutLines
+                        |> Array.skipWhile System.String.IsNullOrWhiteSpace
+                        |> Array.head
 
-                let hostName =
-                    if result.Contains "[" then
-                        (result |> split "[")[0] |> split " " |> Array.last
-                    else
-                        ""
+                    let hostName =
+                        if result.Contains "[" then
+                            (result |> split "[")[0] |> split " " |> Array.last
+                        else
+                            ""
 
-                NameInfo (ipAddress, hostName)
+                    NameInfo (ipAddress, hostName)
+                with _ ->
+                    emptyNameInfo
             //----------------------------------------------------------------------------------------------------------
 
             // ---------------------------------------------------------------------------------------------------------
@@ -161,14 +167,15 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
                     try
                         let! ipHostEntry = Dns.GetHostEntryAsync (ipAdress.value, cts.Token)
                         return NameInfo (ipAddress, ipHostEntry.HostName)
-                    with _ -> return emptyNameInfo
+                    with _ ->
+                        return emptyNameInfo
                 }
             // ---------------------------------------------------------------------------------------------------------
 
             let args, processRawDataFun =
                 match RuntimeInformation.OSDescription with
-                | LinuxOs -> ipAddress.value, processLinuxRawDataAsyncTry
-                | WindowsOs -> $"-n 1 -a -w {pingTimeOut} {ipAddress}", processWindowsRawDataAsyncTry
+                | LinuxOs -> ipAddress.value, processLinuxRawDataAsync
+                | WindowsOs -> $"-n 1 -a -w {pingTimeOut} {ipAddress}", processWindowsRawDataAsync
                 | MacOs | OtherOs -> failwith OS_UNSUPPORTED
 
 
