@@ -3,7 +3,7 @@ namespace Brokers
 open System
 open DI.Interfaces
 
-type ExceptionBroker () as this =
+type ExceptionBroker (debug : bool) as this =
 
     let self = this :> IExceptionBroker
 
@@ -11,7 +11,12 @@ type ExceptionBroker () as this =
         //--------------------------------------------------------------------------------------------------------------
         member _.printSingle (exn : Exception) =
 
-            Console.Error.WriteLine exn
+            if debug then
+                exn.ToString()
+            else
+                exn.Message
+            |> Console.Error.WriteLine
+
             if exn.InnerException <> null then self.printSingle exn.InnerException
         //--------------------------------------------------------------------------------------------------------------
 

@@ -20,7 +20,8 @@ let ServiceProviderBuild (options : ArgumentOptions) =
                          options.NameLookUpTimeOut |> NameLookupTimeOut.create))
         .AddSingleton<INetworkBroker, NetworkBroker>()
         .AddSingleton<IHelpTextBroker, HelpTextBroker>()
-        .AddSingleton<IExceptionBroker, ExceptionBroker>()
+        .AddSingleton<IExceptionBroker, ExceptionBroker>(
+            fun _ -> ExceptionBroker(options.Debug))
         .AddSingleton<IMetricsBroker, MetricsBroker>()
         .AddSingleton<IMacBlacklistBroker, MacBlacklistBroker>(
             fun _ -> MacBlacklistBroker(FileName.create options.MacBlackListFileName))
