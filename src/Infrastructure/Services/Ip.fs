@@ -1,5 +1,6 @@
 namespace Services
 
+open System
 open System.Runtime.InteropServices
 open System.Text.RegularExpressions
 open System.Threading.Tasks
@@ -60,9 +61,20 @@ type IpService (IpBroker : IIpBroker, NetworkBroker : INetworkBroker,
         backgroundTask {
             let! ipBlackList = IpBlacklistBroker.getIpBlacklistAsyncTry ()
 
-            return
-                ipBlackList
-                |> Array.map IpAddress.create
+            let validBlackListIps = ResizeArray<IpAddress>()
+            let exceptionList = ResizeArray<Exception>()
+
+            for ipStringValue in ipBlackList do
+                try
+                    IpAddress.create ipStringValue
+                    |> validBlackListIps.Add
+                with e ->
+                    exceptionList.Add e
+
+            if exceptionList.Count > 0 then
+                raise (AggregateException(exceptionList))
+
+            return validBlackListIps.ToArray()
         }
     //------------------------------------------------------------------------------------------------------------------
 
