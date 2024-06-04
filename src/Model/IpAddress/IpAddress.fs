@@ -20,7 +20,7 @@ type IpAddress =
                 |> Array.iter (fun f -> f value)
 
                 value
-            with e -> failwith $"IpAddress: {e.Message}"
+            with e -> failwith $"IpAddress ({value}): {e.Message}"
 
         member this.value = let (IpAddress value) = this in value
 
