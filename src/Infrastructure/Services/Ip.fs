@@ -44,14 +44,33 @@ type IpService (IpBroker : IIpBroker, NetworkBroker : INetworkBroker,
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
+    let mapOrAggregateExceptionTry mappingFun items =
+
+        let mappedItems = ResizeArray()
+        let exceptions = ResizeArray<Exception>()
+
+        for item in items do
+            try
+                mappingFun item
+                |> mappedItems.Add
+            with e ->
+                exceptions.Add e
+
+        if exceptions.Count > 0 then
+            raise (AggregateException(exceptions))
+
+        mappedItems |> Array.ofSeq
+    //------------------------------------------------------------------------------------------------------------------
+
+    //------------------------------------------------------------------------------------------------------------------
     let getMacBlackListAsyncTry () =
 
         backgroundTask {
-            let! macBlackList = MacBlackListBroker.getMacBlacklistAsyncTry ()
+            let! macStrings = MacBlackListBroker.getMacBlacklistAsyncTry ()
 
             return
-                macBlackList
-                |> Array.map Mac.create
+                macStrings
+                |> mapOrAggregateExceptionTry Mac.create
         }
     //------------------------------------------------------------------------------------------------------------------
 
@@ -59,22 +78,11 @@ type IpService (IpBroker : IIpBroker, NetworkBroker : INetworkBroker,
     let getIpBlackListAsyncTry () =
 
         backgroundTask {
-            let! ipBlackList = IpBlacklistBroker.getIpBlacklistAsyncTry ()
+            let! ipStrings = IpBlacklistBroker.getIpBlacklistAsyncTry ()
 
-            let validBlackListIps = ResizeArray<IpAddress>()
-            let exceptionList = ResizeArray<Exception>()
-
-            for ipStringValue in ipBlackList do
-                try
-                    IpAddress.create ipStringValue
-                    |> validBlackListIps.Add
-                with e ->
-                    exceptionList.Add e
-
-            if exceptionList.Count > 0 then
-                raise (AggregateException(exceptionList))
-
-            return validBlackListIps.ToArray()
+            return
+                ipStrings
+                |> mapOrAggregateExceptionTry IpAddress.create
         }
     //------------------------------------------------------------------------------------------------------------------
 
