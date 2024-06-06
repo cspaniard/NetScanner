@@ -21,7 +21,10 @@ let ServiceProviderBuild (options : ArgumentOptions) =
         .AddSingleton<INetworkBroker, NetworkBroker>()
         .AddSingleton<IHelpTextBroker, HelpTextBroker>()
         .AddSingleton<IExceptionBroker, ExceptionBroker>(
-            fun _ -> ExceptionBroker(options.Debug))
+            fun _ ->
+                match obj.ReferenceEquals(options, null) with
+                | true -> ExceptionBroker(false)
+                | false -> ExceptionBroker(options.Debug))
         .AddSingleton<IMetricsBroker, MetricsBroker>()
         .AddSingleton<IMacBlacklistBroker, MacBlacklistBroker>(
             fun _ -> MacBlacklistBroker(FileName.create options.MacBlackListFileName))
