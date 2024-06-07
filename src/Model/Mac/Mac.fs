@@ -22,7 +22,7 @@ type Mac =
                 getValidatorsList ()
                 |> Array.iter (fun f -> f (Mac.cleanValue value))
 
-                value
+                Mac.cleanValue value
             with e -> failwith $"Mac ({value}): {e.Message}"
 
         member this.value = let (Mac value) = this in value
