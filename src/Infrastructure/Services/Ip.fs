@@ -1,9 +1,9 @@
 namespace Services
 
-open System
 open System.Runtime.InteropServices
 open System.Text.RegularExpressions
 open System.Threading.Tasks
+open Motsoft.Util
 
 open Model
 open DI.Interfaces
@@ -12,12 +12,12 @@ type IpService (IpBroker : IIpBroker, NetworkBroker : INetworkBroker,
                 MacBlackListBroker : IMacBlacklistBroker, IpBlacklistBroker : IIpBlacklistBroker) =
 
     //------------------------------------------------------------------------------------------------------------------
-    let scanStatusAsyncTry (network : IpNetwork) (ipBlackList : IpAddress array) =
+    let scanStatusAsyncTry (network : IpNetwork) (ipBlackList : IpAddress seq) =
 
         let removeSetFromSet s1 s2 = Set.difference s2 s1
 
         set [ for i in 1..254 -> IpAddress.create $"%s{network.value}{i}" ]
-        |> removeSetFromSet (ipBlackList |> Set.ofArray)
+        |> removeSetFromSet (ipBlackList |> Set.ofSeq)
         |> Set.toArray
         |> Array.map IpBroker.getDeviceInfoStatusForIpAsync
         |> Task.WhenAll
@@ -44,25 +44,6 @@ type IpService (IpBroker : IIpBroker, NetworkBroker : INetworkBroker,
     //------------------------------------------------------------------------------------------------------------------
 
     //------------------------------------------------------------------------------------------------------------------
-    let mapOrAggregateExceptionTry mappingFun items =
-
-        let mappedItems = ResizeArray()
-        let exceptions = ResizeArray<Exception>()
-
-        for item in items do
-            try
-                mappingFun item
-                |> mappedItems.Add
-            with e ->
-                exceptions.Add e
-
-        if exceptions.Count > 0 then
-            raise (AggregateException(exceptions))
-
-        mappedItems |> Array.ofSeq
-    //------------------------------------------------------------------------------------------------------------------
-
-    //------------------------------------------------------------------------------------------------------------------
     let getMacBlackListAsyncTry () =
 
         backgroundTask {
@@ -70,7 +51,7 @@ type IpService (IpBroker : IIpBroker, NetworkBroker : INetworkBroker,
 
             return
                 macStrings
-                |> mapOrAggregateExceptionTry Mac.create
+                |> Seq.mapOrAggregateExceptionTry Mac.create
         }
     //------------------------------------------------------------------------------------------------------------------
 
@@ -82,7 +63,7 @@ type IpService (IpBroker : IIpBroker, NetworkBroker : INetworkBroker,
 
             return
                 ipStrings
-                |> mapOrAggregateExceptionTry IpAddress.create
+                |> Seq.mapOrAggregateExceptionTry IpAddress.create
         }
     //------------------------------------------------------------------------------------------------------------------
 
@@ -90,13 +71,13 @@ type IpService (IpBroker : IIpBroker, NetworkBroker : INetworkBroker,
     let scanMacInfoAsyncTry blackList deviceInfos =
 
         //--------------------------------------------------------------------------------------------------------------
-        let filterMacBlackList (macBlackList : Mac[]) (deviceInfos : DeviceInfo[]) =
+        let filterMacBlackList (macBlackList : Mac seq) (deviceInfos : DeviceInfo[]) =
 
-            if macBlackList.Length = 0 then
+            if macBlackList |> Seq.isEmpty then
                 deviceInfos
             else
                 deviceInfos
-                |> Array.filter (fun di -> macBlackList |> (not << Array.contains di.Mac))
+                |> Array.filter (fun di -> macBlackList |> (not << Seq.contains di.Mac))
         //--------------------------------------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------------------------------------
@@ -195,7 +176,7 @@ type IpService (IpBroker : IIpBroker, NetworkBroker : INetworkBroker,
 
                 let! deviceInfos = scanStatusAsyncTry network ipBlackList
 
-                let! deviceInfos = if scanMacs || macBlackList.Length > 0
+                let! deviceInfos = if scanMacs || macBlackList |> (not << Seq.isEmpty)
                                    then scanMacInfoAsyncTry macBlackList deviceInfos
                                    else deviceInfos |> Task.FromResult
 
