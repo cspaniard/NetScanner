@@ -21,8 +21,9 @@ type BlacklistBrokerBase (fileName : FileName) =
                     |> Array.map (fun l -> l |> split "\t")
                     |> Array.collect id
                     |> Array.filter (not << String.IsNullOrEmpty)
+                    :> seq<string>
             | false ->
-                return Array.empty<string>
+                return Seq.empty
         }
 //----------------------------------------------------------------------------------------------------------------------
 
