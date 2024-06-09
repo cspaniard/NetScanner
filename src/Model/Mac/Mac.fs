@@ -12,18 +12,20 @@ type Mac =
                 |> trim
                 |> toUpper)
                 .ToCharArray ()
-            |> Array.fold (fun st c -> if Char.IsLetterOrDigit c
-                                       then st + c.ToString ()
-                                       else st) ""
+            |> Array.fold (
+                fun st c ->
+                    if Char.IsLetterOrDigit c
+                    then st + c.ToString ()
+                    else st) ""
 
         static member private validateTry (value : string) =
 
-            try
-                getValidatorsList ()
-                |> Array.iter (fun f -> f (Mac.cleanValue value))
+            let cleanValue = Mac.cleanValue value
 
-                Mac.cleanValue value
-            with e -> failwith $"Mac ({value}): {e.Message}"
+            getValidatorsList ()
+            |> Seq.iterOrAggregateExceptionTry (fun f -> f cleanValue value)
+
+            cleanValue
 
         member this.value = let (Mac value) = this in value
         member this.hasValue = let (Mac value) = this in value |> (not << String.IsNullOrWhiteSpace)
