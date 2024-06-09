@@ -3,13 +3,14 @@ module Model.IpNetworkValidation
 open Model.ValidationHelper
 
 let IpNetworkErrors = ErrorDict ()
+let [<Literal>] PREFIX = "IpNetwork ({0}):"
 
-IpNetworkErrors.Add (ValueIsEmpty, "El valor de la red está vacío.")
-IpNetworkErrors.Add (ValueContainsSpaces, "La red proporcionada contiene espacios.")
-IpNetworkErrors.Add (OctectIsEmpty, "La red contiene octetos vacíos.")
-IpNetworkErrors.Add (OctectIsNotNumber, "La red contiene partes que no son números.")
-IpNetworkErrors.Add (OctectOutOfRange, "La red contiene octetos fuera de rango.")
-IpNetworkErrors.Add (OctectIncorrectCount, "La red tiene un número erróneo de octetos.")
+IpNetworkErrors.Add (ValueIsEmpty, $"{PREFIX} El valor de la red está vacío.")
+IpNetworkErrors.Add (ValueContainsSpaces, $"{PREFIX} La red proporcionada contiene espacios.")
+IpNetworkErrors.Add (OctectIsEmpty, $"{PREFIX} La red contiene octetos vacíos.")
+IpNetworkErrors.Add (OctectIsNotNumber, $"{PREFIX} La red contiene partes que no son números.")
+IpNetworkErrors.Add (OctectOutOfRange, $"{PREFIX} La red contiene octetos fuera de rango.")
+IpNetworkErrors.Add (OctectIncorrectCount, $"{PREFIX} La red tiene un número erróneo de octetos.")
 
 let getValidatorsList () =
     [|
