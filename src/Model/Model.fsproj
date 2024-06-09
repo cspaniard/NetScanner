@@ -14,7 +14,7 @@
     <ItemGroup>
       <Compile Include="Constants.fs" />
       <Compile Include="Options.fs" />
-      <Compile Include="ValidationHelper.fs" />
+      <Compile Include="IpValidationHelper.fs" />
       <Compile Include="IpAddress\IpAdressValidation.fs" />
       <Compile Include="IpAddress\IpAddress.fs" />
       <Compile Include="Mac\MacValidation.fs" />
