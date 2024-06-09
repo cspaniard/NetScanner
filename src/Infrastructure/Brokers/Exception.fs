@@ -23,6 +23,10 @@ type ExceptionBroker (debug : bool) as this =
         //--------------------------------------------------------------------------------------------------------------
         member _.printAggregate (aggregateException : AggregateException) =
 
+            if debug then
+                Console.Error.WriteLine $"STACK TRACE: {aggregateException.Message}"
+                Console.Error.WriteLine aggregateException.StackTrace
+
             aggregateException.InnerExceptions
             |> Seq.iter (fun e -> match e with
                                   | :? AggregateException as ae -> self.printAggregate ae
