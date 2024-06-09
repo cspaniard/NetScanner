@@ -10,24 +10,32 @@ type IpAddress =
         static member private canonicalize (value : string) =
             value
             |> trim
-            |> splitWitchOptionsByStringChars "." StringSplitOptions.None
+            |> split "."
+            |> Array.map trim
             |> join "."
 
         static member private validateTry (value : string) =
 
-            try
-                getValidatorsList ()
-                |> Array.iter (fun f -> f value)
+            getValidatorsList ()
+            |> Seq.iterOrAggregateExceptionTry (fun f -> f value)
 
-                value
-            with e -> failwith $"IpAddress ({value}): {e.Message}"
+            value
+
+        static member private finalCleanUp (value : string) =
+
+            value
+            |> split "."
+            |> Array.map (Int32.Parse >> string)
+            |> join "."
 
         member this.value = let (IpAddress value) = this in value
 
         static member create (value : string) =
+
             value
             |> IpAddress.canonicalize
             |> IpAddress.validateTry
+            |> IpAddress.finalCleanUp
             |> IpAddress
 
         override this.ToString () = this.value

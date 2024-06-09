@@ -4,7 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net7.0</TargetFramework>
         <AssemblyName>netscanner</AssemblyName>
-        <AssemblyVersion>5.3.7</AssemblyVersion>
+        <AssemblyVersion>5.4.0</AssemblyVersion>
         <LangVersion>latest</LangVersion>
         <SelfContained>true</SelfContained>
     </PropertyGroup>
@@ -27,7 +27,7 @@
 
     <ItemGroup>
       <PackageReference Include="CommandLineParser.FSharp" Version="2.9.1" />
-      <PackageReference Include="Motsoft.Util" Version="1.8.0" />
+      <PackageReference Include="Motsoft.Util" Version="1.9.0" />
     </ItemGroup>
 
 </Project>
