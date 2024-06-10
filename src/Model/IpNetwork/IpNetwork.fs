@@ -1,7 +1,6 @@
 namespace Model
 
 open System
-open System.ComponentModel.DataAnnotations
 open Motsoft.Util
 open Model.IpNetworkValidation
 
@@ -10,7 +9,7 @@ type IpNetwork =
         //--------------------------------------------------------------------------------------------------------------
         static member private canonicalize (value : string) =
             value
-            |> trimStringChars " ."
+            |> trim
             |> splitWithOptions "." StringSplitOptions.None
             |> join "."
         //--------------------------------------------------------------------------------------------------------------
@@ -18,12 +17,10 @@ type IpNetwork =
         //--------------------------------------------------------------------------------------------------------------
         static member private validateTry (value : string) =
 
-            try
-                getValidatorsList ()
-                |> Array.iter (fun f -> f value)
+            getValidatorsList ()
+            |> Seq.iterOrAggregateExceptionTry (fun f -> f value)
 
-                value
-            with e -> raise <| ValidationException $"red: {e.Message}"
+            value
         //--------------------------------------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------------------------------------

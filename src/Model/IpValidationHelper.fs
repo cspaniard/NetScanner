@@ -2,46 +2,82 @@ module Model.ValidationHelper
 
 open System
 open System.Collections.Generic
+open System.ComponentModel.DataAnnotations
 open Motsoft.Util
 
+//----------------------------------------------------------------------------------------------------------------------
 type Errors =
-    | ValueIsEmpty
+    | EmptyValue
     | ValueContainsSpaces
-    | OctectIsEmpty
-    | OctectIsNotNumber
-    | OctectOutOfRange
-    | OctectIncorrectCount
+    | EmptyOctects
+    | NonNumericOctects
+    | OutOfRangeOctects
+    | IncorrectOctectCount
 
 type ErrorDict = Dictionary<Errors, string>
+//----------------------------------------------------------------------------------------------------------------------
 
-let checkEmptyTry (errors : ErrorDict) (value : string) =
+//----------------------------------------------------------------------------------------------------------------------
+let validationExceptionIfTrue errorMessageFormat (value : string) boolVal =
+
+    if boolVal then
+        raise <| ValidationException (String.Format(errorMessageFormat, value))
+//----------------------------------------------------------------------------------------------------------------------
+
+//----------------------------------------------------------------------------------------------------------------------
+let validationException errorMessageFormat (value : string) =
+
+    validationExceptionIfTrue errorMessageFormat value true
+//----------------------------------------------------------------------------------------------------------------------
+
+//----------------------------------------------------------------------------------------------------------------------
+let checkEmptyValueTry (errors : ErrorDict) (value : string) =
     value
     |> String.IsNullOrWhiteSpace
-    |> failWithIfTrue (String.Format(errors[ValueIsEmpty], value))
+    |> validationExceptionIfTrue errors[EmptyValue] value
+//----------------------------------------------------------------------------------------------------------------------
 
-let checkOctectsForSpacesOrEmptyTry (errors : ErrorDict) (value : string) =
+//----------------------------------------------------------------------------------------------------------------------
+let checkValueContainsSpacesTry (errors : ErrorDict) (value : string) =
     value
     |> splitWithOptions "." StringSplitOptions.None
     |> Array.iter (fun o -> o.Contains " "
-                            |> failWithIfTrue (String.Format(errors[ValueContainsSpaces], value))
+                            |> validationExceptionIfTrue errors[ValueContainsSpaces] value)
+//----------------------------------------------------------------------------------------------------------------------
 
-                            o
+//----------------------------------------------------------------------------------------------------------------------
+let checkEmptyOctects (errors : ErrorDict) (value : string) =
+    value
+    |> splitWithOptions "." StringSplitOptions.None
+    |> Array.iter (fun o -> o
                             |> String.IsNullOrWhiteSpace
-                            |> failWithIfTrue (String.Format(errors[OctectIsEmpty], value)))
+                            |> validationExceptionIfTrue errors[EmptyOctects] value)
+//----------------------------------------------------------------------------------------------------------------------
 
-let checkOctectsAreIntsInRangeTry (errors : ErrorDict) (value : string) =
+//----------------------------------------------------------------------------------------------------------------------
+let checkNonNumericOctectsTry (errors : ErrorDict) (value : string) =
+    value
+    |> split "."
+    |> Array.iter
+           (fun o -> if (Int32.TryParse o |> fst) = false then
+                        validationException errors[NonNumericOctects] value)
+//----------------------------------------------------------------------------------------------------------------------
+
+//----------------------------------------------------------------------------------------------------------------------
+let checkOutOfRangeOctectsTry (errors : ErrorDict) (value : string) =
     value
     |> split "."
     |> Array.iter
            (fun o -> match Int32.TryParse o with
-                     | false, _ ->
-                         failwith (String.Format(errors[OctectIsNotNumber], value))
                      | true, intVal when intVal < 0 || intVal > 254 ->
-                         failwith (String.Format(errors[OctectOutOfRange], value))
+                         validationException errors[OutOfRangeOctects] value
                      | _ -> ())
+//----------------------------------------------------------------------------------------------------------------------
 
-let checkOctectCountTry (errors : ErrorDict) octetCount (value : string) =
+//----------------------------------------------------------------------------------------------------------------------
+let checkIncorrectOctectCountTry (errors : ErrorDict) octetCount (value : string) =
     value
     |> splitWithOptions "." StringSplitOptions.None
     |> Array.length <> octetCount
-    |> failWithIfTrue (String.Format(errors[OctectIncorrectCount], value))
+    |> validationExceptionIfTrue errors[IncorrectOctectCount] value
+//----------------------------------------------------------------------------------------------------------------------

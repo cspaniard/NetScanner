@@ -1,5 +1,6 @@
 namespace Services
 
+open System
 open System.ComponentModel.DataAnnotations
 open CommandLine
 open DI.Interfaces
@@ -14,18 +15,25 @@ type OptionValidationService (HelpTextService : IHelpTextService) =
         let getValidationExceptionOrNone f v =
             try
                 f v |> ignore
-                None
+                seq { None }
             with
-            | :? ValidationException as e -> Some e
-            | _ -> failwith "Alguna de Las validaciones no devuelve un error de tipo ValidationException."
+            | :? AggregateException as e ->
+                    seq {
+                        for ex in e.Flatten().InnerExceptions do
+                            match ex with
+                            | :? ValidationException as ve -> yield Some ve
+                            | _ ->
+                                failwith "Alguna de Las validaciones no devuelve un error de tipo ValidationException."
+                    }
+            | _ -> failwith "No se ha recibido un AggregateException con los errores de validación."
 
         seq {
-            getValidationExceptionOrNone PingTimeOut.create options.PingTimeOut
-            getValidationExceptionOrNone Retries.create options.Retries
-            getValidationExceptionOrNone NameLookupTimeOut.create options.NameLookUpTimeOut
-            getValidationExceptionOrNone FileName.create options.MacBlackListFileName
-            getValidationExceptionOrNone FileName.create options.IpBlackListFileName
-            getValidationExceptionOrNone IpNetwork.create options.Network
+            yield! getValidationExceptionOrNone PingTimeOut.create options.PingTimeOut
+            yield! getValidationExceptionOrNone Retries.create options.Retries
+            yield! getValidationExceptionOrNone NameLookupTimeOut.create options.NameLookUpTimeOut
+            yield! getValidationExceptionOrNone FileName.create options.MacBlackListFileName
+            yield! getValidationExceptionOrNone FileName.create options.IpBlackListFileName
+            yield! getValidationExceptionOrNone IpNetwork.create options.Network
         }
         |> Seq.choose id
         |> ValidationErrors
