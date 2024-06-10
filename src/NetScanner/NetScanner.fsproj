@@ -4,7 +4,7 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net7.0</TargetFramework>
         <AssemblyName>netscanner</AssemblyName>
-        <AssemblyVersion>5.4.4</AssemblyVersion>
+        <AssemblyVersion>5.4.5</AssemblyVersion>
         <LangVersion>latest</LangVersion>
         <SelfContained>true</SelfContained>
     </PropertyGroup>

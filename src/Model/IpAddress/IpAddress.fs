@@ -11,7 +11,6 @@ type IpAddress =
             value
             |> trim
             |> split "."
-            |> Array.map trim
             |> join "."
 
         static member private validateTry (value : string) =
