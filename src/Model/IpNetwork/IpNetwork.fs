@@ -11,7 +11,7 @@ type IpNetwork =
         static member private canonicalize (value : string) =
             value
             |> trimStringChars " ."
-            |> splitWitchOptionsByStringChars "." StringSplitOptions.None
+            |> splitWithOptions "." StringSplitOptions.None
             |> join "."
         //--------------------------------------------------------------------------------------------------------------
 

@@ -10,7 +10,7 @@ type IpAddress =
         static member private canonicalize (value : string) =
             value
             |> trim
-            |> split "."
+            |> splitWithOptions "." StringSplitOptions.None
             |> join "."
 
         static member private validateTry (value : string) =

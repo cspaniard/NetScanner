@@ -21,7 +21,7 @@ let checkEmptyTry (errors : ErrorDict) (value : string) =
 
 let checkOctectsForSpacesOrEmptyTry (errors : ErrorDict) (value : string) =
     value
-    |> split "."
+    |> splitWithOptions "." StringSplitOptions.None
     |> Array.iter (fun o -> o.Contains " "
                             |> failWithIfTrue (String.Format(errors[ValueContainsSpaces], value))
 
@@ -42,6 +42,6 @@ let checkOctectsAreIntsInRangeTry (errors : ErrorDict) (value : string) =
 
 let checkOctectCountTry (errors : ErrorDict) octetCount (value : string) =
     value
-    |> split "."
+    |> splitWithOptions "." StringSplitOptions.None
     |> Array.length <> octetCount
     |> failWithIfTrue (String.Format(errors[OctectIncorrectCount], value))
