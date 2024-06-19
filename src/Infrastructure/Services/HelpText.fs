@@ -36,7 +36,7 @@ type HelpTextService (HelpTextBroker : IHelpTextBroker) =
 
     interface IHelpTextService with
         //--------------------------------------------------------------------------------------------------------------
-        member _.showHelp (appErrors : AppErrors) =
+        member _.showHelpTry (appErrors : AppErrors) =
 
             //----------------------------------------------------------------------------------------------------------
             let showHelpText (errorMessages : seq<string>) =
@@ -44,14 +44,14 @@ type HelpTextService (HelpTextBroker : IHelpTextBroker) =
                 //------------------------------------------------------------------------------------------------------
                 let showHelpText (errorMessages : seq<string>) =
 
-                    HelpTextBroker.printHeader ()
-                    HelpTextBroker.printUsage ()
-                    HelpTextBroker.printErrorSection errorMessages
-                    HelpTextBroker.printArgsInfo <| getArgLinesInfo ()
+                    HelpTextBroker.printHeaderTry ()
+                    HelpTextBroker.printUsageTry ()
+                    HelpTextBroker.printErrorSectionTry errorMessages
+                    HelpTextBroker.printArgsInfoTry <| getArgLinesInfo ()
                 //------------------------------------------------------------------------------------------------------
 
                 match Seq.head errorMessages with
-                | "VERSION" -> HelpTextBroker.printHeader ()
+                | "VERSION" -> HelpTextBroker.printHeaderTry ()
                 | "HELP" -> showHelpText Seq.empty
                 | _ -> showHelpText errorMessages
             //----------------------------------------------------------------------------------------------------------

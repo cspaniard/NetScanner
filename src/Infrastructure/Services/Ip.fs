@@ -167,7 +167,7 @@ type IpService (IpBroker : IIpBroker, NetworkBroker : INetworkBroker,
     interface IIpService with
 
         //--------------------------------------------------------------------------------------------------------------
-        member _.scanNetworkAsync scanMacs scanNames useDns network =
+        member _.scanNetworkAsyncTry scanMacs scanNames useDns network =
 
             backgroundTask {
 
@@ -189,7 +189,7 @@ type IpService (IpBroker : IIpBroker, NetworkBroker : INetworkBroker,
         //--------------------------------------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------------------------------------
-        member _.outputDeviceInfos activesOnly separator showMacs showNames (deviceInfos : DeviceInfo[]) =
+        member _.outputDeviceInfosTry activesOnly separator showMacs showNames (deviceInfos : DeviceInfo[]) =
 
             let filterFun =
                 if activesOnly
@@ -206,6 +206,6 @@ type IpService (IpBroker : IIpBroker, NetworkBroker : INetworkBroker,
             deviceInfos
             |> filterFun
             |> buildInfoLinesFun
-            |> NetworkBroker.outputDeviceInfoLines
+            |> NetworkBroker.outputDeviceInfoLinesTry
         //--------------------------------------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------------------------

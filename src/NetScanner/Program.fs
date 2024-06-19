@@ -30,10 +30,10 @@ try
     OptionValidationService.ifErrorsShowAndExit parserResult
 
     let mainApp = serviceProvider.GetRequiredService<IMainApp>()
-    mainApp.run ()
+    mainApp.runTry ()
 
 with
-| :? ValidationException as ve -> HelpTextService.showHelp <| ValidationError ve |> exit
-| e -> ExceptionService.outputException e
+| :? ValidationException as ve -> HelpTextService.showHelpTry <| ValidationError ve |> exit
+| e -> ExceptionService.outputExceptionTry e
        exit EXIT_CODE_EXCEPTION
 //----------------------------------------------------------------------------------------------------------------------

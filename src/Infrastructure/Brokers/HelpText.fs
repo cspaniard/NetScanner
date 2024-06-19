@@ -11,7 +11,7 @@ type HelpTextBroker () =
 
     interface IHelpTextBroker with
         //--------------------------------------------------------------------------------------------------------------
-        member _.printHeader () =
+        member _.printHeaderTry () =
 
             if RuntimeInformation.IsOSPlatform OSPlatform.Windows then Console.WriteLine ()
 
@@ -21,13 +21,13 @@ type HelpTextBroker () =
         //--------------------------------------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------------------------------------
-        member _.printUsage () =
+        member _.printUsageTry () =
 
             Console.WriteLine "\nUSO: netscanner [opciones] red"
         //--------------------------------------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------------------------------------
-        member _.printErrorSection errorList =
+        member _.printErrorSectionTry errorList =
 
             if errorList |> (not << Seq.isEmpty) then
                 let leftMargin = String (' ', LEFT_MARGIN)
@@ -42,7 +42,7 @@ type HelpTextBroker () =
         //--------------------------------------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------------------------------------
-        member _.printArgsInfo argLineInfoList =
+        member _.printArgsInfoTry argLineInfoList =
 
             let maxWidth = argLineInfoList |> Array.map (fun (ArgLineInfo (n, _)) -> n.Length) |> Array.max
             let leftMargin = String (' ', LEFT_MARGIN)

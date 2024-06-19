@@ -18,43 +18,43 @@ type IIpBroker =
     abstract member getNameInfoForIpAsyncTry: useDns: bool -> ipAddress : IpAddress -> Task<NameInfo>
 
 type INetworkBroker =
-    abstract member outputDeviceInfoLines: deviceInfoLines : string[] -> unit
+    abstract member outputDeviceInfoLinesTry: deviceInfoLines : string[] -> unit
 
 type IHelpTextBroker =
-    abstract member printHeader : unit -> unit
-    abstract member printUsage : unit -> unit
-    abstract member printErrorSection : errorList : seq<string> -> unit
-    abstract member printArgsInfo : argLineInfoList : ArgLineInfo array -> unit
+    abstract member printHeaderTry: unit -> unit
+    abstract member printUsageTry: unit -> unit
+    abstract member printErrorSectionTry: errorList : seq<string> -> unit
+    abstract member printArgsInfoTry: argLineInfoList : ArgLineInfo array -> unit
 
 type IExceptionBroker =
-    abstract member printSingle : exn : Exception -> unit
-    abstract member printAggregate : aggregateException : AggregateException -> unit
+    abstract member printSingleTry: exn : Exception -> unit
+    abstract member printAggregateTry: aggregateException : AggregateException -> unit
 
 type IMetricsBroker =
     abstract member outputMeasurementTry: elementName : string -> ms : int64 -> unit
 
 type IMacBlacklistBroker =
-    abstract member getMacBlacklistAsyncTry : unit -> Task<string seq>
+    abstract member getMacBlacklistAsyncTry: unit -> Task<string seq>
 
 type IIpBlacklistBroker =
-    abstract member getIpBlacklistAsyncTry : unit -> Task<string seq>
+    abstract member getIpBlacklistAsyncTry: unit -> Task<string seq>
 //----------------------------------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------------------------------
 type IIpService =
-    abstract member scanNetworkAsync : scanMacs : bool -> scanNames : bool -> useDns : bool -> network : IpNetwork ->
-                                       Task<DeviceInfo[]>
-    abstract member outputDeviceInfos : activesOnly : bool -> separator : string -> showMacs : bool ->
-                                        showNames : bool -> deviceInfos : DeviceInfo array -> unit
+    abstract member scanNetworkAsyncTry: scanMacs : bool -> scanNames : bool -> useDns : bool ->
+                                         network : IpNetwork -> Task<DeviceInfo[]>
+    abstract member outputDeviceInfosTry: activesOnly : bool -> separator : string -> showMacs : bool ->
+                                          showNames : bool -> deviceInfos : DeviceInfo array -> unit
 
 type IHelpTextService =
-    abstract member showHelp : appErrors : AppErrors -> int
+    abstract member showHelpTry: appErrors : AppErrors -> int
 
 type IExceptionService =
-    abstract member outputException : exn : Exception -> unit
+    abstract member outputExceptionTry: exn : Exception -> unit
 
 type IMetricsService =
-    abstract member outputScanNetworkTimeTry : stopwatch : Stopwatch -> unit
+    abstract member outputScanNetworkTimeTry: stopwatch : Stopwatch -> unit
 
 type IOptionValidationService =
     abstract member ifErrorsShowAndExit: parserResult : ParserResult<ArgumentOptions> -> unit

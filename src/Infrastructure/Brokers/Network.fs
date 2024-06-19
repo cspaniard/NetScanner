@@ -7,7 +7,7 @@ type NetworkBroker () =
 
     //------------------------------------------------------------------------------------------------------------------
     interface INetworkBroker with
-        member _.outputDeviceInfoLines (deviceInfoLines : string[]) =
+        member _.outputDeviceInfoLinesTry (deviceInfoLines : string[]) =
 
             deviceInfoLines
             |> Array.iter Console.WriteLine

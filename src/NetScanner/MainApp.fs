@@ -8,15 +8,15 @@ type MainApp (ipService : IIpService, metricsService : IMetricsService, options 
 
     //------------------------------------------------------------------------------------------------------------------
     interface IMainApp with
-        member _.run () =
+        member _.runTry () =
 
             let processTask =
                 backgroundTask {
                     let scanNetworkStopwatch = Stopwatch.StartNew ()
 
                     let! deviceInfos =
-                        ipService.scanNetworkAsync options.ShowMacs options.ShowNames options.UseDns
-                                                   (options.Network |> IpNetwork.create)
+                        ipService.scanNetworkAsyncTry options.ShowMacs options.ShowNames options.UseDns
+                                                      (options.Network |> IpNetwork.create)
 
                     scanNetworkStopwatch.Stop ()
 
@@ -24,8 +24,8 @@ type MainApp (ipService : IIpService, metricsService : IMetricsService, options 
                         metricsService.outputScanNetworkTimeTry scanNetworkStopwatch
 
                     deviceInfos
-                    |> ipService.outputDeviceInfos options.ActivesOnly options.Separator
-                                                   options.ShowMacs options.ShowNames
+                    |> ipService.outputDeviceInfosTry options.ActivesOnly options.Separator
+                                                      options.ShowMacs options.ShowNames
                 }
 
             processTask.GetAwaiter().GetResult()

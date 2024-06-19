@@ -9,7 +9,7 @@ type ExceptionBroker (debug : bool) as this =
 
     interface IExceptionBroker with
         //--------------------------------------------------------------------------------------------------------------
-        member _.printSingle (exn : Exception) =
+        member _.printSingleTry (exn : Exception) =
 
             if debug then
                 exn.ToString()
@@ -17,11 +17,11 @@ type ExceptionBroker (debug : bool) as this =
                 exn.Message
             |> Console.Error.WriteLine
 
-            if exn.InnerException <> null then self.printSingle exn.InnerException
+            if exn.InnerException <> null then self.printSingleTry exn.InnerException
         //--------------------------------------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------------------------------------
-        member _.printAggregate (aggregateException : AggregateException) =
+        member _.printAggregateTry (aggregateException : AggregateException) =
 
             if debug then
                 Console.Error.WriteLine $"STACK TRACE: {aggregateException.Message}"
@@ -29,6 +29,6 @@ type ExceptionBroker (debug : bool) as this =
 
             aggregateException.InnerExceptions
             |> Seq.iter (fun e -> match e with
-                                  | :? AggregateException as ae -> self.printAggregate ae
-                                  | e -> self.printSingle e)
+                                  | :? AggregateException as ae -> self.printAggregateTry ae
+                                  | e -> self.printSingleTry e)
         //--------------------------------------------------------------------------------------------------------------

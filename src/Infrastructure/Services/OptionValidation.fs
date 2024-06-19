@@ -46,7 +46,7 @@ type OptionValidationService (HelpTextService : IHelpTextService) =
             //----------------------------------------------------------------------------------------------------------
             let showErrorsAndExit (errors: AppErrors) =
                     errors
-                    |> HelpTextService.showHelp
+                    |> HelpTextService.showHelpTry
                     |> exit
             //----------------------------------------------------------------------------------------------------------
 
