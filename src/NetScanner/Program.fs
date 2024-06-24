@@ -29,8 +29,9 @@ let OptionValidationService = serviceProvider.GetRequiredService<IOptionValidati
 try
     OptionValidationService.ifErrorsShowAndExit parserResult
 
-    let mainApp = serviceProvider.GetRequiredService<IMainApp>()
-    mainApp.runTry ()
+    serviceProvider
+        .GetRequiredService<IMainApp>()
+        .runTry ()
 
 with
 | :? ValidationException as ve -> HelpTextService.showHelpTry <| ValidationError ve |> exit
