@@ -44,39 +44,42 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
         //--------------------------------------------------------------------------------------------------------------
         member _.getDeviceInfoStatusForIpAsync (ipAddress : IpAddress) =
 
+            let createDeviceInfo active ttl =
+                { IpAddress = ipAddress
+                  Active = active
+                  Mac = Mac.create ""
+                  Name = ""
+                  Ttl = ttl }
+
+            let rec doPing (ping: Ping) retriesLeft =
+
+                backgroundTask {
+
+                    if retriesLeft = 0 then
+                        return None
+                    else
+                        let! pingReply = ping.SendPingAsync(ipAddress.value, pingTimeOut.value)
+
+                        if pingReply.Status = IPStatus.Success then
+                            return Some pingReply
+                        else
+                            return! doPing ping (retriesLeft - 1)
+                }
+
             backgroundTask {
 
                 try
-                    let ping = new Ping ()
-                    let mutable retryCount = retries.value
-                    let mutable resultStatus = IPStatus.Unknown
-                    let mutable pingReply = Unchecked.defaultof<PingReply>
+                    use ping = new Ping()
+                    let! pingReply = doPing ping retries.value
 
-                    while retryCount > 0 do
-                        let! pingReplyAwaited = ping.SendPingAsync (ipAddress.value, pingTimeOut.value)
-                        pingReply <- pingReplyAwaited
-
-                        if pingReply.Status = IPStatus.Success then
-                            resultStatus <- pingReply.Status
-                            retryCount <- 0
-                        else
-                            retryCount <- retryCount - 1
-
-                    return ({ IpAddress = ipAddress
-                              Active = (resultStatus = IPStatus.Success)
-                              Mac = Mac.create ""
-                              Name = ""
-                              Ttl = if pingReply.Options <> null
-                                    then Some pingReply.Options.Ttl
-                                    else None
-                            } : DeviceInfo)
+                    match pingReply with
+                    | Some reply ->
+                        let ttlOption = reply.Options |> Option.ofObj |> Option.map _.Ttl
+                        return createDeviceInfo true ttlOption
+                    | None ->
+                        return createDeviceInfo false None
                 with _ ->
-                    return ({ IpAddress = ipAddress
-                              Active = false
-                              Mac = Mac.create ""
-                              Name = ""
-                              Ttl = None
-                            } : DeviceInfo)
+                    return createDeviceInfo false None
             }
         //--------------------------------------------------------------------------------------------------------------
 
