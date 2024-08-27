@@ -189,7 +189,7 @@ type IpService (IpBroker : IIpBroker, NetworkBroker : INetworkBroker,
         //--------------------------------------------------------------------------------------------------------------
 
         //--------------------------------------------------------------------------------------------------------------
-        member _.outputDeviceInfosTry activesOnly separator showMacs showNames (deviceInfos : DeviceInfo[]) =
+        member _.outputDeviceInfosTry activesOnly separator showMacs showNames showTtl (deviceInfos : DeviceInfo[]) =
 
             let filterFun =
                 if activesOnly
@@ -201,7 +201,12 @@ type IpService (IpBroker : IIpBroker, NetworkBroker : INetworkBroker,
             let buildInfoLinesFun =
                 Array.map (fun di -> $"%s{di.IpAddress.value}%s{separator}%b{di.Active}" +
                                      (if showMacs then $"%s{separator}%s{di.Mac.formatted}" else "") +
-                                     (if showNames then $"%s{separator}%s{di.Name}" else ""))
+                                     (if showNames then $"%s{separator}%s{di.Name}" else "") +
+                                     (if showTtl then
+                                          match di.Ttl with
+                                          | Some ttl -> $"%s{separator}%i{ttl}"
+                                          | None -> $"%s{separator}n/a"
+                                      else ""))
 
             deviceInfos
             |> filterFun

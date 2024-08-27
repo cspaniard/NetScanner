@@ -13,6 +13,7 @@ type DeviceInfo = {
     Active : bool
     Mac : Mac
     Name : string
+    Ttl : int option
 }
 
 type ArgLineInfo = ArgLineInfo of paramNames : string * helpText : string

@@ -25,7 +25,7 @@ type MainApp (ipService : IIpService, metricsService : IMetricsService, options 
 
                     deviceInfos
                     |> ipService.outputDeviceInfosTry options.ActivesOnly options.Separator
-                                                      options.ShowMacs options.ShowNames
+                                                      options.ShowMacs options.ShowNames options.ShowTtl
                 }
 
             processTask.GetAwaiter().GetResult()

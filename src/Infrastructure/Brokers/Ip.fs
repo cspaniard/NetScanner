@@ -42,7 +42,7 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
 
     interface IIpBroker with
         //--------------------------------------------------------------------------------------------------------------
-        member _.getDeviceInfoStatusForIpAsync (ipAddress: IpAddress) =
+        member _.getDeviceInfoStatusForIpAsync (ipAddress : IpAddress) =
 
             backgroundTask {
 
@@ -50,9 +50,11 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
                     let ping = new Ping ()
                     let mutable retryCount = retries.value
                     let mutable resultStatus = IPStatus.Unknown
+                    let mutable pingReply = Unchecked.defaultof<PingReply>
 
                     while retryCount > 0 do
-                        let! pingReply = ping.SendPingAsync (ipAddress.value, pingTimeOut.value)
+                        let! pingReplyAwaited = ping.SendPingAsync (ipAddress.value, pingTimeOut.value)
+                        pingReply <- pingReplyAwaited
 
                         if pingReply.Status = IPStatus.Success then
                             resultStatus <- pingReply.Status
@@ -63,12 +65,18 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
                     return ({ IpAddress = ipAddress
                               Active = (resultStatus = IPStatus.Success)
                               Mac = Mac.create ""
-                              Name = ""} : DeviceInfo)
+                              Name = ""
+                              Ttl = if pingReply.Options <> null
+                                    then Some pingReply.Options.Ttl
+                                    else None
+                            } : DeviceInfo)
                 with _ ->
                     return ({ IpAddress = ipAddress
                               Active = false
                               Mac = Mac.create ""
-                              Name = ""} : DeviceInfo)
+                              Name = ""
+                              Ttl = None
+                            } : DeviceInfo)
             }
         //--------------------------------------------------------------------------------------------------------------
 

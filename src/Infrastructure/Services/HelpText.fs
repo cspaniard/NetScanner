@@ -23,6 +23,7 @@ type HelpTextService (HelpTextBroker : IHelpTextBroker) =
             ArgLineInfo ("-n,  --nombres", "Muestra los nombres de los dispositivos (def: False)")
             ArgLineInfo ("-l,  --nombres-timeout",
                          $"Tiempo de espera en ms para cada resolución de nombre. (def: {DEF_NAME_LOOKUP_TIMEOUT})")
+            ArgLineInfo ("-t,  --ttl", "Muestra el TTL de cada IP activa. (def: False)")
             ArgLineInfo ("-D,  --dns", "Resuelve los nombres usando DNS. (def: False)")
             ArgLineInfo ("-d,  --debug", "Muestra estadísticas de tiempo. (def: False)")
             ArgLineInfo ("-b,  --blacklist", "Fichero con las MACs de los dispositivos a ignorar. (def: \"\")")

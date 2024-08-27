@@ -45,7 +45,7 @@ type IIpService =
     abstract member scanNetworkAsyncTry: scanMacs : bool -> scanNames : bool -> useDns : bool ->
                                          network : IpNetwork -> Task<DeviceInfo[]>
     abstract member outputDeviceInfosTry: activesOnly : bool -> separator : string -> showMacs : bool ->
-                                          showNames : bool -> deviceInfos : DeviceInfo array -> unit
+                                          showNames : bool -> showTtl : bool -> deviceInfos : DeviceInfo array -> unit
 
 type IHelpTextService =
     abstract member showHelpTry: appErrors : AppErrors -> int

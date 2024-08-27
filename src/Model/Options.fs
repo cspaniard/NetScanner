@@ -31,6 +31,9 @@ type ArgumentOptions = {
     [<Option ('d', "debug", Default = false)>]
     Debug : bool
 
+    [<Option ('t', "ttl", Default = false)>]
+    ShowTtl : bool
+
     [<Option ('b', "blacklist", Default = "")>]
     MacBlackListFileName : string
 
