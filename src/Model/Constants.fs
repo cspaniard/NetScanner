@@ -9,3 +9,5 @@ let [<Literal>] EXIT_CODE_EXCEPTION = 2
 let [<Literal>] DEF_PING_TIMEOUT = 500
 let [<Literal>] DEF_RETRIES = 3
 let [<Literal>] DEF_NAME_LOOKUP_TIMEOUT = 500
+
+let [<Literal>] OS_PLATFORM = 0

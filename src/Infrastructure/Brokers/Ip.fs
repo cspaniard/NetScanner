@@ -2,7 +2,6 @@ namespace Brokers
 
 open System.Net
 open System.Net.NetworkInformation
-open System.Runtime.InteropServices
 open System.Threading
 open ArpLookup
 open DI.Interfaces
@@ -10,6 +9,7 @@ open Motsoft.Util
 
 open Model
 open Model.Definitions
+open Model.Constants
 
 module private IpBrokerExceptions =
 
@@ -25,7 +25,7 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
     let startProcessReadLinesNoTimeOutAsyncTry = ProcessBroker.startProcessReadLinesAsyncTry (TimeOut.create 0)
 
     let lookUpApp =
-        match RuntimeInformation.OSDescription with
+        match OS_PLATFORM with
         | LinuxOs -> "nslookup"
         | WindowsOs -> "ping"
         | MacOs -> "nslookup"
@@ -184,7 +184,7 @@ type IpBroker (ProcessBroker : IProcessBroker, pingTimeOut : PingTimeOut,
             // ---------------------------------------------------------------------------------------------------------
 
             let args, processRawDataFun =
-                match RuntimeInformation.OSDescription with
+                match OS_PLATFORM with
                 | LinuxOs -> ipAddress.value, processLinuxRawDataAsync
                 | WindowsOs -> $"-n 1 -a -w {pingTimeOut} {ipAddress}", processWindowsRawDataAsync
                 | MacOs | OtherOs -> failwith OS_UNSUPPORTED
